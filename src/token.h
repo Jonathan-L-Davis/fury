@@ -17,6 +17,7 @@ enum token_type:uint32_t{
     Operator = 2,
     type = 3,
     identifier = 4,
+    parser = 5,
 };
 
 struct token{

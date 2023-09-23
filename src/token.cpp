@@ -5,13 +5,21 @@
 
 std::vector<std::string> keywords
 {
-    "if",
-    "while",
+    "byte",
+    "dual",
+    "else",
+    "export",
     "for",
-    "goto",
-    "instruction",
-    "instr",
-    "function",//not used? meh
+    "function",
+    "goto",//not used? meh
+    "if",
+    "import",
+    "oct",
+    "quad",
+    "return",
+    "struct",
+    "union",
+    "while",
 };
 
 std::vector<std::string> operators
@@ -41,14 +49,23 @@ std::vector<std::string> operators
 
     ",",//sub-expression separator
     ";",//expression terminal
+
+    "::",//scoping, add later
+    ".",//member access & scoping current
+    "..",//scoping backstep
 };
 
+//not used now, may be moved to parsing code
+//I'm still learning how a compiler should work
 std::vector<std::string> types =
 {
     "byte",
     "dual",
     "quad",
     "oct",
+
+    "struct",
+    "union",
 };
 
 std::vector<token> tokenize( const std::string &file_name ){
@@ -102,7 +119,5 @@ token_type get_token_type( std::string type_me ){
         return keyword;
     if( std::find(operators.begin(), operators.end(), type_me ) != operators.end() )
         return Operator;
-    if( std::find(types.begin(), types.end(), type_me ) != types.end() )
-        return type;
     return identifier;
 }
