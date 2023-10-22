@@ -18,6 +18,10 @@ enum token_type:uint32_t{
     type = 3,
     identifier = 4,
     parser = 5,
+    enclosing = 6,
+    literal = 7,
+    error = 8,
+    root = 9,
 };
 
 struct token{
