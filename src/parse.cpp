@@ -6,6 +6,7 @@
 /** AHHHHH AGONY**/
 
 AST_node parse_if(const std::vector<token> &tokens, int &start_pos);
+AST_node parse_function(const std::vector<token> &tokens, int &start_pos);
 
 AST_node epsilon_node = {{"",0,epsilon},{}};
 
@@ -33,7 +34,7 @@ AST_node parse_expression(const std::vector<token> &tokens, int &start_pos){
 
             }else
             if( tokens[start_pos].text == "function" ){
-
+                retMe = parse_function(tokens,start_pos);
             }else
             if( tokens[start_pos].text == "goto" ){
 
@@ -139,9 +140,10 @@ AST_node parse_if(const std::vector<token> &tokens, int &start_pos){
     AST_node retMe;
     AST_node* active = &retMe;
 
-    if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "if" )
+    if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "if" ){
         retMe.tok = tokens[start_pos];
-    start_pos++;
+        start_pos++;
+    }else assert(false);
 
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "(" ){
         AST_node temp = {tokens[start_pos]};
@@ -176,6 +178,25 @@ AST_node parse_if(const std::vector<token> &tokens, int &start_pos){
         active->children.push_back(true_case);
     }
 
+
+    return retMe;
+}
+
+AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
+    AST_node retMe;
+    AST_node* active = &retMe;
+
+    if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "function" ){
+        retMe.tok = tokens[start_pos];
+        start_pos++;
+    }else assert(false);
+
+    while( (unsigned) start_pos < tokens.size() && tokens[start_pos].text != ")" ){
+        AST_node exp = parse_expression(tokens,start_pos);
+        retMe.children.push_back(exp);
+    }
+
+    parse_expression(tokens,start_pos);//function body
 
     return retMe;
 }
