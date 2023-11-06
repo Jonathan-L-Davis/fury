@@ -6,16 +6,14 @@
 /** AHHHHH AGONY**/
 
 AST_node parse_if(const std::vector<token> &tokens, int &start_pos);
-AST_node parse_until_end_paren(const std::vector<token> &tokens, int &start_pos);
-AST_node parse_until_end_curly_brace(const std::vector<token> &tokens, int &start_pos);
 
-AST_node null_node = {{"",0,null},{}};
+AST_node epsilon_node = {{"",0,epsilon},{}};
 
 AST_node parse_expression(const std::vector<token> &tokens, int &start_pos){
     AST_node retMe;
 
     switch(tokens[start_pos].type){
-        case null:{
+        case epsilon:{
             assert(false); //shouldn't be here;
         }break;
         case keyword:{
@@ -66,22 +64,57 @@ AST_node parse_expression(const std::vector<token> &tokens, int &start_pos){
             }
         }break;
         case Operator:{
-            std::cout << tokens[start_pos].text << "\n";
+            if( tokens[start_pos].text == "=" ){
+
+            retMe.tok = tokens[start_pos];
+            start_pos++;
+            AST_node exp = parse_expression(tokens,start_pos);
+            retMe.children.push_back(exp);
+            }else
+            if( tokens[start_pos].text == ";" ){
+
+            retMe.tok = tokens[start_pos];
+            start_pos++;
+            }else
+            std::cout << tokens[start_pos].text << "\n",
             assert(false);
         }break;
         case type:{
             assert(false); //shouldn't be here;
         }break;
         case identifier:{
-            retMe.tok = tokens[start_pos];
+            AST_node id;
+            id.tok = tokens[start_pos];
             start_pos++;
+
+            if( tokens[start_pos].text == ";" ){
+                retMe = id;
+                AST_node terminal_op;
+                terminal_op.tok = tokens[start_pos];
+                retMe.children.push_back(terminal_op);
+                start_pos++;
+            }else
+            if( tokens[start_pos].text == "=" ){//binary operators should be handled this way, will add them one at a time
+                retMe = parse_expression(tokens,start_pos);
+                retMe.children.insert( retMe.children.begin(), id);
+            }else assert(false);
         }break;
         case parser:{
             assert(false); //shouldn't be here;
         }break;
-        case enclosing:{
-            retMe.tok = tokens[start_pos];
-            start_pos++;
+        case scoping:{
+            if( tokens[start_pos].text == "{" ){
+                retMe.tok = tokens[start_pos];
+                start_pos++;
+                while( (unsigned) start_pos < tokens.size() && tokens[start_pos].text != "}" ){
+                    AST_node exp = parse_expression(tokens,start_pos);
+                    retMe.children.push_back(exp);
+                }
+                AST_node end_bracket;// we are not error checking like we should be here
+                end_bracket.tok = tokens[start_pos];//may be past end of array
+                start_pos++;
+                retMe.children.push_back(end_bracket);
+            }else assert(false);
         }break;
         case literal:{
             retMe.tok = tokens[start_pos];
@@ -93,58 +126,19 @@ AST_node parse_expression(const std::vector<token> &tokens, int &start_pos){
         case root:{
             assert(false); //shouldn't be here;
         }break;
-
-
+        default:
+            assert(false);
     }
 
     return retMe;
 }
 
-AST_node parse(const std::vector<token> &tokens){// going to change drastically
-    AST_node ret_me;
-
-    ret_me.tok.line_no = 0;
-    ret_me.tok.text = ":root";
-    ret_me.tok.type = parser;
-
-    return ret_me;
-}
-
-AST_node parse_until_end_paren(const std::vector<token> &tokens, int &start_pos){
-    AST_node retMe = {tokens[start_pos]};
-    start_pos++;
-
-    AST_node temp;
-    while( temp.tok.text != ")" ){
-        temp = parse_expression(tokens,start_pos);//this handles nested parens because it can call this function, 2 step recursion
-        retMe.children.push_back( temp );
-        //std::cout << temp.tok.text << "\n";
-    }
-    start_pos++;
-
-    return retMe;
-}
-
-AST_node parse_until_end_curly_brace(const std::vector<token> &tokens, int &start_pos){
-    AST_node retMe = {tokens[start_pos]};
-    start_pos++;
-
-    AST_node temp;
-    while( temp.tok.text != "}" ){
-        temp = parse_expression(tokens,start_pos);//this handles nested parens because it can call this function, 2 step recursion
-        retMe.children.push_back( temp );
-        //std::cout << temp.tok.text << "\n";
-    }
-    start_pos++;
-
-    return retMe;
-}
 
 AST_node parse_if(const std::vector<token> &tokens, int &start_pos){
 
     AST_node retMe;
+    AST_node* active = &retMe;
 
-    // else clauses should error
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "if" )
         retMe.tok = tokens[start_pos];
     start_pos++;
@@ -152,32 +146,35 @@ AST_node parse_if(const std::vector<token> &tokens, int &start_pos){
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "(" ){
         AST_node temp = {tokens[start_pos]};
         retMe.children.push_back( temp );
+        active = &retMe.children[0];
         start_pos++;
     }else assert(false);
 
-    parse_expression(tokens,start_pos);
+    AST_node boolean_expression = parse_expression(tokens,start_pos);//multiple expressions handled by { ... } scoping expression
 
-    if(tokens[start_pos].text == ")" )
-        retMe.children.push_back( {tokens[start_pos]} );
-    start_pos++;
+    if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == ")" ){
+        active->children.push_back( {tokens[start_pos]} );
+        active = &(active->children[0]);
+        start_pos++;
+    }else assert(false);
 
+    active->children.push_back(boolean_expression);
 
+    AST_node true_case, false_case;
 
-    if( tokens[start_pos].text == "{" ){
-        //AST_node bracket_exp = parse_until_end_curly_brace(tokens,start_pos);
-    }else{
-        retMe.children.push_back( parse_expression(tokens,start_pos) );//single expression
+    true_case = parse_expression(tokens,start_pos);
+    if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "else" ){// if else statement
+        AST_node else_clause;
+        else_clause.tok = tokens[start_pos]; start_pos++;
+        false_case = parse_expression(tokens,start_pos);
+
+        else_clause.children.push_back( true_case );
+        else_clause.children.push_back( false_case );
+
+        active->children.push_back(else_clause);
+    }else{// if statement
+        active->children.push_back(true_case);
     }
-
-    //general parse
-    //if {,
-    // scan for n expressions,
-    // scan for }
-    //else
-    // scan for single expression
-    //scan for else
-
-
 
 
     return retMe;
@@ -185,8 +182,6 @@ AST_node parse_if(const std::vector<token> &tokens, int &start_pos){
 
 std::string indent = "";
 void AST_node::print(){
-// TODO    VVV
-//is depth first search not breadth. will fix later, but any output is better than none rn
     std::cout << indent << tok.text << "\n";
     indent += "    ";
     for( unsigned int i = 0; i < children.size(); i++ )
