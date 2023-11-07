@@ -224,10 +224,22 @@ AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
         AST_node type_name, param_name, comma;
         if( (unsigned) start_pos < tokens.size() &&
             ( tokens[start_pos].type == identifier || tokens[start_pos].type == type ) ){//type of param for function declaration
-            ;
+            active->children.push_back( {tokens[start_pos]} );
+            active = &(active->children[0]);
+            start_pos++;
         }else assert(false);
         if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ){//parameter name
-            ;
+            active->children.push_back( {tokens[start_pos]} );
+            active = &(active->children[0]);
+            start_pos++;
+        }else assert(false);
+
+        if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "," ){//parameter name
+            active->children.push_back( {tokens[start_pos]} );
+            active = &(active->children[0]);
+            start_pos++;
+        }else
+        if ( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == ")" ){
         }else assert(false);
     }
 

@@ -31,12 +31,28 @@ std::vector<token> example_3 = { {"function",0,keyword},{"byte",0,type},{"func_n
                                         };
 ;
 
+std::vector<token> example_4 = { {"function",0,keyword},{"byte",0,type},{"func_name",0,identifier},
+                                        {"(",0,paren},{"byte",0,type},{"a",0,identifier},{")",0,paren},
+                                        {"{",0,scoping},
+                                        {"a",0,identifier},{"=",0,Operator},{"b",0,identifier},{";",0,Operator},
+                                        {"}",0,scoping},
+                                        };
+;
+
+std::vector<token> example_5 = { {"function",0,keyword},{"byte",0,type},{"func_name",0,identifier},
+                                        {"(",0,paren},{"byte",0,type},{"a",0,identifier},{",",0,Operator},{"byte",0,type},{"b",0,identifier},{")",0,paren},
+                                        {"{",0,scoping},
+                                        {"a",0,identifier},{"=",0,Operator},{"b",0,identifier},{";",0,Operator},
+                                        {"}",0,scoping},
+                                        };
+;
+
 bool is_valid_literal( std::string str );
 bool is_hex(uint8_t c);
 
 int main(int argc, char**argv){
 
-    auto tokens = tokenize("./file2.txt");
+    //auto tokens = tokenize("./file2.txt");
 
     std::string type;
 
@@ -53,6 +69,14 @@ int main(int argc, char**argv){
     start_pos = 0;
     AST_node ex3 = parse_expression(example_3,start_pos);
     ex3.print();
+
+    start_pos = 0;
+    AST_node ex4 = parse_expression(example_4,start_pos);
+    ex4.print();
+
+    start_pos = 0;
+    AST_node ex5 = parse_expression(example_5,start_pos);
+    ex5.print();
 
 
 
