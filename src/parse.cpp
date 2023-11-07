@@ -128,6 +128,7 @@ AST_node parse_expression(const std::vector<token> &tokens, int &start_pos){
             assert(false); //shouldn't be here;
         }break;
         default:
+            std::cout << tokens[start_pos].text << "\n";
             assert(false);
     }
 
@@ -191,12 +192,50 @@ AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
         start_pos++;
     }else assert(false);
 
+    if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == type ){//built in return type
+        active->children.push_back( {tokens[start_pos]} );
+        active = &(active->children[0]);
+        start_pos++;
+
+        if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ) {//function name
+            active->children.push_back( {tokens[start_pos]} );
+            active = &(active->children[0]);
+            start_pos++;
+        }else assert(false);
+    }else if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ) {//could be void return type or custom return type
+        active->children.push_back( {tokens[start_pos]} );
+        active = &(active->children[0]);
+        start_pos++;
+
+        if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ) {//id if custom type, doesn't appear if it's a void function
+            active->children.push_back( {tokens[start_pos]} );
+            active = &(active->children[0]);
+            start_pos++;
+        }// may not happen, void functions have no return type
+    }else assert(false);
+
+    if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "(" ){
+        active->children.push_back( {tokens[start_pos]} );
+        active = &(active->children[0]);
+        start_pos++;
+    }else assert(false);
+
     while( (unsigned) start_pos < tokens.size() && tokens[start_pos].text != ")" ){
-        AST_node exp = parse_expression(tokens,start_pos);
-        retMe.children.push_back(exp);
+        AST_node type_name, param_name, comma;
+        if( (unsigned) start_pos < tokens.size() &&
+            ( tokens[start_pos].type == identifier || tokens[start_pos].type == type ) ){//type of param for function declaration
+            ;
+        }else assert(false);
+        if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ){//parameter name
+            ;
+        }else assert(false);
     }
 
-    parse_expression(tokens,start_pos);//function body
+    active->children.push_back( {tokens[start_pos]} );
+    active = &(active->children[0]);
+    start_pos++;
+
+    active->children.push_back( parse_expression(tokens,start_pos) );//function body
 
     return retMe;
 }

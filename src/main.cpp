@@ -23,6 +23,14 @@ std::vector<token> example_2 = { {"if",0,keyword},{"(",0,paren},{"0",0,literal},
                                         };
 ;
 
+std::vector<token> example_3 = { {"function",0,keyword},{"byte",0,type},{"func_name",0,identifier},
+                                        {"(",0,paren},{")",0,paren},
+                                        {"{",0,scoping},
+                                        {"a",0,identifier},{"=",0,Operator},{"b",0,identifier},{";",0,Operator},
+                                        {"}",0,scoping},
+                                        };
+;
+
 bool is_valid_literal( std::string str );
 bool is_hex(uint8_t c);
 
@@ -41,6 +49,10 @@ int main(int argc, char**argv){
     start_pos = 0;
     AST_node ex2 = parse_expression(example_2,start_pos);
     ex2.print();
+
+    start_pos = 0;
+    AST_node ex3 = parse_expression(example_3,start_pos);
+    ex3.print();
 
 
 
