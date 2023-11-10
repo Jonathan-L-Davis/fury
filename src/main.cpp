@@ -5,6 +5,13 @@
 #include <vector>
 #include <assert.h>
 
+/*
+    the example vectors are just token streams,
+    tokenizer needs to be rewritten to produce these,
+    had a lot of lang design to figure out before these could be written appropriately
+    will probably change again anyway
+//*/
+
 std::vector<token> example_1 = { {"if",0,keyword},{"(",0,paren},{"0",0,literal},{")",0,paren},
                                         {"{",0,scoping},
                                         {"a",0,identifier},{"=",0,Operator},{"b",0,identifier},{";",0,Operator},
@@ -47,6 +54,22 @@ std::vector<token> example_5 = { {"function",0,keyword},{"byte",0,type},{"func_n
                                         };
 ;
 
+std::vector<token> example_6 = { {"function",0,keyword},{"byte",0,type},{"func_name",0,identifier},
+                                        {"(",0,paren},{"byte",0,type},{"a",0,identifier},{",",0,Operator},{"byte",0,type},{"b",0,identifier},{")",0,paren},
+                                        {"{",0,scoping},
+                                        {"a",0,identifier},{"=",0,Operator},{"b",0,identifier},{";",0,Operator},
+                                        {"return",0,keyword},{"b",0,identifier},{";",0,Operator},
+                                        {"}",0,scoping},
+                                        };
+;
+
+std::vector<token> example_7 = { {"while",0,keyword},{"(",0,paren},{"0",0,literal},{")",0,paren},
+                                        {"{",0,scoping},
+                                        {"a",0,identifier},{"=",0,Operator},{"b",0,identifier},{";",0,Operator},
+                                        {"}",0,scoping}
+                                        };
+;
+
 bool is_valid_literal( std::string str );
 bool is_hex(uint8_t c);
 
@@ -77,6 +100,14 @@ int main(int argc, char**argv){
     start_pos = 0;
     AST_node ex5 = parse_expression(example_5,start_pos);
     ex5.print();
+
+    start_pos = 0;
+    AST_node ex6 = parse_expression(example_6,start_pos);
+    ex6.print();
+
+    start_pos = 0;
+    AST_node ex7 = parse_expression(example_7,start_pos);
+    ex7.print();
 
 
 

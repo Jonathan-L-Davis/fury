@@ -13,6 +13,4 @@ struct AST_node{
 
 AST_node parse_expression(const std::vector<token> &tokens, int &start_pos);
 
-AST_node parse_if(const std::vector<token> &tokens, int &start_pos);
-
 #endif//PARSE_H
