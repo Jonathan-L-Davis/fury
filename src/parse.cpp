@@ -224,28 +224,33 @@ AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
         AST_node type_name, param_name, comma;
         if( (unsigned) start_pos < tokens.size() &&
             ( tokens[start_pos].type == identifier || tokens[start_pos].type == type ) ){//type of param for function declaration
-            active->children.push_back( {tokens[start_pos]} );
-            active = &(active->children[0]);
+            type_name = {tokens[start_pos]};
             start_pos++;
         }else assert(false);
         if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ){//parameter name
-            active->children.push_back( {tokens[start_pos]} );
-            active = &(active->children[0]);
+            type_name.children.push_back({tokens[start_pos]});
             start_pos++;
         }else assert(false);
 
-        if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "," ){//parameter name
-            active->children.push_back( {tokens[start_pos]} );
-            active = &(active->children[0]);
-            start_pos++;
+        active->children.push_back( type_name );
+
+        if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "," ){//comma or end of param pack
+
+            start_pos++;//skip comma
         }else
         if ( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == ")" ){
+            active->children.push_back( {tokens[start_pos]} );
+            std::cout << tokens[start_pos].text << "here\n";
+            active = &(active->children[ active->children.size()-1 ]);
+            //start_pos++;//don't do until after loop, since it is the break condition
+            //active->children.push_back( type_name );
         }else assert(false);
     }
-
-    active->children.push_back( {tokens[start_pos]} );
-    active = &(active->children[0]);
     start_pos++;
+
+
+    //active = &(active->children[ active->children.size()-1 ]);
+
 
     active->children.push_back( parse_expression(tokens,start_pos) );//function body
 
