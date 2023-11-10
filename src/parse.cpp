@@ -7,6 +7,7 @@
 
 AST_node parse_if(const std::vector<token> &tokens, int &start_pos);
 AST_node parse_while(const std::vector<token> &tokens, int &start_pos);
+AST_node parse_for(const std::vector<token> &tokens, int &start_pos);
 AST_node parse_function(const std::vector<token> &tokens, int &start_pos);
 AST_node parse_return(const std::vector<token> &tokens, int &start_pos);
 
@@ -33,13 +34,13 @@ AST_node parse_expression(const std::vector<token> &tokens, int &start_pos){
 
             }else
             if( tokens[start_pos].text == "for" ){
-
+                retMe = parse_for(tokens,start_pos);
             }else
             if( tokens[start_pos].text == "function" ){
                 retMe = parse_function(tokens,start_pos);
             }else
             if( tokens[start_pos].text == "goto" ){
-
+                //skipping for v0.0
             }else
             if( tokens[start_pos].text == "if" ){
                 retMe = parse_if(tokens,start_pos);
@@ -217,6 +218,48 @@ AST_node parse_while(const std::vector<token> &tokens, int &start_pos){
     while_body = parse_expression(tokens,start_pos);
 
     active->children.push_back(while_body);
+
+    return retMe;
+}
+
+AST_node parse_for(const std::vector<token> &tokens, int &start_pos){
+
+    AST_node retMe;
+    AST_node* active = &retMe;
+
+    if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "for" ){
+        retMe.tok = tokens[start_pos];
+        start_pos++;
+    }else assert(false);
+
+    if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "(" ){
+        AST_node temp = {tokens[start_pos]};
+        retMe.children.push_back( temp );
+        active = &retMe.children[0];
+        start_pos++;
+    }else assert(false);
+
+    AST_node init_expression = parse_expression(tokens,start_pos);
+    AST_node boolean_expression = parse_expression(tokens,start_pos);
+    AST_node increment_expression = parse_expression(tokens,start_pos);
+
+    active->children.push_back(init_expression);
+    active->children.push_back(boolean_expression);
+    active->children.push_back(increment_expression);
+
+        retMe.print();
+        std::cout << tokens[start_pos].text << "\n";
+    if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == ")" ){
+        active->children.push_back( {tokens[start_pos]} );
+        active = &(active->children[active->children.size()-1]);
+        start_pos++;
+    }else assert(false);
+
+    AST_node for_body;
+
+    for_body = parse_expression(tokens,start_pos);
+
+    active->children.push_back(for_body);
 
     return retMe;
 }

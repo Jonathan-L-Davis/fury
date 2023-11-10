@@ -70,6 +70,13 @@ std::vector<token> example_7 = { {"while",0,keyword},{"(",0,paren},{"0",0,litera
                                         };
 ;
 
+std::vector<token> example_8 = { {"for",0,keyword},{"(",0,paren},{"0",0,literal},{";",0,Operator},{"0",0,literal},{";",0,Operator},{"0",0,literal},{";",0,Operator},{")",0,paren},
+                                        {"{",0,scoping},
+                                        {"a",0,identifier},{"=",0,Operator},{"b",0,identifier},{";",0,Operator},
+                                        {"}",0,scoping}
+                                        };
+;
+
 bool is_valid_literal( std::string str );
 bool is_hex(uint8_t c);
 
@@ -108,6 +115,10 @@ int main(int argc, char**argv){
     start_pos = 0;
     AST_node ex7 = parse_expression(example_7,start_pos);
     ex7.print();
+
+    start_pos = 0;
+    AST_node ex8 = parse_expression(example_8,start_pos);
+    ex8.print();
 
 
 
