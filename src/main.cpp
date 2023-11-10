@@ -70,7 +70,7 @@ std::vector<token> example_7 = { {"while",0,keyword},{"(",0,paren},{"0",0,litera
                                         };
 ;
 
-std::vector<token> example_8 = { {"for",0,keyword},{"(",0,paren},{"0",0,literal},{";",0,Operator},{"0",0,literal},{";",0,Operator},{"0",0,literal},{";",0,Operator},{")",0,paren},
+std::vector<token> example_8 = { {"for",0,keyword},{"(",0,paren},{"a",0,identifier},{";",0,Operator},{"a",0,identifier},{";",0,Operator},{"a",0,identifier},{";",0,Operator},{")",0,paren},
                                         {"{",0,scoping},
                                         {"a",0,identifier},{"=",0,Operator},{"b",0,identifier},{";",0,Operator},
                                         {"}",0,scoping}
