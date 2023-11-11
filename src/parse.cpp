@@ -398,13 +398,36 @@ AST_node parse_struct_or_union(const std::vector<token> &tokens, int &start_pos)
     return retMe;
 }
 
+//import and export will get way more complicated, but this should work for now
 AST_node parse_import(const std::vector<token> &tokens, int &start_pos){
     AST_node retMe;
+
+    if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "import" ){
+        retMe = {tokens[start_pos]};
+        start_pos++;
+    }else assert(false);
+
+    if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ){
+        retMe.children.push_back( {tokens[start_pos]} );
+        start_pos++;
+    }else assert(false);
+
     return retMe;
 }
 
 AST_node parse_export(const std::vector<token> &tokens, int &start_pos){
     AST_node retMe;
+
+    if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "export" ){
+        retMe = {tokens[start_pos]};
+        start_pos++;
+    }else assert(false);
+
+    if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ){
+        retMe.children.push_back( {tokens[start_pos]} );
+        start_pos++;
+    }else assert(false);
+
     return retMe;
 }
 
