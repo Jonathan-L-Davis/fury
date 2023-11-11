@@ -200,6 +200,40 @@ bool is_scoping( std::string str ){
     return false;
 }
 
+bool ws( char am_i_space ){//common whitespaces
+    return ( am_i_space == ' ' || ( 0x7 <= am_i_space && am_i_space <= 0xD ) );
+}
+
+std::vector<token> tokenize2temp( const std::string &file_name ){
+    std::vector<token> retMe;
+
+    std::fstream file(file_name,std::ios::in);
+
+    char current_character = 0;
+    token current_token;
+    bool buffer, extra_loop = 0;//extra loop grabs last character
+    for( int line_no = 1; (buffer = (bool) file.get(current_character) ) || extra_loop ; extra_loop = buffer ){
+    std::cout << line_no << " ";
+    std::cout << " " << extra_loop << " " << buffer << "\n";
+        current_token.line_no = line_no;
+        if( ws(current_character) || !buffer ){// if on ws or last character push token
+            if( current_token.text.size() > 0 )
+                retMe.push_back(current_token);
+            current_token = {};
+            if( current_character == '\n' )
+                line_no++;
+        }
+        else{
+            current_token.text += current_character;
+        }
+
+        if( false )//triggers on ws and on end of file
+            retMe.push_back(current_token);
+    }
+
+    return retMe;
+}
+
 std::vector<token> tokenize( const std::string &file_name ){
 
     std::vector<token> retMe;

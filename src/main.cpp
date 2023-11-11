@@ -77,7 +77,7 @@ std::vector<token> example_8 = { {"for",0,keyword},{"(",0,paren},{"a",0,identifi
                                         };
 ;
 
-std::vector<token> example_9 = { {"for",0,keyword},{"(",0,paren},{"a",0,identifier},{";",0,Operator},{"a",0,identifier},{";",0,Operator},{"a",0,identifier},{";",0,Operator},{")",0,paren},
+std::vector<token> example_9 = { {"for",0,keyword},{"(",0,paren},{"0",0,literal},{";",0,Operator},{"0",0,literal},{";",0,Operator},{"0",0,literal},{")",0,paren},
                                         {"{",0,scoping},
                                         {"a",0,identifier},{"=",0,binary_operator},{"b",0,identifier},{";",0,Operator},
                                         {"}",0,scoping}
@@ -86,10 +86,19 @@ std::vector<token> example_9 = { {"for",0,keyword},{"(",0,paren},{"a",0,identifi
 
 bool is_valid_literal( std::string str );
 bool is_hex(uint8_t c);
-
+std::vector<token> tokenize2temp( const std::string &file_name );
 int main(int argc, char**argv){
 
+
+
     //auto tokens = tokenize("./file2.txt");
+    auto tokens = tokenize2temp("./file2.txt");
+
+    for( auto tok : tokens ){
+        std::cout << "|" << tok.text << "|\n";
+    }
+
+    return 0;
 
     std::string type;
 
@@ -126,6 +135,11 @@ int main(int argc, char**argv){
     start_pos = 0;
     AST_node ex8 = parse_expression(example_8,start_pos);
     ex8.print();
+
+    //breaks because of literal parsing in for loop, will fix later.
+    //start_pos = 0;
+    //AST_node ex9 = parse_expression(example_9,start_pos);
+    //ex9.print();
 
 
 
