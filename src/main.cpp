@@ -14,18 +14,18 @@
 
 std::vector<token> example_1 = { {"if",0,keyword},{"(",0,paren},{"0",0,literal},{")",0,paren},
                                         {"{",0,scoping},
-                                        {"a",0,identifier},{"=",0,Operator},{"b",0,identifier},{";",0,Operator},
+                                        {"a",0,identifier},{"=",0,binary_operator},{"b",0,identifier},{";",0,Operator},
                                         {"}",0,scoping}
                                         };
 ;
 
 std::vector<token> example_2 = { {"if",0,keyword},{"(",0,paren},{"0",0,literal},{")",0,paren},
                                         {"{",0,scoping},
-                                        {"a",0,identifier},{"=",0,Operator},{"b",0,identifier},{";",0,Operator},
+                                        {"a",0,identifier},{"=",0,binary_operator},{"b",0,identifier},{";",0,Operator},
                                         {"}",0,scoping},
                                         {"else",0,keyword},
                                         {"{",0,scoping},
-                                        {"a",0,identifier},{"=",0,Operator},{"b",0,identifier},{";",0,Operator},
+                                        {"a",0,identifier},{"=",0,binary_operator},{"b",0,identifier},{";",0,Operator},
                                         {"}",0,scoping},
                                         };
 ;
@@ -33,7 +33,7 @@ std::vector<token> example_2 = { {"if",0,keyword},{"(",0,paren},{"0",0,literal},
 std::vector<token> example_3 = { {"function",0,keyword},{"byte",0,type},{"func_name",0,identifier},
                                         {"(",0,paren},{")",0,paren},
                                         {"{",0,scoping},
-                                        {"a",0,identifier},{"=",0,Operator},{"b",0,identifier},{";",0,Operator},
+                                        {"a",0,identifier},{"=",0,binary_operator},{"b",0,identifier},{";",0,Operator},
                                         {"}",0,scoping},
                                         };
 ;
@@ -41,7 +41,7 @@ std::vector<token> example_3 = { {"function",0,keyword},{"byte",0,type},{"func_n
 std::vector<token> example_4 = { {"function",0,keyword},{"byte",0,type},{"func_name",0,identifier},
                                         {"(",0,paren},{"byte",0,type},{"a",0,identifier},{")",0,paren},
                                         {"{",0,scoping},
-                                        {"a",0,identifier},{"=",0,Operator},{"b",0,identifier},{";",0,Operator},
+                                        {"a",0,identifier},{"=",0,binary_operator},{"b",0,identifier},{";",0,Operator},
                                         {"}",0,scoping},
                                         };
 ;
@@ -49,7 +49,7 @@ std::vector<token> example_4 = { {"function",0,keyword},{"byte",0,type},{"func_n
 std::vector<token> example_5 = { {"function",0,keyword},{"byte",0,type},{"func_name",0,identifier},
                                         {"(",0,paren},{"byte",0,type},{"a",0,identifier},{",",0,Operator},{"byte",0,type},{"b",0,identifier},{")",0,paren},
                                         {"{",0,scoping},
-                                        {"a",0,identifier},{"=",0,Operator},{"b",0,identifier},{";",0,Operator},
+                                        {"a",0,identifier},{"=",0,binary_operator},{"b",0,identifier},{";",0,Operator},
                                         {"}",0,scoping},
                                         };
 ;
@@ -57,7 +57,7 @@ std::vector<token> example_5 = { {"function",0,keyword},{"byte",0,type},{"func_n
 std::vector<token> example_6 = { {"function",0,keyword},{"byte",0,type},{"func_name",0,identifier},
                                         {"(",0,paren},{"byte",0,type},{"a",0,identifier},{",",0,Operator},{"byte",0,type},{"b",0,identifier},{")",0,paren},
                                         {"{",0,scoping},
-                                        {"a",0,identifier},{"=",0,Operator},{"b",0,identifier},{";",0,Operator},
+                                        {"a",0,identifier},{"=",0,binary_operator},{"b",0,identifier},{";",0,Operator},
                                         {"return",0,keyword},{"b",0,identifier},{";",0,Operator},
                                         {"}",0,scoping},
                                         };
@@ -65,14 +65,21 @@ std::vector<token> example_6 = { {"function",0,keyword},{"byte",0,type},{"func_n
 
 std::vector<token> example_7 = { {"while",0,keyword},{"(",0,paren},{"0",0,literal},{")",0,paren},
                                         {"{",0,scoping},
-                                        {"a",0,identifier},{"=",0,Operator},{"b",0,identifier},{";",0,Operator},
+                                        {"a",0,identifier},{"=",0,binary_operator},{"b",0,identifier},{";",0,Operator},
                                         {"}",0,scoping}
                                         };
 ;
 
-std::vector<token> example_8 = { {"for",0,keyword},{"(",0,paren},{"a",0,identifier},{";",0,Operator},{"a",0,identifier},{";",0,Operator},{"a",0,identifier},{";",0,Operator},{")",0,paren},
+std::vector<token> example_8 = { {"for",0,keyword},{"(",0,paren},{"a",0,identifier},{";",0,Operator},{"a",0,identifier},{";",0,Operator},{"a",0,identifier},{")",0,paren},
                                         {"{",0,scoping},
-                                        {"a",0,identifier},{"=",0,Operator},{"b",0,identifier},{";",0,Operator},
+                                        {"a",0,identifier},{"=",0,binary_operator},{"b",0,identifier},{";",0,Operator},
+                                        {"}",0,scoping}
+                                        };
+;
+
+std::vector<token> example_9 = { {"for",0,keyword},{"(",0,paren},{"a",0,identifier},{";",0,Operator},{"a",0,identifier},{";",0,Operator},{"a",0,identifier},{";",0,Operator},{")",0,paren},
+                                        {"{",0,scoping},
+                                        {"a",0,identifier},{"=",0,binary_operator},{"b",0,identifier},{";",0,Operator},
                                         {"}",0,scoping}
                                         };
 ;

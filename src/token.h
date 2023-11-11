@@ -24,6 +24,7 @@ enum token_type:uint32_t{
     root = 9,
     sigma = 10,
     paren = 11,
+    binary_operator = 12,
 };
 
 struct token{
