@@ -57,6 +57,38 @@ std::vector<std::string> operators
     "..",//scoping backstep
 };
 
+std::vector<std::string> boperators
+{
+    "+",//arithmetic
+    "-",
+    "*",
+    "/",
+    "%",
+    "=",
+
+    ">>",//bitwise
+    "<<",
+    ">O>",
+    "<O<",
+    "&",
+    "|",
+    "~",
+    "^",
+
+    "==",//comparison
+    "!=",
+    ">",
+    "<",
+    ">=",
+    "<=",
+
+    ",",//sub-expression separator
+
+    "::",//scoping, add later
+    ".",//member access & scoping current
+    "..",//scoping backstep
+};
+
 //not used now, may be moved to parsing code
 //I'm still learning how a compiler should work
 std::vector<std::string> types =
@@ -141,6 +173,12 @@ bool is_operator( std::string str ){
     return false;
 }
 
+bool is_binary_operator( std::string str ){
+    if( std::find(boperators.begin(), boperators.end(), str ) != boperators.end() )
+        return true;
+    return false;
+}
+
 bool is_valid_literal( std::string str ){
     if( str.size() == 0 ) return false;
 
@@ -200,6 +238,12 @@ bool is_scoping( std::string str ){
     return false;
 }
 
+bool is_paren( std::string str ){
+    if( str == "(" || str == ")" )
+       return true;
+    return false;
+}
+
 bool ws( char am_i_space ){//common whitespaces
     return ( am_i_space == ' ' || ( 0x7 <= am_i_space && am_i_space <= 0xD ) );
 }
@@ -211,24 +255,92 @@ std::vector<token> tokenize2temp( const std::string &file_name ){
 
     char current_character = 0;
     token current_token;
+    current_token.line_no = 1;
     bool buffer, extra_loop = 0;//extra loop grabs last character
     for( int line_no = 1; (buffer = (bool) file.get(current_character) ) || extra_loop ; extra_loop = buffer ){
-    std::cout << line_no << " ";
-    std::cout << " " << extra_loop << " " << buffer << "\n";
-        current_token.line_no = line_no;
+        //std::cout << current_character << "\n";
+
+        //find operators as substrings, since they aren't always separated by ws, like "type varname = id;"
+        int i = 0;
+        for( std::string s : operators ){
+            int pos;
+            if( (pos = current_token.text.find(s) ) != std::string::npos ){i++;
+
+                token tmp;
+                tmp.line_no = line_no;
+                tmp.text = current_token.text.substr( 0, pos );
+                tmp.type = get_token_type( tmp.text );
+
+                retMe.push_back(tmp);
+
+                tmp.line_no = line_no;
+                tmp.text = current_token.text.substr( pos, pos + s.size() );
+                tmp.type = get_token_type( tmp.text );
+
+                retMe.push_back(tmp);
+
+                current_token.text = current_token.text.substr( pos + s.size(), current_token.text.size() );
+
+                break;//assuming that there is only one nested per main loop, don't want to think about more than one occuring
+            }
+        }assert( i <= 1 );
+
         if( ws(current_character) || !buffer ){// if on ws or last character push token
             if( current_token.text.size() > 0 )
                 retMe.push_back(current_token);
             current_token = {};
-            if( current_character == '\n' )
+            if( current_character == '\n' ){
                 line_no++;
-        }
-        else{
-            current_token.text += current_character;
-        }
+                current_token.line_no = line_no;
+            }
+        }else{//this tokenization model will be broken later, badly
 
-        if( false )//triggers on ws and on end of file
-            retMe.push_back(current_token);
+            //affect normal lexing
+            if( current_character == '{' or current_character == '}' ){
+                if( current_token.text.size() > 0 ){
+                    retMe.push_back(current_token);
+                    current_token = {};
+                }
+                current_token.type = scoping;
+                current_token.text += current_character;
+                retMe.push_back(current_token);
+                current_token = {};
+                continue;
+            }
+
+            if( current_character == '(' or current_character == ')' ){
+                if( current_token.text.size() > 0 ){
+                    retMe.push_back(current_token);
+                    current_token = {};
+                }
+                current_token.type = paren;
+                current_token.text += current_character;
+                retMe.push_back(current_token);
+                current_token = {};
+                continue;
+            }
+
+            current_token.text += current_character;
+
+            if( is_keyword( current_token.text ) ){
+                current_token.type = keyword;
+                retMe.push_back(current_token);
+                current_token = {};
+            }else
+            if( is_operator( current_token.text ) ){//ternary for binary vs other operators, affects parsing, lot of work left to do with operators
+                current_token.type = is_binary_operator(current_token.text)?binary_operator:Operator;
+                retMe.push_back(current_token);
+                current_token = {};
+            }else
+            if( is_valid_identifier( current_token.text ) ){
+                current_token.type = identifier;
+            }else
+            if( is_valid_literal( current_token.text ) ){
+                current_token.type = literal;
+            }
+            else current_token.type = epsilon;
+
+        }
     }
 
     return retMe;
@@ -286,6 +398,8 @@ token_type get_token_type( std::string type_me ){
         return epsilon;
     if( is_keyword( type_me ) )
         return keyword;
+    if( is_binary_operator( type_me ) )
+        return binary_operator;
     if( is_operator( type_me ) )
         return Operator;
     if( is_valid_identifier( type_me ) )

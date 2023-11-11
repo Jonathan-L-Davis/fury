@@ -95,7 +95,7 @@ int main(int argc, char**argv){
     auto tokens = tokenize2temp("./file2.txt");
 
     for( auto tok : tokens ){
-        std::cout << "|" << tok.text << "|\n";
+        std::cout << "|" << tok.text << "|" << tok.type << "\n";
     }
 
     return 0;
