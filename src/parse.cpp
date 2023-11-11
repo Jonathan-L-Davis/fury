@@ -385,8 +385,15 @@ AST_node parse_typed_declaration(const std::vector<token> &tokens, int &start_po
 AST_node parse_struct_or_union(const std::vector<token> &tokens, int &start_pos){
     AST_node retMe;
 
-    //struct/union
-    //any expression?
+    if( (unsigned) start_pos < tokens.size() && (
+        tokens[start_pos].text == "struct" ||
+        tokens[start_pos].text == "union"
+        ) ){
+        retMe = {tokens[start_pos]};
+        start_pos++;
+    }else assert(false);
+
+    retMe.children.push_back( parse_expression( tokens, start_pos ) );
 
     return retMe;
 }
