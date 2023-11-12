@@ -11,6 +11,7 @@ struct AST_node{
     void print();
 };
 
+AST_node parse(const std::vector<token> &tokens, int &start_pos);
 AST_node parse_expression(const std::vector<token> &tokens, int &start_pos);
 
 #endif//PARSE_H

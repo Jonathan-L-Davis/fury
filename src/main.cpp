@@ -86,68 +86,20 @@ std::vector<token> example_9 = { {"for",0,keyword},{"(",0,paren},{"0",0,literal}
 
 bool is_valid_literal( std::string str );
 bool is_hex(uint8_t c);
-std::vector<token> tokenize2temp( const std::string &file_name );
+std::vector<token> lex( const std::string &file_name );
 int main(int argc, char**argv){
 
+    auto tokens = lex("./file.txt");
+    int start_pos = 0;
 
-
-    //auto tokens = tokenize("./file2.txt");
-    auto tokens = tokenize2temp("./file2.txt");
-
-    for( auto tok : tokens ){
-        std::cout << "|" << tok.text << "|" << tok.type << "\n";
+    for( token tok : tokens ){
+        std::cout << "|" << tok.text<< "|" << tok.line_no << "\n";
     }
 
+    AST_node parsed_file = parse(tokens,start_pos);
+    parsed_file.print();
+
     return 0;
-
-    std::string type;
-
-
-
-    int start_pos = 0;
-    AST_node ex1 = parse_expression(example_1,start_pos);
-    ex1.print();
-
-    start_pos = 0;
-    AST_node ex2 = parse_expression(example_2,start_pos);
-    ex2.print();
-
-    start_pos = 0;
-    AST_node ex3 = parse_expression(example_3,start_pos);
-    ex3.print();
-
-    start_pos = 0;
-    AST_node ex4 = parse_expression(example_4,start_pos);
-    ex4.print();
-
-    start_pos = 0;
-    AST_node ex5 = parse_expression(example_5,start_pos);
-    ex5.print();
-
-    start_pos = 0;
-    AST_node ex6 = parse_expression(example_6,start_pos);
-    ex6.print();
-
-    start_pos = 0;
-    AST_node ex7 = parse_expression(example_7,start_pos);
-    ex7.print();
-
-    start_pos = 0;
-    AST_node ex8 = parse_expression(example_8,start_pos);
-    ex8.print();
-
-    //breaks because of literal parsing in for loop, will fix later.
-    //start_pos = 0;
-    //AST_node ex9 = parse_expression(example_9,start_pos);
-    //ex9.print();
-
-
-
-    /*
-    std::string hex_test = "0123456789ABCDEF";
-    for( int i = 0; i < 16; i++ ){
-        std::cout << is_hex(hex_test[i]) << "\n";
-    }//*/
 
     assert( is_valid_literal( "0" ) );
     assert( is_valid_literal( "0x0123456789ABCDEF" ) );
@@ -164,32 +116,4 @@ int main(int argc, char**argv){
     assert( is_valid_literal( "9876543210" ) );
     assert( is_valid_literal( "0123456789" ) );
     assert( is_valid_literal( "10000000000000000000" ) );
-
-
-    /*
-    for( auto token : tokens ){
-
-        switch( token.type ){
-            case epsilon:{
-                type = "epsilon";
-            }break;
-            case keyword:{
-                type = "keyword";
-            }break;
-            case Operator:{
-                type = "operator";
-            }break;
-            case token_type::type:{
-                type = "type";
-            }break;
-            case identifier:{
-                type = "identifier";
-            }break;
-            case parser:{
-                type = "parser";
-            }break;
-        }
-
-        std::cout << token.line_no << " : \"" << token.text << "\" : " << type << "\n";
-    }//*/
 }

@@ -3,7 +3,7 @@
 #include <iostream>
 
 
-/** AHHHHH AGONY**/
+/** easier than I thought **/
 
 AST_node parse_if(const std::vector<token> &tokens, int &start_pos);
 AST_node parse_while(const std::vector<token> &tokens, int &start_pos);
@@ -17,6 +17,16 @@ AST_node parse_export(const std::vector<token> &tokens, int &start_pos);
 
 AST_node epsilon_node = {{"",0,epsilon},{}};//basically a null return value
 
+
+AST_node parse(const std::vector<token> &tokens, int &start_pos){
+    AST_node retMe;
+
+    while( (unsigned) start_pos < tokens.size() )
+        retMe.children.push_back( parse_expression( tokens, start_pos ) );
+
+    return retMe;
+}
+
 AST_node parse_expression(const std::vector<token> &tokens, int &start_pos){
     AST_node retMe;
 
@@ -26,16 +36,16 @@ AST_node parse_expression(const std::vector<token> &tokens, int &start_pos){
         }break;
         case keyword:{
             if( tokens[start_pos].text == "byte" ){
-
+                retMe = parse_typed_declaration(tokens,start_pos);
             }else
             if( tokens[start_pos].text == "dual" ){
-
+                retMe = parse_typed_declaration(tokens,start_pos);
             }else
             if( tokens[start_pos].text == "else" ){
                 assert(false);// handled by if, never occurs in isolation
             }else
             if( tokens[start_pos].text == "export" ){
-
+                parse_export(tokens,start_pos);
             }else
             if( tokens[start_pos].text == "for" ){
                 retMe = parse_for(tokens,start_pos);
@@ -50,22 +60,22 @@ AST_node parse_expression(const std::vector<token> &tokens, int &start_pos){
                 retMe = parse_if(tokens,start_pos);
             }else
             if( tokens[start_pos].text == "import" ){
-
+                parse_import(tokens,start_pos);
             }else
             if( tokens[start_pos].text == "oct" ){
-
+                retMe = parse_typed_declaration(tokens,start_pos);
             }else
             if( tokens[start_pos].text == "quad" ){
-
+                retMe = parse_typed_declaration(tokens,start_pos);
             }else
             if( tokens[start_pos].text == "return" ){
                 retMe = parse_return(tokens,start_pos);
             }else
             if( tokens[start_pos].text == "struct" ){
-
+                parse_struct_or_union(tokens,start_pos);
             }else
             if( tokens[start_pos].text == "union" ){
-
+                parse_struct_or_union(tokens,start_pos);
             }else
             if( tokens[start_pos].text == "while" ){
                 retMe = parse_while(tokens,start_pos);
@@ -105,6 +115,20 @@ AST_node parse_expression(const std::vector<token> &tokens, int &start_pos){
             }else
             if( tokens[start_pos].text == ")" ){
                 retMe = id;
+            }else if( tokens[start_pos].text == "(" ){//should only be function arguments for now.
+                retMe = id;
+                retMe.children.push_back({tokens[start_pos]});
+                start_pos++;
+                while( (unsigned) start_pos < tokens.size() && tokens[start_pos].text != ")" ){
+                    AST_node exp = parse_expression(tokens,start_pos);
+                    retMe.children[0].children.push_back(exp);
+                }
+
+                if((unsigned) start_pos < tokens.size() && tokens[start_pos].text == ")"){
+                    retMe.children[0].children.push_back({tokens[start_pos]});
+                    start_pos++;
+                }else assert(false);
+
             }else assert(false);
         }break;
         case parser:{
@@ -134,8 +158,14 @@ AST_node parse_expression(const std::vector<token> &tokens, int &start_pos){
         case root:{
             assert(false); //shouldn't be here;
         }break;
+        case paren:{
+            if( tokens[start_pos].text == ")" ){
+                retMe.tok = tokens[start_pos];
+                start_pos++;
+            }
+        }break;
         default:
-            std::cout << tokens[start_pos].text << "\n";
+            std::cout << tokens[start_pos].line_no << " " << tokens[start_pos].text << "\n";
             assert(false);
     }
 
