@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <string>
-#include "token.h"
+#include "lex.h"
 
 struct AST_node{
     token tok;

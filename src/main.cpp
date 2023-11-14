@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "token.h"
+#include "lex.h"
 #include "parse.h"
 #include <vector>
 #include <assert.h>
