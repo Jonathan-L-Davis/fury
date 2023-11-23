@@ -3,7 +3,6 @@
 #include <iostream>
 
 
-/** easier than I thought **/
 
 AST_node parse_if(const std::vector<token> &tokens, int &start_pos);
 AST_node parse_while(const std::vector<token> &tokens, int &start_pos);
@@ -20,6 +19,8 @@ AST_node epsilon_node = {{"",0,epsilon},{}};//basically a null return value
 
 AST_node parse(const std::vector<token> &tokens, int &start_pos){
     AST_node retMe;
+
+    retMe.tok.text = ":root";
 
     while( (unsigned) start_pos < tokens.size() )
         retMe.children.push_back( parse_expression( tokens, start_pos ) );

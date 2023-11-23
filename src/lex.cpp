@@ -57,6 +57,7 @@ std::vector<std::string> operators
     "..",//scoping backstep
 };
 
+//binary operators
 std::vector<std::string> boperators
 {
     "+",//arithmetic
@@ -270,7 +271,7 @@ std::vector<token> lex( const std::string &file_name ){
         current_token.line_no = line_no;
         int i = 0;
         for( std::string s : operators ){
-            int pos;
+            std::string::size_type pos;
             if( (pos = current_token.text.find(s) ) != std::string::npos ){i++;
 
                 token tmp;

@@ -2,6 +2,7 @@
 
 #include "lex.h"
 #include "parse.h"
+#include "symbol_table.h"
 #include <vector>
 #include <assert.h>
 
@@ -93,11 +94,18 @@ int main(int argc, char**argv){
     int start_pos = 0;
 
     for( token tok : tokens ){
-        std::cout << "|" << tok.text<< "|" << tok.line_no << "\n";
+        //std::cout << "|" << tok.text<< "|" << tok.line_no << "\n";
     }
 
     AST_node parsed_file = parse(tokens,start_pos);
     parsed_file.print();
+    symbol_table sym_tbl;
+
+    anal(parsed_file,sym_tbl);
+
+    for( symbol sym : sym_tbl.symbols ){
+        std::cout << "|" << sym.name << "|\n";
+    }
 
     return 0;
 
