@@ -20,7 +20,7 @@ std::vector<std::string> keywords
     "quad",
     "return",
     "struct",
-    "union",
+    "union",// might remove from language eventually
     "while",
 };
 

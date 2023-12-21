@@ -21,11 +21,21 @@ void anal_type( AST_node& frisk_me, symbol_table& fill_me ){
     
 }
 
-void anal_( AST_node& frisk_me, symbol_table& fill_me ){
+void anal_if( AST_node& frisk_me, symbol_table& fill_me ){
     
 }
 
-void 
+void anal_while( AST_node& frisk_me, symbol_table& fill_me ){
+    
+}
+
+void anal_for( AST_node& frisk_me, symbol_table& fill_me ){
+    
+}
+
+void anal_goto( AST_node& frisk_me, symbol_table& fill_me ){
+    //not implemented for v0.0
+}
 
 void symbol_table::add_symbol( symbol add_me ){
     

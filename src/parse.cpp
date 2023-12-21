@@ -123,11 +123,15 @@ AST_node parse_expression(const std::vector<token> &tokens, int &start_pos){
                     retMe.children[0].children.push_back(exp);
                 }
 
+                
                 if((unsigned) start_pos < tokens.size() && tokens[start_pos].text == ")"){
                     retMe.children[0].children.push_back({tokens[start_pos]});
                     start_pos++;
                 }else assert(false);
-
+                if((unsigned) start_pos < tokens.size() && tokens[start_pos].text == ";"){
+                    retMe.children.push_back({tokens[start_pos]});
+                    start_pos++;
+                }
             }else assert(false);
         }break;
         case parser:{
@@ -377,6 +381,11 @@ AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
 
     function_id->children.push_back( parse_expression(tokens,start_pos) );//function body
 
+    if((unsigned) start_pos < tokens.size() && tokens[start_pos].text == ";"){//terminate function
+        retMe.children.push_back({tokens[start_pos]});
+        start_pos++;
+    }
+    
     return retMe;
 }
 
