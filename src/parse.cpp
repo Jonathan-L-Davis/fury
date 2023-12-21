@@ -14,13 +14,11 @@ AST_node parse_struct_or_union(const std::vector<token> &tokens, int &start_pos)
 AST_node parse_import(const std::vector<token> &tokens, int &start_pos);
 AST_node parse_export(const std::vector<token> &tokens, int &start_pos);
 
-AST_node epsilon_node = {{"",0,epsilon},{}};//basically a null return value
-
 
 AST_node parse(const std::vector<token> &tokens, int &start_pos){
     AST_node retMe;
 
-    retMe.tok.text = ":root";
+    retMe.tok.text = "::";
 
     while( (unsigned) start_pos < tokens.size() )
         retMe.children.push_back( parse_expression( tokens, start_pos ) );
