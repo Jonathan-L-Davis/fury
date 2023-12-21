@@ -300,6 +300,7 @@ AST_node parse_for(const std::vector<token> &tokens, int &start_pos){
 AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
     AST_node retMe;
     AST_node* active = &retMe;
+    AST_node* function_id;
 
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "function" ){
         retMe.tok = tokens[start_pos];
@@ -309,6 +310,7 @@ AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == type ){//built in return type
         active->children.push_back( {tokens[start_pos]} );
         active = &(active->children[0]);
+        function_id = active;
         start_pos++;
 
         if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ) {//function name
@@ -320,19 +322,29 @@ AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
         active->children.push_back( {tokens[start_pos]} );
         active = &(active->children[0]);
         start_pos++;
-
+        // may not happen, void functions have no return type
         if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ) {//id if custom type, doesn't appear if it's a void function
             active->children.push_back( {tokens[start_pos]} );
             active = &(active->children[0]);
             start_pos++;
-        }// may not happen, void functions have no return type
+        }
     }else assert(false);
+
+    function_id = active;// non conditional because id is always active at this point;
 
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "(" ){
         active->children.push_back( {tokens[start_pos]} );
         active = &(active->children[0]);
         start_pos++;
     }else assert(false);
+
+    //handle case where function has no paramters
+
+    if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == ")" ){
+        active->children.push_back( {tokens[start_pos]} );
+        //active = &(active->children[ active->children.size()-1 ]);
+        //start_pos++;
+    }
 
     while( (unsigned) start_pos < tokens.size() && tokens[start_pos].text != ")" ){
         AST_node type_name, param_name, comma;
@@ -354,7 +366,7 @@ AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
         }else
         if ( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == ")" ){
             active->children.push_back( {tokens[start_pos]} );
-            active = &(active->children[ active->children.size()-1 ]);
+            //active = &(active->children[ active->children.size()-1 ]);
             //start_pos++;//don't do until after loop, since it is the break condition
             //active->children.push_back( type_name );
         }else assert(false);
@@ -365,7 +377,7 @@ AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
     //active = &(active->children[ active->children.size()-1 ]);
 
 
-    active->children.push_back( parse_expression(tokens,start_pos) );//function body
+    function_id->children.push_back( parse_expression(tokens,start_pos) );//function body
 
     return retMe;
 }
