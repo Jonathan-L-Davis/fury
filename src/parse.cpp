@@ -18,7 +18,7 @@ AST_node parse_export(const std::vector<token> &tokens, int &start_pos);
 AST_node parse(const std::vector<token> &tokens, int &start_pos){
     AST_node retMe;
 
-    retMe.tok.text = "::";
+    retMe.tok.text = "";
 
     while( (unsigned) start_pos < tokens.size() )
         retMe.children.push_back( parse_expression( tokens, start_pos ) );
@@ -481,13 +481,13 @@ AST_node parse_export(const std::vector<token> &tokens, int &start_pos){
     return retMe;
 }
 
-std::string indent = "";
+std::string sym_indent = "";
 void AST_node::print(){
-    std::cout << indent << tok.text << "\n";
-    indent += "    ";
+    std::cout << sym_indent << tok.text << "\n";
+    sym_indent += "    ";
     for( unsigned int i = 0; i < children.size(); i++ )
         children[i].print();
-    indent.resize(indent.size()-4);
+    sym_indent.resize(sym_indent.size()-4);
 }
 
 

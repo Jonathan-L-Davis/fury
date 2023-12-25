@@ -38,10 +38,12 @@ struct symbol_table{
 
     void add_symbol(symbol);
     void add_scope(std::string scope);
+    
+    void print();
 
 };
 
 // intentionally not const
-void anal( AST_node& frisk_me, symbol_table& fill_me );
+symbol_table anal( AST_node& frisk_me );
 
 #endif//SYMBOL_TABLE_H
