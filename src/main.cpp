@@ -98,7 +98,7 @@ int main(int argc, char**argv){
     }
 
     AST_node parsed_file = parse(tokens,start_pos);
-    //parsed_file.print();
+    parsed_file.print();
     
     symbol_table sym_tbl = anal(parsed_file);
     sym_tbl.print();

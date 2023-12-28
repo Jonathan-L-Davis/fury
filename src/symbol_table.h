@@ -21,6 +21,9 @@ struct symbol{
     std::string type;
     std::string name;
     std::string value;
+    
+    void print();
+    
 };
 
 struct symbol_table{
@@ -36,6 +39,7 @@ struct symbol_table{
 
     std::string get_full_scope();//returns absolute scope
 
+    bool contains_id(std::string);
     void add_symbol(symbol);
     void add_scope(std::string scope);
     
@@ -43,7 +47,7 @@ struct symbol_table{
 
 };
 
-// intentionally not const
-symbol_table anal( AST_node& frisk_me );
+// intentionally not
+symbol_table anal( const AST_node& frisk_me );
 
 #endif//SYMBOL_TABLE_H

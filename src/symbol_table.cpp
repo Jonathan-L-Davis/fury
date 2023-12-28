@@ -6,13 +6,13 @@
 
 void anal_expression( const AST_node& frisk_me, symbol_table& fill_me );
 void anal_function( const AST_node& frisk_me, symbol_table& fill_me );
-void anal_type( const AST_node& frisk_me, symbol_table& fill_me );
+void anal_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me );
 void anal_if( const AST_node& frisk_me, symbol_table& fill_me );
 void anal_while( const AST_node& frisk_me, symbol_table& fill_me );
 void anal_for( const AST_node& frisk_me, symbol_table& fill_me );
 //void anal_goto( const AST_node& frisk_me, symbol_table& fill_me );//not yet
 
-symbol_table anal( AST_node& frisk_me ){
+symbol_table anal( const AST_node& frisk_me ){
     symbol_table fill_me;
     fill_me.scope = "";
     
@@ -30,6 +30,10 @@ void anal_expression( const AST_node& frisk_me, symbol_table& fill_me ){
                 anal_function(frisk_me,fill_me);
             }
         }break;
+        case type:{
+            anal_typed_declaration(frisk_me,fill_me);
+        }break;
+        default: assert(false);
     }
     
 }
@@ -42,6 +46,7 @@ void anal_function( const AST_node& frisk_me, symbol_table& fill_me ){
     if( current_node->tok.text == "function" ){
         current_node = &current_node->children[0];
     }else assert(false); // why was this function called?
+    // conditionally pick off function return type
     // pick off function name
     if( current_node->tok.type == identifier ){
         symbol temp = { "function", current_node->tok.text, "" };
@@ -52,23 +57,28 @@ void anal_function( const AST_node& frisk_me, symbol_table& fill_me ){
     
 }
 
-void anal_type( AST_node& frisk_me, symbol_table& fill_me ){
+void anal_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me ){
+    const AST_node* active = &frisk_me;
+    
+    std::string variable_id = "";
+    if( fill_me.contains_id( variable_id ) ){
+        
+    }
+}
+
+void anal_if( const AST_node& frisk_me, symbol_table& fill_me ){
     
 }
 
-void anal_if( AST_node& frisk_me, symbol_table& fill_me ){
+void anal_while( const AST_node& frisk_me, symbol_table& fill_me ){
     
 }
 
-void anal_while( AST_node& frisk_me, symbol_table& fill_me ){
+void anal_for( const AST_node& frisk_me, symbol_table& fill_me ){
     
 }
 
-void anal_for( AST_node& frisk_me, symbol_table& fill_me ){
-    
-}
-
-void anal_goto( AST_node& frisk_me, symbol_table& fill_me ){
+void anal_goto( const AST_node& frisk_me, symbol_table& fill_me ){
     //not implemented for v0.0
 }
 
@@ -116,11 +126,31 @@ symbol_table::symbol_table( symbol_table* parent_ptr, std::string scope ){
     this->scope = scope;
 }
 
-std::string indent = "";
+std::string sym_tbl_indent = "";
 void symbol_table::print(){
-    std::cout << indent << scope << "\n";
-    indent += "    ";
+    std::cout << sym_tbl_indent << "\"" << scope << "\"\n";
+    sym_tbl_indent += "    ";
+    for( unsigned int i = 0; i < symbols.size(); i++ ){
+        std::cout << sym_tbl_indent; symbols[i].print();
+    }
+    
     for( unsigned int i = 0; i < sub_scopes.size(); i++ )
         sub_scopes[i].print();
-    indent.resize(indent.size()-4);
+    sym_tbl_indent.resize(sym_tbl_indent.size()-4);
+}
+
+void symbol::print(){
+    std::cout << "|" << type << "|" << name << "|" << value << "|\n";
+}
+
+bool symbol_table::contains_id(std::string find_me){
+    
+    bool retMe = false;
+    
+    for( int i = 0; i < symbols.size(); i++ ){
+        if( symbols[i].name == find_me )
+            retMe = true;
+    }
+    
+    return retMe || parent?parent->contains_id( find_me ):false;
 }

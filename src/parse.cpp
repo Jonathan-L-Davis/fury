@@ -94,7 +94,7 @@ AST_node parse_expression(const std::vector<token> &tokens, int &start_pos){
             retMe.children.push_back(exp);// first operand will be pushed later after return of this call
         }break;
         case type:{
-            assert(false); //shouldn't be here;
+            retMe = parse_typed_declaration(tokens,start_pos);
         }break;
         case identifier:{
             AST_node id;
@@ -309,26 +309,26 @@ AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
         start_pos++;
     }else assert(false);
 
+    // parse return type and ID
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == type ){//built in return type
         active->children.push_back( {tokens[start_pos]} );
-        active = &(active->children[0]);
-        function_id = active;
         start_pos++;
 
         if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ) {//function name
             active->children.push_back( {tokens[start_pos]} );
-            active = &(active->children[0]);
+            active = &(active->children[1]);
             start_pos++;
         }else assert(false);
     }else if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ) {//could be void return type or custom return type
         active->children.push_back( {tokens[start_pos]} );
-        active = &(active->children[0]);
         start_pos++;
         // may not happen, void functions have no return type
         if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ) {//id if custom type, doesn't appear if it's a void function
             active->children.push_back( {tokens[start_pos]} );
-            active = &(active->children[0]);
+            active = &(active->children[1]);
             start_pos++;
+        }else{
+            active = &(active->children[0]);// set function id as active for void functions
         }
     }else assert(false);
 
@@ -420,14 +420,18 @@ AST_node parse_typed_declaration(const std::vector<token> &tokens, int &start_po
         retMe.children.push_back( {tokens[start_pos]} );
         start_pos++;
     }else assert(false);
-
+    //AST_node* decl_end = &retMe.children[0];
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "=" ){//with default value
-        retMe.children.push_back( {tokens[start_pos]} );
+        //retMe.children[0].children.push_back( {tokens[start_pos]} );
         start_pos++;
 
-        retMe.children[0].children.push_back( parse_expression( tokens, start_pos ) );
-
-    }else assert(false);
+        retMe.children.push_back( parse_expression( tokens, start_pos ) );
+    }
+    //*
+    if((unsigned) start_pos < tokens.size() && tokens[start_pos].text == ";"){//terminate function
+        retMe.children.push_back({tokens[start_pos]});
+        start_pos++;
+    }else assert(false);//*/
 
     return retMe;
 }
@@ -481,13 +485,13 @@ AST_node parse_export(const std::vector<token> &tokens, int &start_pos){
     return retMe;
 }
 
-std::string sym_indent = "";
+std::string indent = "";
 void AST_node::print(){
-    std::cout << sym_indent << tok.text << "\n";
-    sym_indent += "    ";
+    std::cout << indent << tok.text << "\n";
+    indent += "    ";
     for( unsigned int i = 0; i < children.size(); i++ )
         children[i].print();
-    sym_indent.resize(sym_indent.size()-4);
+    indent.resize(indent.size()-4);
 }
 
 
