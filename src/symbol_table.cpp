@@ -44,17 +44,18 @@ void anal_function( const AST_node& frisk_me, symbol_table& fill_me ){
     
     // pick off function keyword
     if( active->tok.text == "function" ){
-        active = &active->children[0];
+        if( active->children.size() ){
+            active = &active->children[0];
+        }else assert(false);
     }else assert(false); // why was this function called?
     // conditionally pick off function return type
     // pick off function name
+    symbol function_symbol;
     if( active->tok.type == identifier ){
-        symbol temp = { "function", active->tok.text, nullptr };
-        fill_me.add_symbol( temp );
+        function_symbol = { "function", active->tok.text, (AST_node*)(void*)&frisk_me };
+        fill_me.add_symbol( function_symbol );
         fill_me.add_scope( active->tok.text );
-        active = &active->children[0];
     }
-    // pick off function body
     
 }
 
