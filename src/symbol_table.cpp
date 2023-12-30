@@ -40,30 +40,50 @@ void anal_expression( const AST_node& frisk_me, symbol_table& fill_me ){
 
 void anal_function( const AST_node& frisk_me, symbol_table& fill_me ){
     const AST_node* start_node = &frisk_me;
-    const AST_node* current_node = start_node;
+    const AST_node* active = start_node;
     
     // pick off function keyword
-    if( current_node->tok.text == "function" ){
-        current_node = &current_node->children[0];
+    if( active->tok.text == "function" ){
+        active = &active->children[0];
     }else assert(false); // why was this function called?
     // conditionally pick off function return type
     // pick off function name
-    if( current_node->tok.type == identifier ){
-        symbol temp = { "function", current_node->tok.text, "" };
+    if( active->tok.type == identifier ){
+        symbol temp = { "function", active->tok.text, nullptr };
         fill_me.add_symbol( temp );
-        current_node = &current_node->children[0];
+        fill_me.add_scope( active->tok.text );
+        active = &active->children[0];
     }
-    // pick off 
+    // pick off function body
     
 }
 
 void anal_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me ){
     const AST_node* active = &frisk_me;
     
-    std::string variable_id = "";
-    if( fill_me.contains_id( variable_id ) ){
-        
+    std::string type;
+    std::string variable_id;
+    AST_node* value;
+    
+    if( active->tok.type == ::type ){
+        type = active->tok.text;
+        active = &frisk_me.children[0];
     }
+    else assert(false);
+    
+    if( active->tok.type == identifier ){
+        variable_id = active->tok.text;
+        active = &frisk_me.children[1];
+    }else assert(false);
+    
+    //*
+    if( active->tok.text != ";" ){
+        value = (AST_node*)(void*)active;
+    }//*/
+    
+    if( !fill_me.contains_id( variable_id ) ){
+        fill_me.add_symbol({ type, variable_id, value });
+    }else assert(false);
 }
 
 void anal_if( const AST_node& frisk_me, symbol_table& fill_me ){
@@ -147,7 +167,7 @@ bool symbol_table::contains_id(std::string find_me){
     
     bool retMe = false;
     
-    for( int i = 0; i < symbols.size(); i++ ){
+    for( unsigned int i = 0; i < symbols.size(); i++ ){
         if( symbols[i].name == find_me )
             retMe = true;
     }
