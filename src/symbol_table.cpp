@@ -37,25 +37,15 @@ void anal_expression( const AST_node& frisk_me, symbol_table& fill_me ){
         }break;
         case binary_operator:{
             
-            if( frisk_me.tok.text == "+" ){
-                std::cout << "+\n";
-            }else
-            if( frisk_me.tok.text == "*" ){
-                std::cout << "*\n";
-            }else
-            if( frisk_me.tok.text == "+" ){
-                
-            }else
-            if( frisk_me.tok.text == "+" ){
-                
-            }else
-            if( frisk_me.tok.text == "+" ){
-                
-            }
+            for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
+                anal_expression( frisk_me.children[i], fill_me );
+            std::cout << "operator scoping\n";
             
         }break;
         case identifier:{
             assert( fill_me.contains_id( frisk_me.tok.text ) );
+            for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
+                anal_expression( frisk_me.children[i], fill_me );
         }break;
         case literal:{
             
