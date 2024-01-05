@@ -30,10 +30,40 @@ void anal_expression( const AST_node& frisk_me, symbol_table& fill_me ){
                 anal_function(frisk_me,fill_me);
             }
         }break;
+        case Operator:{
+            if( frisk_me.tok.text == ";" ){
+                    
+            }else assert(false);
+        }break;
+        case binary_operator:{
+            
+            if( frisk_me.tok.text == "+" ){
+                std::cout << "+\n";
+            }else
+            if( frisk_me.tok.text == "*" ){
+                std::cout << "*\n";
+            }else
+            if( frisk_me.tok.text == "+" ){
+                
+            }else
+            if( frisk_me.tok.text == "+" ){
+                
+            }else
+            if( frisk_me.tok.text == "+" ){
+                
+            }
+            
+        }break;
+        case identifier:{
+            assert( fill_me.contains_id( frisk_me.tok.text ) );
+        }break;
+        case literal:{
+            
+        }break;
         case type:{
             anal_typed_declaration(frisk_me,fill_me);
         }break;
-        default: assert(false);
+        default: std::cout << frisk_me.tok.text << "\n",assert(false);
     }
     
 }
@@ -85,6 +115,9 @@ void anal_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me ){
     if( !fill_me.contains_id( variable_id ) ){
         fill_me.add_symbol({ type, variable_id, value });
     }else assert(false);
+    
+    anal_expression( *active ,fill_me.sub_scopes[fill_me.sub_scopes.size()-1]);
+    
 }
 
 void anal_if( const AST_node& frisk_me, symbol_table& fill_me ){
@@ -166,12 +199,12 @@ void symbol::print(){
 
 bool symbol_table::contains_id(std::string find_me){
     
-    bool retMe = false;
-    
     for( unsigned int i = 0; i < symbols.size(); i++ ){
         if( symbols[i].name == find_me )
-            retMe = true;
+            return true;
     }
     
-    return retMe || parent?parent->contains_id( find_me ):false;
+    if( parent == nullptr ) return false;
+    return parent->contains_id(find_me);
+    
 }
