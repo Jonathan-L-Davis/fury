@@ -43,6 +43,7 @@ void anal_expression( const AST_node& frisk_me, symbol_table& fill_me ){
             
         }break;
         case identifier:{
+            std::cout << "ID in scope analysis \"" << frisk_me.tok.text << "\" not declared\n";
             assert( fill_me.contains_id( frisk_me.tok.text ) );
             for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
                 anal_expression( frisk_me.children[i], fill_me );
@@ -53,7 +54,7 @@ void anal_expression( const AST_node& frisk_me, symbol_table& fill_me ){
         case type:{
             anal_typed_declaration(frisk_me,fill_me);
         }break;
-        default: std::cout << frisk_me.tok.text << "\n",assert(false);
+        default: {std::cout << frisk_me.tok.text << "\n";assert(false);}break;
     }
     
 }
@@ -65,7 +66,7 @@ void anal_function( const AST_node& frisk_me, symbol_table& fill_me ){
     // pick off function keyword
     if( active->tok.text == "function" ){
         if( active->children.size() ){
-            active = &active->children[0];
+            active = &active->children[ active->children.size()-2 ];
         }else assert(false);
     }else assert(false); // why was this function called?
     // conditionally pick off function return type
@@ -75,7 +76,22 @@ void anal_function( const AST_node& frisk_me, symbol_table& fill_me ){
         function_symbol = { "function", active->tok.text, (AST_node*)(void*)&frisk_me };
         fill_me.add_symbol( function_symbol );
         fill_me.add_scope( active->tok.text );
+    }else assert(false);
+    
+    const AST_node* param_pack = &active->children[0];
+    assert( param_pack->tok.text == "("  );
+    
+    for( unsigned int i = 0; param_pack->children.size() > i && param_pack->children[i].tok.text != ")"; i++ ){
+        fill_me.sub_scopes[fill_me.sub_scopes.size()-1].add_symbol( {param_pack->children[i].tok.text ,param_pack->children[i].children[0].tok.text ,(AST_node*)(void*)&param_pack->children[i]} );
     }
+    
+    const AST_node* function_body = &active->children[1];
+    
+    for( unsigned int i = 0; param_pack->children.size() > i && param_pack->children[i].tok.text != ")"; i++ ){
+        //anal_expression(,);
+    }
+    
+    std::cout << active->tok.text << " " << active->children.size() << "\n";
     
 }
 
