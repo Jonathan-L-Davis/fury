@@ -28,22 +28,35 @@ void anal_expression( const AST_node& frisk_me, symbol_table& fill_me ){
         case keyword:{
             if( frisk_me.tok.text == "function" ){
                 anal_function(frisk_me,fill_me);
-            }
+            }else
+            if( frisk_me.tok.text == "return" ){
+                
+            }else assert(false);
         }break;
         case Operator:{
             if( frisk_me.tok.text == ";" ){
                     
             }else assert(false);
         }break;
+        case scoping:{
+            //*std::cout << frisk_me.tok.text << "\n";
+            if( frisk_me.tok.text == "{" ){
+                for( unsigned int i = 0; frisk_me.children.size() > i && frisk_me.children[i].tok.text != "}"; i++ ){
+                    //std::cout << frisk_me.children.size() << "\n";
+                    anal_expression(frisk_me.children[i],fill_me.sub_scopes[fill_me.sub_scopes.size()-1]);
+                    //std::cout << i << "\n";
+                }
+            }else assert(false);//*/
+        }break;
         case binary_operator:{
             
             for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
                 anal_expression( frisk_me.children[i], fill_me );
-            std::cout << "operator scoping\n";
             
         }break;
         case identifier:{
-            std::cout << "ID in scope analysis \"" << frisk_me.tok.text << "\" not declared\n";
+            
+            //std::cout << fill_me.get_full_scope() << "\"\n";
             assert( fill_me.contains_id( frisk_me.tok.text ) );
             for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
                 anal_expression( frisk_me.children[i], fill_me );
@@ -86,12 +99,10 @@ void anal_function( const AST_node& frisk_me, symbol_table& fill_me ){
     }
     
     const AST_node* function_body = &active->children[1];
+    //std::cout << (function_body->tok.text) << "\n";
+    anal_expression(*function_body,fill_me.sub_scopes[fill_me.sub_scopes.size()-1]);
     
-    for( unsigned int i = 0; param_pack->children.size() > i && param_pack->children[i].tok.text != ")"; i++ ){
-        //anal_expression(,);
-    }
-    
-    std::cout << active->tok.text << " " << active->children.size() << "\n";
+    //std::cout << active->tok.text << " " << active->children.size() << "\n";
     
 }
 
@@ -166,14 +177,10 @@ void symbol_table::add_scope(std::string scope){
 }
 
 std::string symbol_table::get_full_scope(){//returns absolute scope
-    std::string retMe;
-    
-    retMe = scope;
-    for( symbol_table* scope_ptr = this->parent; scope_ptr != nullptr; scope_ptr = scope_ptr->parent ){
-        retMe = scope_ptr->scope + retMe;
-    }
-    
-    return retMe;
+    //std::cout << "\n" << scope << "\n";
+    if ( parent != nullptr )
+        return parent->scope + "::" + scope;
+    return scope;
 }
 
 symbol_table::symbol_table(){
@@ -188,6 +195,7 @@ symbol_table::symbol_table( symbol_table* parent_ptr, std::string scope ){
 
 std::string sym_tbl_indent = "";
 void symbol_table::print(){
+    //std::cout << sym_tbl_indent << get_full_scope() << "\n";
     std::cout << sym_tbl_indent << "\"" << scope << "\"\n";
     sym_tbl_indent += "    ";
     for( unsigned int i = 0; i < symbols.size(); i++ ){
