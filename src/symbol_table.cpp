@@ -4,12 +4,12 @@
 
 
 
-void anal_expression( const AST_node& frisk_me, symbol_table& fill_me );
-void anal_function( const AST_node& frisk_me, symbol_table& fill_me );
-void anal_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me );
-void anal_if( const AST_node& frisk_me, symbol_table& fill_me );
-void anal_while( const AST_node& frisk_me, symbol_table& fill_me );
-void anal_for( const AST_node& frisk_me, symbol_table& fill_me );
+void scope_expression( const AST_node& frisk_me, symbol_table& fill_me );
+void scope_function( const AST_node& frisk_me, symbol_table& fill_me );
+void scope_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me );
+void scope_if( const AST_node& frisk_me, symbol_table& fill_me );
+void scope_while( const AST_node& frisk_me, symbol_table& fill_me );
+void scope_for( const AST_node& frisk_me, symbol_table& fill_me );
 //void anal_goto( const AST_node& frisk_me, symbol_table& fill_me );//not yet
 
 symbol_table anal( const AST_node& frisk_me ){
@@ -17,17 +17,17 @@ symbol_table anal( const AST_node& frisk_me ){
     fill_me.scope = "";
     
     for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
-        anal_expression( frisk_me.children[i], fill_me );//each child should be a separate expression.
+        scope_expression( frisk_me.children[i], fill_me );//each child should be a separate expression.
     
     return fill_me;
 }
 
-void anal_expression( const AST_node& frisk_me, symbol_table& fill_me ){
+void scope_expression( const AST_node& frisk_me, symbol_table& fill_me ){
     
     switch(frisk_me.tok.type){
         case keyword:{
             if( frisk_me.tok.text == "function" ){
-                anal_function(frisk_me,fill_me);
+                scope_function(frisk_me,fill_me);
             }else
             if( frisk_me.tok.text == "return" ){
                 
@@ -41,27 +41,27 @@ void anal_expression( const AST_node& frisk_me, symbol_table& fill_me ){
         case scoping:{
             if( frisk_me.tok.text == "{" ){
                 for( unsigned int i = 0; frisk_me.children.size() > i && frisk_me.children[i].tok.text != "}"; i++ ){
-                    anal_expression(frisk_me.children[i],fill_me);
+                    scope_expression(frisk_me.children[i],fill_me);
                 }
             }else assert(false);
         }break;
         case binary_operator:{
             
             for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
-                anal_expression( frisk_me.children[i], fill_me );
+                scope_expression( frisk_me.children[i], fill_me );
             
         }break;
         case identifier:{
             
             assert( fill_me.contains_id( frisk_me.tok.text ) );
             for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
-                anal_expression( frisk_me.children[i], fill_me );//*/
+                scope_expression( frisk_me.children[i], fill_me );//*/
         }break;
         case literal:{
             // idk fam, probably wont be built into the lang, or will be really minimal
         }break;
         case type:{//*
-            anal_typed_declaration(frisk_me,fill_me);//*/
+            scope_typed_declaration(frisk_me,fill_me);//*/
         }break;
         case paren:{//*
             //for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
@@ -72,7 +72,7 @@ void anal_expression( const AST_node& frisk_me, symbol_table& fill_me ){
     
 }
 
-void anal_function( const AST_node& frisk_me, symbol_table& fill_me ){
+void scope_function( const AST_node& frisk_me, symbol_table& fill_me ){
     const AST_node* start_node = &frisk_me;
     const AST_node* active = start_node;
     
@@ -103,13 +103,13 @@ void anal_function( const AST_node& frisk_me, symbol_table& fill_me ){
     auto func_scope = fill_me.sub_scopes[fill_me.sub_scopes.size()-1];
     
     
-    anal_expression(*function_body, func_scope );
+    scope_expression(*function_body, func_scope );
     
     //std::cout << active->tok.text << " " << active->children.size() << "\n";
     
 }
 
-void anal_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me ){
+void scope_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me ){
     const AST_node* active = &frisk_me;
     
     std::string type;
@@ -136,23 +136,23 @@ void anal_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me ){
         fill_me.add_symbol({ type, variable_id, value });
     }else assert(false);
     
-    anal_expression( *active ,fill_me.sub_scopes[fill_me.sub_scopes.size()-1]);
+    scope_expression( *active ,fill_me.sub_scopes[fill_me.sub_scopes.size()-1]);
     
 }
 
-void anal_if( const AST_node& frisk_me, symbol_table& fill_me ){
+void scope_if( const AST_node& frisk_me, symbol_table& fill_me ){
     
 }
 
-void anal_while( const AST_node& frisk_me, symbol_table& fill_me ){
+void scope_while( const AST_node& frisk_me, symbol_table& fill_me ){
     
 }
 
-void anal_for( const AST_node& frisk_me, symbol_table& fill_me ){
+void scope_for( const AST_node& frisk_me, symbol_table& fill_me ){
     
 }
 
-void anal_goto( const AST_node& frisk_me, symbol_table& fill_me ){
+void scope_goto( const AST_node& frisk_me, symbol_table& fill_me ){
     //not implemented for v0.0
 }
 
