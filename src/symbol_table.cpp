@@ -39,14 +39,11 @@ void anal_expression( const AST_node& frisk_me, symbol_table& fill_me ){
             }else assert(false);
         }break;
         case scoping:{
-            //*std::cout << frisk_me.tok.text << "\n";
             if( frisk_me.tok.text == "{" ){
                 for( unsigned int i = 0; frisk_me.children.size() > i && frisk_me.children[i].tok.text != "}"; i++ ){
-                    //std::cout << frisk_me.children.size() << "\n";
-                    anal_expression(frisk_me.children[i],fill_me.sub_scopes[fill_me.sub_scopes.size()-1]);
-                    //std::cout << i << "\n";
+                    anal_expression(frisk_me.children[i],fill_me);
                 }
-            }else assert(false);//*/
+            }else assert(false);
         }break;
         case binary_operator:{
             
@@ -56,18 +53,21 @@ void anal_expression( const AST_node& frisk_me, symbol_table& fill_me ){
         }break;
         case identifier:{
             
-            //std::cout << fill_me.get_full_scope() << "\"\n";
             assert( fill_me.contains_id( frisk_me.tok.text ) );
             for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
-                anal_expression( frisk_me.children[i], fill_me );
+                anal_expression( frisk_me.children[i], fill_me );//*/
         }break;
         case literal:{
-            
+            // idk fam, probably wont be built into the lang, or will be really minimal
         }break;
-        case type:{
-            anal_typed_declaration(frisk_me,fill_me);
+        case type:{//*
+            anal_typed_declaration(frisk_me,fill_me);//*/
         }break;
-        default: {std::cout << frisk_me.tok.text << "\n";assert(false);}break;
+        case paren:{//*
+            //for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
+                //anal_typed_declaration(frisk_me.children[i],fill_me);//*/
+        }break;
+        default: {std::cout << frisk_me.tok.line_no << "\n";std::cout << frisk_me.tok.line_no << "\n";assert(false);}break;
     }
     
 }
@@ -97,10 +97,13 @@ void anal_function( const AST_node& frisk_me, symbol_table& fill_me ){
     for( unsigned int i = 0; param_pack->children.size() > i && param_pack->children[i].tok.text != ")"; i++ ){
         fill_me.sub_scopes[fill_me.sub_scopes.size()-1].add_symbol( {param_pack->children[i].tok.text ,param_pack->children[i].children[0].tok.text ,(AST_node*)(void*)&param_pack->children[i]} );
     }
-    
+    //std::cout << active->children[1].tok.text << "\n";
     const AST_node* function_body = &active->children[1];
     //std::cout << (function_body->tok.text) << "\n";
-    anal_expression(*function_body,fill_me.sub_scopes[fill_me.sub_scopes.size()-1]);
+    auto func_scope = fill_me.sub_scopes[fill_me.sub_scopes.size()-1];
+    
+    
+    anal_expression(*function_body, func_scope );
     
     //std::cout << active->tok.text << " " << active->children.size() << "\n";
     
@@ -177,9 +180,10 @@ void symbol_table::add_scope(std::string scope){
 }
 
 std::string symbol_table::get_full_scope(){//returns absolute scope
-    //std::cout << "\n" << scope << "\n";
-    if ( parent != nullptr )
-        return parent->scope + "::" + scope;
+    
+    if ( scope != "" ){
+        return parent->get_full_scope() + "::" + scope;
+    }
     return scope;
 }
 
@@ -195,8 +199,7 @@ symbol_table::symbol_table( symbol_table* parent_ptr, std::string scope ){
 
 std::string sym_tbl_indent = "";
 void symbol_table::print(){
-    //std::cout << sym_tbl_indent << get_full_scope() << "\n";
-    std::cout << sym_tbl_indent << "\"" << scope << "\"\n";
+    std::cout << sym_tbl_indent << get_full_scope() << "\n";
     sym_tbl_indent += "    ";
     for( unsigned int i = 0; i < symbols.size(); i++ ){
         std::cout << sym_tbl_indent; symbols[i].print();
@@ -218,7 +221,7 @@ bool symbol_table::contains_id(std::string find_me){
             return true;
     }
     
-    if( parent == nullptr ) return false;
-    return parent->contains_id(find_me);
+    if( scope != "" ) return parent->contains_id(find_me);
+    return false;
     
 }

@@ -47,7 +47,6 @@ struct symbol_table{
     
 };
 
-// intentionally not
 symbol_table anal( const AST_node& frisk_me );
 
 #endif//SYMBOL_TABLE_H
