@@ -26,12 +26,21 @@ struct symbol{
     
 };
 
+enum scope_type:uint32_t{
+    scope_t_function = 0,
+    scope_t_if = 1,
+    scope_t_for = 2,
+    scope_t_while = 3,
+    scope_t_anonymous = 4,
+    scope_type_root = 5,
+};
+
 struct symbol_table{
     
     symbol_table* parent; //non owning
-    
+    scope_type type;
     symbol_table();
-    symbol_table( symbol_table*, std::string scope );
+    symbol_table( symbol_table*, std::string scope, scope_type );
     
     std::string scope;
     std::vector<symbol_table> sub_scopes;
@@ -40,8 +49,11 @@ struct symbol_table{
     std::string get_full_scope();//returns absolute scope
     
     bool contains_id(std::string);
+    bool id_exists(std::string find_me);
+    bool contains_scope(std::string);
+    bool scope_exists(std::string find_me);
     void add_symbol(symbol);
-    void add_scope(std::string scope);
+    void add_scope(std::string scope, scope_type);
     
     void print();
     

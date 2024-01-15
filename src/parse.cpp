@@ -206,12 +206,13 @@ AST_node parse_if(const std::vector<token> &tokens, int &start_pos){
     AST_node true_case, false_case;
 
     true_case = parse_expression(tokens,start_pos);
+    active = &retMe;
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "else" ){// if else statement
         AST_node else_clause;
         else_clause.tok = tokens[start_pos]; start_pos++;
         false_case = parse_expression(tokens,start_pos);
 
-        else_clause.children.push_back( true_case );
+        active->children.push_back( true_case );
         else_clause.children.push_back( false_case );
 
         active->children.push_back(else_clause);
