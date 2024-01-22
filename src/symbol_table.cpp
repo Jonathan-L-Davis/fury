@@ -12,6 +12,14 @@ void scope_while( const AST_node& frisk_me, symbol_table& fill_me );
 void scope_for( const AST_node& frisk_me, symbol_table& fill_me );
 //void scope_goto( const AST_node& frisk_me, symbol_table& fill_me );//not yet
 
+void type_expression( const AST_node& frisk_me, symbol_table& fill_me );
+void type_function( const AST_node& frisk_me, symbol_table& fill_me );
+void type_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me );
+void type_if( const AST_node& frisk_me, symbol_table& fill_me );
+void type_while( const AST_node& frisk_me, symbol_table& fill_me );
+void type_for( const AST_node& frisk_me, symbol_table& fill_me );
+//void type_goto( const AST_node& frisk_me, symbol_table& fill_me );//not yet
+
 symbol_table anal( const AST_node& frisk_me ){
     symbol_table fill_me;
     fill_me.scope = "";
@@ -19,8 +27,42 @@ symbol_table anal( const AST_node& frisk_me ){
     for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
         scope_expression( frisk_me.children[i], fill_me );//each child should be a separate expression.
     
+    for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
+        type_expression( frisk_me.children[i], fill_me );//each child should be a separate expression.
+    
     return fill_me;
 }
+
+/****************************************************************************\
+|                                TYPING RULES                                |
+\****************************************************************************/
+
+
+void type_expression( const AST_node& frisk_me, symbol_table& fill_me ){
+}
+
+void type_function( const AST_node& frisk_me, symbol_table& fill_me ){
+}
+
+void type_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me ){
+}
+
+void type_if( const AST_node& frisk_me, symbol_table& fill_me ){
+}
+
+void type_while( const AST_node& frisk_me, symbol_table& fill_me ){
+}
+
+void type_for( const AST_node& frisk_me, symbol_table& fill_me ){
+}
+
+void type_goto( const AST_node& frisk_me, symbol_table& fill_me ){
+    //not implemented for v0.0
+}
+
+/*****************************************************************************\
+|                                SCOPING RULES                                |
+\*****************************************************************************/
 
 void scope_expression( const AST_node& frisk_me, symbol_table& fill_me ){
     
@@ -31,6 +73,12 @@ void scope_expression( const AST_node& frisk_me, symbol_table& fill_me ){
             }else
             if( frisk_me.tok.text == "if" ){
                 scope_if(frisk_me,fill_me);
+            }else
+            if( frisk_me.tok.text == "for" ){
+                scope_for(frisk_me,fill_me);
+            }else
+            if( frisk_me.tok.text == "while" ){
+                scope_while(frisk_me,fill_me);
             }else assert(false);
         }break;
         case Operator:{
@@ -68,7 +116,6 @@ void scope_expression( const AST_node& frisk_me, symbol_table& fill_me ){
             
         }break;
         case identifier:{
-            
             assert( fill_me.id_exists( frisk_me.tok.text ) );
             for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
                 scope_expression( frisk_me.children[i], fill_me );//*/
@@ -154,7 +201,6 @@ void scope_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me ){
 
 void scope_if( const AST_node& frisk_me, symbol_table& fill_me ){
     const AST_node* active = &frisk_me;
-    std::cout << "\n\n\n" << fill_me.scope << "\n\n\n";
     if( frisk_me.tok.text == "if" ){
         assert(frisk_me.children.size()>0);
         active = &frisk_me.children[0];
@@ -186,11 +232,58 @@ void scope_if( const AST_node& frisk_me, symbol_table& fill_me ){
 }
 
 void scope_while( const AST_node& frisk_me, symbol_table& fill_me ){
+    const AST_node* active = &frisk_me;
     
+    if( frisk_me.tok.text == "while" ){
+        active = (const AST_node*)(void*)(&active->children[0]);
+        std::string scope_name = ":while";
+        bool name_exists = true;
+        int i = 0;
+        while(name_exists){
+            
+            if( !fill_me.contains_scope( scope_name + std::to_string(i) ) ){
+                name_exists = false;
+                fill_me.add_scope( scope_name + std::to_string(i), scope_t_for );
+            }
+            i++;
+        }
+    }else assert(false);
+    
+    if( active->tok.text == "(" ){
+        
+    }else assert(false);
+    scope_expression( active->children[0], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );
+    
+    scope_expression( frisk_me.children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );
 }
 
 void scope_for( const AST_node& frisk_me, symbol_table& fill_me ){
+    const AST_node* active = &frisk_me;
     
+    if( frisk_me.tok.text == "for" ){
+        active = (const AST_node*)(void*)(&active->children[0]);
+        std::string scope_name = ":for";
+        bool name_exists = true;
+        int i = 0;
+        while(name_exists){
+            
+            if( !fill_me.contains_scope( scope_name + std::to_string(i) ) ){
+                name_exists = false;
+                fill_me.add_scope( scope_name + std::to_string(i), scope_t_for );
+            }
+            i++;
+        }
+    }else assert(false);
+    
+    if( active->tok.text == "(" ){
+        
+    }else assert(false);
+    scope_expression( active->children[0], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );
+    
+    scope_expression( frisk_me.children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );
+    
+    scope_expression( active->children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );
+    scope_expression( active->children[2], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );
 }
 
 void scope_goto( const AST_node& frisk_me, symbol_table& fill_me ){
@@ -242,7 +335,6 @@ symbol_table::symbol_table( symbol_table* parent_ptr, std::string scope, scope_t
 std::string sym_tbl_indent = "";
 void symbol_table::print(){
     std::cout << sym_tbl_indent << get_full_scope() << "\n";
-    std::cout << sym_tbl_indent << sub_scopes.size() << "\n";
     sym_tbl_indent += "    ";
     for( unsigned int i = 0; i < symbols.size(); i++ ){
         std::cout << sym_tbl_indent; symbols[i].print();
@@ -275,7 +367,7 @@ bool symbol_table::id_exists(std::string find_me){
             return true;
     }
     
-    if( scope != "" ) return parent->contains_id(find_me);
+    if( scope != "" ) return parent->id_exists(find_me);
     return false;
     
 }

@@ -17,18 +17,18 @@ AST_node parse_export(const std::vector<token> &tokens, int &start_pos);
 
 AST_node parse(const std::vector<token> &tokens, int &start_pos){
     AST_node retMe;
-
+    
     retMe.tok.text = "";
-
+    
     while( (unsigned) start_pos < tokens.size() )
         retMe.children.push_back( parse_expression( tokens, start_pos ) );
-
+    
     return retMe;
 }
 
 AST_node parse_expression(const std::vector<token> &tokens, int &start_pos){
     AST_node retMe;
-
+    
     switch(tokens[start_pos].type){
         case epsilon:{
             assert(false); //shouldn't be here;
@@ -82,7 +82,7 @@ AST_node parse_expression(const std::vector<token> &tokens, int &start_pos){
         }break;
         case Operator:{
             if( tokens[start_pos].text == ";" ){
-
+            
             retMe.tok = tokens[start_pos];
             start_pos++;
             }else assert(false);
@@ -100,7 +100,7 @@ AST_node parse_expression(const std::vector<token> &tokens, int &start_pos){
             AST_node id;
             id.tok = tokens[start_pos];
             start_pos++;
-
+            
             if( tokens[start_pos].text == ";" ){
                 retMe = id;
                 AST_node terminal_op;
@@ -122,7 +122,7 @@ AST_node parse_expression(const std::vector<token> &tokens, int &start_pos){
                     AST_node exp = parse_expression(tokens,start_pos);
                     retMe.children[0].children.push_back(exp);
                 }
-
+                
                 
                 if((unsigned) start_pos < tokens.size() && tokens[start_pos].text == ")"){
                     retMe.children[0].children.push_back({tokens[start_pos]});
@@ -165,138 +165,138 @@ AST_node parse_expression(const std::vector<token> &tokens, int &start_pos){
             if( tokens[start_pos].text == ")" ){
                 retMe.tok = tokens[start_pos];
                 start_pos++;
-            }
+            }else assert(false);
         }break;
         default:
             std::cout << tokens[start_pos].line_no << " " << tokens[start_pos].text << "\n";
             assert(false);
     }
-
+    
     return retMe;
 }
 
 
 AST_node parse_if(const std::vector<token> &tokens, int &start_pos){
-
+    
     AST_node retMe;
     AST_node* active = &retMe;
-
+    
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "if" ){
         retMe.tok = tokens[start_pos];
         start_pos++;
     }else assert(false);
-
+    
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "(" ){
         AST_node temp = {tokens[start_pos]};
         retMe.children.push_back( temp );
         active = &retMe.children[0];
         start_pos++;
     }else assert(false);
-
+    
     AST_node boolean_expression = parse_expression(tokens,start_pos);//multiple expressions handled by { ... } scoping expression
-
+    
     active->children.push_back(boolean_expression);
-
+    
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == ")" ){
         active->children.push_back( {tokens[start_pos]} );
         active = &(active->children[active->children.size()-1]);
         start_pos++;
     }else assert(false);
-
+    
     AST_node true_case, false_case;
-
+    
     true_case = parse_expression(tokens,start_pos);
     active = &retMe;
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "else" ){// if else statement
         AST_node else_clause;
         else_clause.tok = tokens[start_pos]; start_pos++;
         false_case = parse_expression(tokens,start_pos);
-
+        
         active->children.push_back( true_case );
         else_clause.children.push_back( false_case );
-
+        
         active->children.push_back(else_clause);
     }else{// if statement
         active->children.push_back(true_case);
     }
-
-
+    
+    
     return retMe;
 }
 
 AST_node parse_while(const std::vector<token> &tokens, int &start_pos){
-
+    
     AST_node retMe;
     AST_node* active = &retMe;
-
+    
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "while" ){
         retMe.tok = tokens[start_pos];
         start_pos++;
     }else assert(false);
-
+    
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "(" ){
         AST_node temp = {tokens[start_pos]};
         retMe.children.push_back( temp );
         active = &retMe.children[0];
         start_pos++;
     }else assert(false);
-
+    
     AST_node boolean_expression = parse_expression(tokens,start_pos);
-
+    
     active->children.push_back(boolean_expression);
-
+    
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == ")" ){
         active->children.push_back( {tokens[start_pos]} );
         active = &(active->children[active->children.size()-1]);
         start_pos++;
     }else assert(false);
-
+    
     AST_node while_body;
-
+    
     while_body = parse_expression(tokens,start_pos);
-
-    active->children.push_back(while_body);
-
+    
+    retMe.children.push_back(while_body);
+    
     return retMe;
 }
 
 AST_node parse_for(const std::vector<token> &tokens, int &start_pos){
-
+    
     AST_node retMe;
     AST_node* active = &retMe;
-
+    
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "for" ){
         retMe.tok = tokens[start_pos];
         start_pos++;
     }else assert(false);
-
+    
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "(" ){
         AST_node temp = {tokens[start_pos]};
         retMe.children.push_back( temp );
         active = &retMe.children[0];
         start_pos++;
     }else assert(false);
-
+    
     AST_node init_expression = parse_expression(tokens,start_pos);
     AST_node boolean_expression = parse_expression(tokens,start_pos);
     AST_node increment_expression = parse_expression(tokens,start_pos);
-
+    
     active->children.push_back(init_expression);
     active->children.push_back(boolean_expression);
     active->children.push_back(increment_expression);
-
+    
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == ")" ){
         active->children.push_back( {tokens[start_pos]} );
         active = &(active->children[active->children.size()-1]);
         start_pos++;
     }else assert(false);
-
+    
     AST_node for_body;
-
+    
     for_body = parse_expression(tokens,start_pos);
-
-    active->children.push_back(for_body);
-
+    
+    retMe.children.push_back(for_body);
+    
     return retMe;
 }
 
@@ -304,17 +304,17 @@ AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
     AST_node retMe;
     AST_node* active = &retMe;
     AST_node* function_id;
-
+    
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "function" ){
         retMe.tok = tokens[start_pos];
         start_pos++;
     }else assert(false);
-
+    
     // parse return type and ID
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == type ){//built in return type
         active->children.push_back( {tokens[start_pos]} );
         start_pos++;
-
+        
         if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ) {//function name
             active->children.push_back( {tokens[start_pos]} );
             active = &(active->children[1]);
@@ -332,23 +332,23 @@ AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
             active = &(active->children[0]);// set function id as active for void functions
         }
     }else assert(false);
-
+    
     function_id = active;// non conditional because id is always active at this point;
-
+    
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "(" ){
         active->children.push_back( {tokens[start_pos]} );
         active = &(active->children[0]);
         start_pos++;
     }else assert(false);
-
+    
     //handle case where function has no paramters
-
+    
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == ")" ){
         active->children.push_back( {tokens[start_pos]} );
         //active = &(active->children[ active->children.size()-1 ]);
         //start_pos++;
     }
-
+    
     while( (unsigned) start_pos < tokens.size() && tokens[start_pos].text != ")" ){
         AST_node type_name, param_name, comma;
         if( (unsigned) start_pos < tokens.size() &&
@@ -360,11 +360,10 @@ AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
             type_name.children.push_back({tokens[start_pos]});
             start_pos++;
         }else assert(false);
-
+        
         active->children.push_back( type_name );
-
+        
         if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "," ){//comma or end of param pack
-
             start_pos++;//skip comma
         }else
         if ( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == ")" ){
@@ -375,13 +374,9 @@ AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
         }else assert(false);
     }
     start_pos++;
-
-
-    //active = &(active->children[ active->children.size()-1 ]);
-
-
+    
     function_id->children.push_back( parse_expression(tokens,start_pos) );//function body
-
+    
     if((unsigned) start_pos < tokens.size() && tokens[start_pos].text == ";"){//terminate function
         retMe.children.push_back({tokens[start_pos]});
         start_pos++;
@@ -393,20 +388,20 @@ AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
 
 AST_node parse_return(const std::vector<token> &tokens, int &start_pos){
     AST_node retMe;
-
+    
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "return" ){
         retMe = {tokens[start_pos]};
         start_pos++;
     }else assert(false);
-
+    
     retMe.children.push_back( parse_expression( tokens, start_pos ) );
-
+    
     return retMe;
 }
 
 AST_node parse_typed_declaration(const std::vector<token> &tokens, int &start_pos){
     AST_node retMe;
-
+    
     if((unsigned) start_pos < tokens.size() && (//pull typename which may be an identifier for a custom type
        tokens[start_pos].text == "byte" ||
        tokens[start_pos].text == "dual" ||
@@ -416,7 +411,7 @@ AST_node parse_typed_declaration(const std::vector<token> &tokens, int &start_po
         retMe = {tokens[start_pos]};
         start_pos++;
     }else assert(false);
-
+    
     if((unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ){//pull variable name
         retMe.children.push_back( {tokens[start_pos]} );
         start_pos++;
@@ -425,7 +420,7 @@ AST_node parse_typed_declaration(const std::vector<token> &tokens, int &start_po
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "=" ){//with default value
         //retMe.children[0].children.push_back( {tokens[start_pos]} );
         start_pos++;
-
+        
         retMe.children.push_back( parse_expression( tokens, start_pos ) );
     }
     //*
@@ -433,13 +428,13 @@ AST_node parse_typed_declaration(const std::vector<token> &tokens, int &start_po
         retMe.children.push_back({tokens[start_pos]});
         start_pos++;
     }else assert(false);//*/
-
+    
     return retMe;
 }
 
 AST_node parse_struct_or_union(const std::vector<token> &tokens, int &start_pos){
     AST_node retMe;
-
+    
     if( (unsigned) start_pos < tokens.size() && (
         tokens[start_pos].text == "struct" ||
         tokens[start_pos].text == "union"
@@ -447,42 +442,42 @@ AST_node parse_struct_or_union(const std::vector<token> &tokens, int &start_pos)
         retMe = {tokens[start_pos]};
         start_pos++;
     }else assert(false);
-
+    
     retMe.children.push_back( parse_expression( tokens, start_pos ) );
-
+    
     return retMe;
 }
 
 //import and export will get way more complicated, but this should work for now
 AST_node parse_import(const std::vector<token> &tokens, int &start_pos){
     AST_node retMe;
-
+    
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "import" ){
         retMe = {tokens[start_pos]};
         start_pos++;
     }else assert(false);
-
+    
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ){
         retMe.children.push_back( {tokens[start_pos]} );
         start_pos++;
     }else assert(false);
-
+    
     return retMe;
 }
 
 AST_node parse_export(const std::vector<token> &tokens, int &start_pos){
     AST_node retMe;
-
+    
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "export" ){
         retMe = {tokens[start_pos]};
         start_pos++;
     }else assert(false);
-
+    
     if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ){
         retMe.children.push_back( {tokens[start_pos]} );
         start_pos++;
     }else assert(false);
-
+    
     return retMe;
 }
 

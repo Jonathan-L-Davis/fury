@@ -6,7 +6,7 @@
 
 #include "parse.h"
 
-enum _type:uint32_t{
+enum type_type:uint32_t{
     semantic_epsilon = 0,//void
     semantic_function = 1,//includes operators,
     semantic_byte = 2,
