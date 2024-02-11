@@ -39,12 +39,54 @@ symbol_table anal( const AST_node& frisk_me ){
 
 
 void type_expression( const AST_node& frisk_me, symbol_table& fill_me ){
+    
+    switch(frisk_me.tok.type){
+        case keyword:{
+            if( frisk_me.tok.text == "function" ){
+                type_function(frisk_me,fill_me);
+            }else
+            if( frisk_me.tok.text == "if" ){
+                type_if(frisk_me,fill_me);
+            }else
+            if( frisk_me.tok.text == "for" ){
+                type_for(frisk_me,fill_me);
+            }else
+            if( frisk_me.tok.text == "while" ){
+                type_while(frisk_me,fill_me);
+            }else assert(false);
+        }break;
+        case Operator:{
+            if( frisk_me.tok.text == ";" ){
+                    
+            }else assert(false);
+        }break;
+        case scoping:{
+            assert(false);
+        }break;
+        case binary_operator:{
+            assert(false);
+        }break;
+        case identifier:{
+            assert(false);
+        }break;
+        case literal:{
+            assert(false);
+        }break;
+        case type:{
+            type_typed_declaration(frisk_me,fill_me);
+        }break;
+        case paren:{
+            assert(false);
+        }break;
+        default: {std::cout << frisk_me.tok.line_no << "\n";std::cout << frisk_me.tok.line_no << "\nError during type analysis";assert(false);}break;
+    }
 }
 
 void type_function( const AST_node& frisk_me, symbol_table& fill_me ){
 }
 
 void type_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me ){
+    
 }
 
 void type_if( const AST_node& frisk_me, symbol_table& fill_me ){
@@ -130,7 +172,7 @@ void scope_expression( const AST_node& frisk_me, symbol_table& fill_me ){
             //for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
                 //anal_typed_declaration(frisk_me.children[i],fill_me);//*/
         }break;
-        default: {std::cout << frisk_me.tok.line_no << "\n";std::cout << frisk_me.tok.line_no << "\n";assert(false);}break;
+        default: {std::cout << frisk_me.tok.line_no << "\n";std::cout << frisk_me.tok.line_no << "\nError during scope analysis.";assert(false);}break;
     }
     
 }

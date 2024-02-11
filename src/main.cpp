@@ -89,26 +89,22 @@ bool is_valid_literal( std::string str );
 bool is_hex(uint8_t c);
 std::vector<token> lex( const std::string &file_name );
 int main(int argc, char**argv){
-
+    
     auto tokens = lex("./file.txt");
     int start_pos = 0;
-
-    for( token tok : tokens ){
-        //std::cout << "|" << tok.text<< "|" << tok.line_no << "\n";
-    }
-
+    
     AST_node parsed_file = parse(tokens,start_pos);
     parsed_file.print();
     
     symbol_table sym_tbl = anal(parsed_file);
     sym_tbl.print();
-
+    
     /*for( symbol sym : sym_tbl.symbols ){
         std::cout << "|" << sym.name << "|\n";
     }//*/
-
+    
     return 0;
-
+    // these checks are important, but should be moved from here.
     assert( is_valid_literal( "0" ) );
     assert( is_valid_literal( "0x0123456789ABCDEF" ) );
     assert( is_valid_literal( "0b010101010101010101" ) );
