@@ -15,7 +15,13 @@ enum type_type:uint32_t{
     semantic_oct = 5,
     semantic_struct = 6,//includes unions
     semantic_type = 7,// type is type? generic? not used for the first version.
+    semantic_label = 8,// used for goto's, labels will be explicitly marked like variables. should be able to make them pointers somehow.
+    semantic_literal = 9,
 };
+
+struct type_t{
+    type_type my_type = semantic_epsilon;
+};//not needed yet. as soon as things can pass back functions or structs, this'll be a nasty refactor, but I need something working before that even matters.
 
 struct symbol{
     std::string type;

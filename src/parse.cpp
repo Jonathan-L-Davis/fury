@@ -368,9 +368,6 @@ AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
         }else
         if ( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == ")" ){
             active->children.push_back( {tokens[start_pos]} );
-            //active = &(active->children[ active->children.size()-1 ]);
-            //start_pos++;//don't do until after loop, since it is the break condition
-            //active->children.push_back( type_name );
         }else assert(false);
     }
     start_pos++;

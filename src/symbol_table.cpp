@@ -12,13 +12,13 @@ void scope_while( const AST_node& frisk_me, symbol_table& fill_me );
 void scope_for( const AST_node& frisk_me, symbol_table& fill_me );
 //void scope_goto( const AST_node& frisk_me, symbol_table& fill_me );//not yet
 
-void type_expression( const AST_node& frisk_me, symbol_table& fill_me );
-void type_function( const AST_node& frisk_me, symbol_table& fill_me );
-void type_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me );
-void type_if( const AST_node& frisk_me, symbol_table& fill_me );
-void type_while( const AST_node& frisk_me, symbol_table& fill_me );
-void type_for( const AST_node& frisk_me, symbol_table& fill_me );
-//void type_goto( const AST_node& frisk_me, symbol_table& fill_me );//not yet
+type_type type_expression( const AST_node& frisk_me, symbol_table& fill_me );
+type_type type_function( const AST_node& frisk_me, symbol_table& fill_me );
+type_type type_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me );
+type_type type_if( const AST_node& frisk_me, symbol_table& fill_me );
+type_type type_while( const AST_node& frisk_me, symbol_table& fill_me );
+type_type type_for( const AST_node& frisk_me, symbol_table& fill_me );
+//type_type type_goto( const AST_node& frisk_me, symbol_table& fill_me );//not yet
 
 symbol_table anal( const AST_node& frisk_me ){
     symbol_table fill_me;
@@ -38,7 +38,9 @@ symbol_table anal( const AST_node& frisk_me ){
 \****************************************************************************/
 
 
-void type_expression( const AST_node& frisk_me, symbol_table& fill_me ){
+type_type type_expression( const AST_node& frisk_me, symbol_table& fill_me ){
+    
+    type_type retMe = semantic_epsilon;
     
     switch(frisk_me.tok.type){
         case keyword:{
@@ -70,7 +72,7 @@ void type_expression( const AST_node& frisk_me, symbol_table& fill_me ){
             assert(false);
         }break;
         case literal:{
-            assert(false);
+            retMe = semantic_literal;
         }break;
         case type:{
             type_typed_declaration(frisk_me,fill_me);
@@ -80,25 +82,53 @@ void type_expression( const AST_node& frisk_me, symbol_table& fill_me ){
         }break;
         default: {std::cout << frisk_me.tok.line_no << "\n";std::cout << frisk_me.tok.line_no << "\nError during type analysis";assert(false);}break;
     }
-}
-
-void type_function( const AST_node& frisk_me, symbol_table& fill_me ){
-}
-
-void type_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me ){
+    
+    return retMe;
     
 }
 
-void type_if( const AST_node& frisk_me, symbol_table& fill_me ){
+type_type type_function( const AST_node& frisk_me, symbol_table& fill_me ){
 }
 
-void type_while( const AST_node& frisk_me, symbol_table& fill_me ){
+type_type type_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me ){
+    type_type retMe;
+    
+    const AST_node* active = &frisk_me;
+    
+    if( active->tok.type == ::type ){
+        if(active->tok.text == "byte"){
+            retMe = semantic_byte;
+        }else
+        if(active->tok.text == "dual"){
+            retMe = semantic_dual;
+        }else
+        if(active->tok.text == "quad"){
+            retMe = semantic_quad;
+        }else
+        if(active->tok.text == "oct"){
+            retMe = semantic_oct;
+        }else assert(false);
+    }
+    else assert(false);
+    
+    if( active->children.size() == 3 ){
+        type_type init_type = type_expression(active->children[1],fill_me);
+        assert( retMe == init_type || init_type == semantic_literal );
+    }
+    
+    return retMe;
 }
 
-void type_for( const AST_node& frisk_me, symbol_table& fill_me ){
+type_type type_if( const AST_node& frisk_me, symbol_table& fill_me ){
 }
 
-void type_goto( const AST_node& frisk_me, symbol_table& fill_me ){
+type_type type_while( const AST_node& frisk_me, symbol_table& fill_me ){
+}
+
+type_type type_for( const AST_node& frisk_me, symbol_table& fill_me ){
+}
+
+type_type type_goto( const AST_node& frisk_me, symbol_table& fill_me ){
     //not implemented for v0.0
 }
 
