@@ -59,7 +59,7 @@ type_type type_expression( const AST_node& frisk_me, symbol_table& fill_me ){
         }break;
         case Operator:{
             if( frisk_me.tok.text == ";" ){
-                    
+                
             }else assert(false);
         }break;
         case scoping:{
@@ -72,7 +72,7 @@ type_type type_expression( const AST_node& frisk_me, symbol_table& fill_me ){
             assert(false);
         }break;
         case literal:{
-            retMe = semantic_literal;
+            retMe = semantic_literal;// not a fan of the generic "literal type" here, but I need something to make it work for now.
         }break;
         case type:{
             type_typed_declaration(frisk_me,fill_me);
