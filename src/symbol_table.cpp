@@ -4,13 +4,13 @@
 
 
 
-void scope_expression( const AST_node& frisk_me, symbol_table& fill_me );
-void scope_function( const AST_node& frisk_me, symbol_table& fill_me );
-void scope_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me );
-void scope_if( const AST_node& frisk_me, symbol_table& fill_me );
-void scope_while( const AST_node& frisk_me, symbol_table& fill_me );
-void scope_for( const AST_node& frisk_me, symbol_table& fill_me );
-//void scope_goto( const AST_node& frisk_me, symbol_table& fill_me );//not yet
+type_type scope_expression( const AST_node& frisk_me, symbol_table& fill_me );
+type_type scope_function( const AST_node& frisk_me, symbol_table& fill_me );
+type_type scope_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me );
+type_type scope_if( const AST_node& frisk_me, symbol_table& fill_me );
+type_type scope_while( const AST_node& frisk_me, symbol_table& fill_me );
+type_type scope_for( const AST_node& frisk_me, symbol_table& fill_me );
+//type_type scope_goto( const AST_node& frisk_me, symbol_table& fill_me );//not yet
 
 type_type type_expression( const AST_node& frisk_me, symbol_table& fill_me );
 type_type type_function( const AST_node& frisk_me, symbol_table& fill_me );
@@ -62,8 +62,12 @@ type_type type_expression( const AST_node& frisk_me, symbol_table& fill_me ){
                 
             }else assert(false);
         }break;
-        case scoping:{
-            assert(false);
+        case scoping:{// scoped blocks "{...;}" have the type of their last block
+            if( frisk_me.tok.text == "{"){
+                for( int i = 0; i < frisk_me.children.size()-1; i++ ){
+                    retMe = type_expression(frisk_me.children[i],fill_me);//only need last, this gives the last without an extra conditional
+                }
+            }else assert(false);
         }break;
         case binary_operator:{
             assert(false);
@@ -136,7 +140,9 @@ type_type type_goto( const AST_node& frisk_me, symbol_table& fill_me ){
 |                                SCOPING RULES                                |
 \*****************************************************************************/
 
-void scope_expression( const AST_node& frisk_me, symbol_table& fill_me ){
+type_type scope_expression( const AST_node& frisk_me, symbol_table& fill_me ){
+    
+    type_type retMe = semantic_epsilon;
     
     switch(frisk_me.tok.type){
         case keyword:{
@@ -205,9 +211,14 @@ void scope_expression( const AST_node& frisk_me, symbol_table& fill_me ){
         default: {std::cout << frisk_me.tok.line_no << "\n";std::cout << frisk_me.tok.line_no << "\nError during scope analysis.";assert(false);}break;
     }
     
+    
+    return retMe;
 }
 
-void scope_function( const AST_node& frisk_me, symbol_table& fill_me ){
+type_type scope_function( const AST_node& frisk_me, symbol_table& fill_me ){
+    
+    type_type retMe = semantic_epsilon;
+    
     const AST_node* start_node = &frisk_me;
     const AST_node* active = start_node;
     
@@ -222,6 +233,7 @@ void scope_function( const AST_node& frisk_me, symbol_table& fill_me ){
     symbol function_symbol;
     if( active->tok.type == identifier ){
         function_symbol = { "function", active->tok.text, (AST_node*)(void*)&frisk_me };
+        //retMe = ;
         fill_me.add_symbol( function_symbol );
         fill_me.add_scope( active->tok.text, scope_t_function );
     }else assert(false);
@@ -234,13 +246,14 @@ void scope_function( const AST_node& frisk_me, symbol_table& fill_me ){
     }
     
     const AST_node* function_body = &active->children[1];
+    type_type body_type = scope_expression(*function_body, fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );
     
+    assert( retMe == body_type );
     
-    scope_expression(*function_body, fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );
-    
+    return retMe;
 }
 
-void scope_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me ){
+type_type scope_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me ){
     const AST_node* active = &frisk_me;
     
     std::string type;
@@ -271,7 +284,7 @@ void scope_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me ){
     
 }
 
-void scope_if( const AST_node& frisk_me, symbol_table& fill_me ){
+type_type scope_if( const AST_node& frisk_me, symbol_table& fill_me ){
     const AST_node* active = &frisk_me;
     if( frisk_me.tok.text == "if" ){
         assert(frisk_me.children.size()>0);
@@ -303,7 +316,7 @@ void scope_if( const AST_node& frisk_me, symbol_table& fill_me ){
     
 }
 
-void scope_while( const AST_node& frisk_me, symbol_table& fill_me ){
+type_type scope_while( const AST_node& frisk_me, symbol_table& fill_me ){
     const AST_node* active = &frisk_me;
     
     if( frisk_me.tok.text == "while" ){
@@ -329,7 +342,7 @@ void scope_while( const AST_node& frisk_me, symbol_table& fill_me ){
     scope_expression( frisk_me.children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );
 }
 
-void scope_for( const AST_node& frisk_me, symbol_table& fill_me ){
+type_type scope_for( const AST_node& frisk_me, symbol_table& fill_me ){
     const AST_node* active = &frisk_me;
     
     if( frisk_me.tok.text == "for" ){
@@ -358,7 +371,7 @@ void scope_for( const AST_node& frisk_me, symbol_table& fill_me ){
     scope_expression( active->children[2], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );
 }
 
-void scope_goto( const AST_node& frisk_me, symbol_table& fill_me ){
+type_type scope_goto( const AST_node& frisk_me, symbol_table& fill_me ){
     //not implemented for v0.0
 }
 

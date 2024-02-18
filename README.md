@@ -8,7 +8,8 @@ v1.0 - fully functioning compiler with all or most of the language shipped.
 ## Planned features:
 
 ### The compiler will be part of the standard library.
-
+This is how builds will be done (eventually), just load files and pass them into a standard library "compile" function.<br>
+I think this'll blur the line between whether fury is a compiled or scripting language.<br>
 
 ### No abstract machine
 All operations are just described in the fury language as operations on bytes, meaning there are almost no assumptions about physical hardware.<br>
