@@ -34,13 +34,6 @@ symbol_table anal( const AST_node& frisk_me ){
     
     for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
         scope_expression( frisk_me.children[i], fill_me );//each child should be a separate expression.
-    /*
-    for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
-        scope_expression( frisk_me.children[i], fill_me );//each child should be a separate expression.
-    
-    for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
-        type_expression( frisk_me.children[i], fill_me );//each child should be a separate expression.
-    //*/
     
     return fill_me;
 }
@@ -48,113 +41,6 @@ symbol_table anal( const AST_node& frisk_me ){
 /****************************************************************************\
 |                               ANALYSIS RULES                               |
 \****************************************************************************/
-
-/****************************************************************************\
-|                                TYPING RULES                                |
-\****************************************************************************/
-
-
-type_type type_expression( const AST_node& frisk_me, symbol_table& fill_me ){
-    
-    type_type retMe = semantic_epsilon;
-    
-    switch(frisk_me.tok.type){
-        case keyword:{
-            if( frisk_me.tok.text == "function" ){
-                type_function(frisk_me,fill_me);
-            }else
-            if( frisk_me.tok.text == "if" ){
-                type_if(frisk_me,fill_me);
-            }else
-            if( frisk_me.tok.text == "for" ){
-                type_for(frisk_me,fill_me);
-            }else
-            if( frisk_me.tok.text == "while" ){
-                type_while(frisk_me,fill_me);
-            }else assert(false);
-        }break;
-        case Operator:{
-            if( frisk_me.tok.text == ";" ){
-                
-            }else assert(false);
-        }break;
-        case scoping:{// scoped blocks "{...;}" have the type of their last block
-            if( frisk_me.tok.text == "{"){
-                for( int i = 0; i < frisk_me.children.size()-1; i++ ){
-                    retMe = type_expression(frisk_me.children[i],fill_me);//only need last, this gives the last without an extra conditional
-                }
-            }else assert(false);
-        }break;
-        case binary_operator:{
-            assert(false);
-        }break;
-        case identifier:{
-            assert(false);
-        }break;
-        case literal:{
-            retMe = semantic_literal;// not a fan of the generic "literal type" here, but I need something to make it work for now.
-        }break;
-        case type:{
-            type_typed_declaration(frisk_me,fill_me);
-        }break;
-        case paren:{
-            assert(false);
-        }break;
-        default: {std::cout << frisk_me.tok.line_no << "\n";std::cout << frisk_me.tok.line_no << "\nError during type analysis";assert(false);}break;
-    }
-    
-    return retMe;
-    
-}
-
-type_type type_function( const AST_node& frisk_me, symbol_table& fill_me ){
-}
-
-type_type type_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me ){
-    type_type retMe;
-    
-    const AST_node* active = &frisk_me;
-    
-    if( active->tok.type == ::type ){
-        if(active->tok.text == "byte"){
-            retMe = semantic_byte;
-        }else
-        if(active->tok.text == "dual"){
-            retMe = semantic_dual;
-        }else
-        if(active->tok.text == "quad"){
-            retMe = semantic_quad;
-        }else
-        if(active->tok.text == "oct"){
-            retMe = semantic_oct;
-        }else assert(false);
-    }
-    else assert(false);
-    
-    if( active->children.size() == 3 ){
-        type_type init_type = type_expression(active->children[1],fill_me);
-        assert( retMe == init_type || init_type == semantic_literal );
-    }
-    
-    return retMe;
-}
-
-type_type type_if( const AST_node& frisk_me, symbol_table& fill_me ){
-}
-
-type_type type_while( const AST_node& frisk_me, symbol_table& fill_me ){
-}
-
-type_type type_for( const AST_node& frisk_me, symbol_table& fill_me ){
-}
-
-type_type type_goto( const AST_node& frisk_me, symbol_table& fill_me ){
-    //not implemented for v0.0
-}
-
-/*****************************************************************************\
-|                                SCOPING RULES                                |
-\*****************************************************************************/
 
 type_type scope_expression( const AST_node& frisk_me, symbol_table& fill_me ){
     
@@ -218,13 +104,13 @@ type_type scope_expression( const AST_node& frisk_me, symbol_table& fill_me ){
             // idk fam, probably wont be built into the lang, or will be really minimal
         }break;
         case type:{//*
-            scope_typed_declaration(frisk_me,fill_me);//*/
+            retMe = scope_typed_declaration(frisk_me,fill_me);//*/
         }break;
         case paren:{//*
             //for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
                 //anal_typed_declaration(frisk_me.children[i],fill_me);//*/
         }break;
-        default: {std::cout << frisk_me.tok.line_no << "\n";std::cout << frisk_me.tok.line_no << "\nError during scope analysis.";assert(false);}break;
+        default: {std::cout << frisk_me.tok.text << "\n";std::cout << frisk_me.tok.line_no << "\nError during scope analysis.";assert(false);}break;
     }
     
     
@@ -270,7 +156,11 @@ type_type scope_function( const AST_node& frisk_me, symbol_table& fill_me ){
 }
 
 type_type scope_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me ){
+
+    type_type retMe = semantic_epsilon;
+
     const AST_node* active = &frisk_me;
+    bool is_assignment = false;
     
     std::string type;
     std::string variable_id;
@@ -279,6 +169,16 @@ type_type scope_typed_declaration( const AST_node& frisk_me, symbol_table& fill_
     if( active->tok.type == ::type ){
         type = active->tok.text;
         active = &frisk_me.children[0];
+        
+        if( type == "byte" )
+            retMe = semantic_byte;
+        if( type == "dual" )
+            retMe = semantic_dual;
+        if( type == "quad" )
+            retMe = semantic_quad;
+        if( type == "oct" )
+            retMe = semantic_oct;
+        
     }
     else assert(false);
     
@@ -295,12 +195,17 @@ type_type scope_typed_declaration( const AST_node& frisk_me, symbol_table& fill_
     if( !fill_me.contains_id( variable_id ) ){
         fill_me.add_symbol({ type, variable_id, value });
     }else assert(false);
+    if ( is_assignment );
+    assert( retMe == scope_expression( *active ,fill_me.sub_scopes[fill_me.sub_scopes.size()-1]) );
+    assert( retMe != semantic_epsilon );
     
-    scope_expression( *active ,fill_me.sub_scopes[fill_me.sub_scopes.size()-1]);
-    
+    return retMe;
 }
 
 type_type scope_if( const AST_node& frisk_me, symbol_table& fill_me ){
+
+    type_type retMe = semantic_epsilon;
+
     const AST_node* active = &frisk_me;
     if( frisk_me.tok.text == "if" ){
         assert(frisk_me.children.size()>0);
@@ -330,6 +235,7 @@ type_type scope_if( const AST_node& frisk_me, symbol_table& fill_me ){
         scope_expression(frisk_me.children[2].children[0],fill_me.sub_scopes[fill_me.sub_scopes.size()-1]);//false clause
     }
     
+    return retMe;
 }
 
 type_type scope_while( const AST_node& frisk_me, symbol_table& fill_me ){
@@ -355,7 +261,7 @@ type_type scope_while( const AST_node& frisk_me, symbol_table& fill_me ){
     }else assert(false);
     scope_expression( active->children[0], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// conditional
     
-    scope_expression( frisk_me.children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// body
+    return scope_expression( frisk_me.children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// body
 }
 
 type_type scope_for( const AST_node& frisk_me, symbol_table& fill_me ){
@@ -383,14 +289,17 @@ type_type scope_for( const AST_node& frisk_me, symbol_table& fill_me ){
     }else assert(false);
     scope_expression( active->children[0], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// first for field, variable declaration
     
-    scope_expression( frisk_me.children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// for body
+    retMe = scope_expression( frisk_me.children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// for body
     
     scope_expression( active->children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// second for field, conditional
     scope_expression( active->children[2], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// third for field, iteration
+    
+    return retMe;
 }
 
 type_type scope_goto( const AST_node& frisk_me, symbol_table& fill_me ){
     //not implemented for v0.0
+    return semantic_epsilon;
 }
 
 void symbol_table::add_symbol( symbol add_me ){
