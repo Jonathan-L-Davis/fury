@@ -20,18 +20,34 @@ type_type type_while( const AST_node& frisk_me, symbol_table& fill_me );
 type_type type_for( const AST_node& frisk_me, symbol_table& fill_me );
 //type_type type_goto( const AST_node& frisk_me, symbol_table& fill_me );//not yet
 
+type_type anal_expression( const AST_node& frisk_me, symbol_table& fill_me );
+type_type anal_function( const AST_node& frisk_me, symbol_table& fill_me );
+type_type anal_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me );
+type_type anal_if( const AST_node& frisk_me, symbol_table& fill_me );
+type_type anal_while( const AST_node& frisk_me, symbol_table& fill_me );
+type_type anal_for( const AST_node& frisk_me, symbol_table& fill_me );
+//type_type anal_goto( const AST_node& frisk_me, symbol_table& fill_me );//not yet
+
 symbol_table anal( const AST_node& frisk_me ){
     symbol_table fill_me;
     fill_me.scope = "";
     
     for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
         scope_expression( frisk_me.children[i], fill_me );//each child should be a separate expression.
+    /*
+    for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
+        scope_expression( frisk_me.children[i], fill_me );//each child should be a separate expression.
     
     for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
         type_expression( frisk_me.children[i], fill_me );//each child should be a separate expression.
+    //*/
     
     return fill_me;
 }
+
+/****************************************************************************\
+|                               ANALYSIS RULES                               |
+\****************************************************************************/
 
 /****************************************************************************\
 |                                TYPING RULES                                |
@@ -147,7 +163,7 @@ type_type scope_expression( const AST_node& frisk_me, symbol_table& fill_me ){
     switch(frisk_me.tok.type){
         case keyword:{
             if( frisk_me.tok.text == "function" ){
-                scope_function(frisk_me,fill_me);
+                retMe = scope_function(frisk_me,fill_me);
             }else
             if( frisk_me.tok.text == "if" ){
                 scope_if(frisk_me,fill_me);
@@ -337,12 +353,14 @@ type_type scope_while( const AST_node& frisk_me, symbol_table& fill_me ){
     if( active->tok.text == "(" ){
         
     }else assert(false);
-    scope_expression( active->children[0], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );
+    scope_expression( active->children[0], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// conditional
     
-    scope_expression( frisk_me.children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );
+    scope_expression( frisk_me.children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// body
 }
 
 type_type scope_for( const AST_node& frisk_me, symbol_table& fill_me ){
+
+    type_type retMe;
     const AST_node* active = &frisk_me;
     
     if( frisk_me.tok.text == "for" ){
@@ -363,12 +381,12 @@ type_type scope_for( const AST_node& frisk_me, symbol_table& fill_me ){
     if( active->tok.text == "(" ){
         
     }else assert(false);
-    scope_expression( active->children[0], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );
+    scope_expression( active->children[0], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// first for field, variable declaration
     
-    scope_expression( frisk_me.children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );
+    scope_expression( frisk_me.children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// for body
     
-    scope_expression( active->children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );
-    scope_expression( active->children[2], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );
+    scope_expression( active->children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// second for field, conditional
+    scope_expression( active->children[2], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// third for field, iteration
 }
 
 type_type scope_goto( const AST_node& frisk_me, symbol_table& fill_me ){

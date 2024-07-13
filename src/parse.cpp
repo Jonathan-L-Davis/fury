@@ -257,6 +257,11 @@ AST_node parse_while(const std::vector<token> &tokens, int &start_pos){
     
     retMe.children.push_back(while_body);
     
+    if((unsigned) start_pos < tokens.size() && tokens[start_pos].text == ";"){//terminate function
+        retMe.children.push_back({tokens[start_pos]});
+        start_pos++;
+    }
+    
     return retMe;
 }
 
