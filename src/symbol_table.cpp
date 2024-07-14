@@ -12,14 +12,6 @@ type_type scope_while( const AST_node& frisk_me, symbol_table& fill_me );
 type_type scope_for( const AST_node& frisk_me, symbol_table& fill_me );
 //type_type scope_goto( const AST_node& frisk_me, symbol_table& fill_me );//not yet
 
-type_type type_expression( const AST_node& frisk_me, symbol_table& fill_me );
-type_type type_function( const AST_node& frisk_me, symbol_table& fill_me );
-type_type type_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me );
-type_type type_if( const AST_node& frisk_me, symbol_table& fill_me );
-type_type type_while( const AST_node& frisk_me, symbol_table& fill_me );
-type_type type_for( const AST_node& frisk_me, symbol_table& fill_me );
-//type_type type_goto( const AST_node& frisk_me, symbol_table& fill_me );//not yet
-
 type_type anal_expression( const AST_node& frisk_me, symbol_table& fill_me );
 type_type anal_function( const AST_node& frisk_me, symbol_table& fill_me );
 type_type anal_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me );
@@ -33,7 +25,7 @@ symbol_table anal( const AST_node& frisk_me ){
     fill_me.scope = "";
     
     for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
-        scope_expression( frisk_me.children[i], fill_me );//each child should be a separate expression.
+        anal_expression( frisk_me.children[i], fill_me );//each child should be a separate expression.
     
     return fill_me;
 }
@@ -42,7 +34,7 @@ symbol_table anal( const AST_node& frisk_me ){
 |                               ANALYSIS RULES                               |
 \****************************************************************************/
 
-type_type scope_expression( const AST_node& frisk_me, symbol_table& fill_me ){
+type_type anal_expression( const AST_node& frisk_me, symbol_table& fill_me ){
     
     type_type retMe = semantic_epsilon;
     
@@ -85,23 +77,23 @@ type_type scope_expression( const AST_node& frisk_me, symbol_table& fill_me ){
             
             if( frisk_me.tok.text == "{" ){
                 for( unsigned int i = 0; frisk_me.children.size() > i && frisk_me.children[i].tok.text != "}"; i++ ){
-                    scope_expression(frisk_me.children[i],fill_me);
+                    anal_expression(frisk_me.children[i],fill_me);
                 }
             }else assert(false);
         }break;
         case binary_operator:{
             
             for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
-                scope_expression( frisk_me.children[i], fill_me );
+                anal_expression( frisk_me.children[i], fill_me );
             
         }break;
         case identifier:{
             assert( fill_me.id_exists( frisk_me.tok.text ) );
             for( unsigned int i = 0; i < frisk_me.children.size(); i++ )
-                scope_expression( frisk_me.children[i], fill_me );//*/
+                anal_expression( frisk_me.children[i], fill_me );//*/
         }break;
         case literal:{
-            // idk fam, probably wont be built into the lang, or will be really minimal
+            retMe = semantic_literal;
         }break;
         case type:{//*
             retMe = scope_typed_declaration(frisk_me,fill_me);//*/
@@ -148,7 +140,7 @@ type_type scope_function( const AST_node& frisk_me, symbol_table& fill_me ){
     }
     
     const AST_node* function_body = &active->children[1];
-    type_type body_type = scope_expression(*function_body, fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );
+    type_type body_type = anal_expression(*function_body, fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );
     
     assert( retMe == body_type );
     
@@ -156,9 +148,9 @@ type_type scope_function( const AST_node& frisk_me, symbol_table& fill_me ){
 }
 
 type_type scope_typed_declaration( const AST_node& frisk_me, symbol_table& fill_me ){
-
+    
     type_type retMe = semantic_epsilon;
-
+    
     const AST_node* active = &frisk_me;
     bool is_assignment = false;
     
@@ -190,22 +182,27 @@ type_type scope_typed_declaration( const AST_node& frisk_me, symbol_table& fill_
     //*
     if( active->tok.text != ";" ){
         value = (AST_node*)(void*)active;
+        is_assignment = true;
     }//*/
     
     if( !fill_me.contains_id( variable_id ) ){
         fill_me.add_symbol({ type, variable_id, value });
-    }else assert(false);
-    if ( is_assignment );
-    assert( retMe == scope_expression( *active ,fill_me.sub_scopes[fill_me.sub_scopes.size()-1]) );
+    }else assert(false);// symbol already exists
+    
+    if ( is_assignment ){
+        auto rest_of_expression = anal_expression( *active ,fill_me.sub_scopes[fill_me.sub_scopes.size()-1]);
+        assert( retMe == rest_of_expression || rest_of_expression == semantic_literal );
+    }
+    
     assert( retMe != semantic_epsilon );
     
     return retMe;
 }
 
 type_type scope_if( const AST_node& frisk_me, symbol_table& fill_me ){
-
+    
     type_type retMe = semantic_epsilon;
-
+    
     const AST_node* active = &frisk_me;
     if( frisk_me.tok.text == "if" ){
         assert(frisk_me.children.size()>0);
@@ -225,14 +222,14 @@ type_type scope_if( const AST_node& frisk_me, symbol_table& fill_me ){
     
     if( active->tok.text == "(" ){
         assert(active->children.size()>0);
-        scope_expression(active->children[0],fill_me.sub_scopes[fill_me.sub_scopes.size()-1]);
+        anal_expression(active->children[0],fill_me.sub_scopes[fill_me.sub_scopes.size()-1]);
     }else assert(false);
     if( frisk_me.children.size() == 2 )
-        scope_expression(frisk_me.children[1],fill_me.sub_scopes[fill_me.sub_scopes.size()-1]);
+        anal_expression(frisk_me.children[1],fill_me.sub_scopes[fill_me.sub_scopes.size()-1]);
     else {
         assert( frisk_me.children.size() == 3 );
-        scope_expression(frisk_me.children[1],fill_me.sub_scopes[fill_me.sub_scopes.size()-1]);//true clause
-        scope_expression(frisk_me.children[2].children[0],fill_me.sub_scopes[fill_me.sub_scopes.size()-1]);//false clause
+        anal_expression(frisk_me.children[1],fill_me.sub_scopes[fill_me.sub_scopes.size()-1]);//true clause
+        anal_expression(frisk_me.children[2].children[0],fill_me.sub_scopes[fill_me.sub_scopes.size()-1]);//false clause
     }
     
     return retMe;
@@ -259,9 +256,9 @@ type_type scope_while( const AST_node& frisk_me, symbol_table& fill_me ){
     if( active->tok.text == "(" ){
         
     }else assert(false);
-    scope_expression( active->children[0], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// conditional
+    anal_expression( active->children[0], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// conditional
     
-    return scope_expression( frisk_me.children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// body
+    return anal_expression( frisk_me.children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// body
 }
 
 type_type scope_for( const AST_node& frisk_me, symbol_table& fill_me ){
@@ -287,12 +284,12 @@ type_type scope_for( const AST_node& frisk_me, symbol_table& fill_me ){
     if( active->tok.text == "(" ){
         
     }else assert(false);
-    scope_expression( active->children[0], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// first for field, variable declaration
+    anal_expression( active->children[0], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// first for field, variable declaration
     
-    retMe = scope_expression( frisk_me.children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// for body
+    retMe = anal_expression( frisk_me.children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// for body
     
-    scope_expression( active->children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// second for field, conditional
-    scope_expression( active->children[2], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// third for field, iteration
+    anal_expression( active->children[1], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// second for field, conditional
+    anal_expression( active->children[2], fill_me.sub_scopes[fill_me.sub_scopes.size()-1] );// third for field, iteration
     
     return retMe;
 }
