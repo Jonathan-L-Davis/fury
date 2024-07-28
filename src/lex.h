@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <vector>
 
+
+//only keywords should exist. The others have to be defined by default in the symbol table.
 extern std::vector<std::string> keywords;
 
 extern std::vector<std::string> operators;
@@ -33,7 +35,7 @@ struct token{
     token_type type;
 };
 
-std::vector<token> tokenize( const std::string &filename );
+std::vector<token> lex( const std::string &filename );
 
 token_type get_token_type( std::string type_me );
 

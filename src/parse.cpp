@@ -8,6 +8,7 @@ AST_node parse_if(const std::vector<token> &tokens, int &start_pos);
 AST_node parse_while(const std::vector<token> &tokens, int &start_pos);
 AST_node parse_for(const std::vector<token> &tokens, int &start_pos);
 AST_node parse_function(const std::vector<token> &tokens, int &start_pos);
+AST_node parse_operator(const std::vector<token> &tokens, int &start_pos);
 AST_node parse_return(const std::vector<token> &tokens, int &start_pos);
 AST_node parse_typed_declaration(const std::vector<token> &tokens, int &start_pos);
 AST_node parse_struct_or_union(const std::vector<token> &tokens, int &start_pos);
@@ -63,6 +64,9 @@ AST_node parse_expression(const std::vector<token> &tokens, int &start_pos){
             }else
             if( tokens[start_pos].text == "oct" ){
                 retMe = parse_typed_declaration(tokens,start_pos);
+            }else
+            if( tokens[start_pos].text == "operator" ){
+                retMe = parse_operator(tokens,start_pos);
             }else
             if( tokens[start_pos].text == "quad" ){
                 retMe = parse_typed_declaration(tokens,start_pos);
@@ -325,7 +329,7 @@ AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
             active = &(active->children[1]);
             start_pos++;
         }else assert(false);
-    }else if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ) {//could be void return type or custom return type
+    }else if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ) {//could be void function id or custom return type
         active->children.push_back( {tokens[start_pos]} );
         start_pos++;
         // may not happen, void functions have no return type
@@ -387,6 +391,13 @@ AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
     return retMe;
 }
 
+AST_node parse_operator(const std::vector<token> &tokens, int &start_pos){
+    AST_node retMe;
+    AST_node* active = &retMe;
+    AST_node* operator_id;
+    
+    return retMe;
+}
 
 AST_node parse_return(const std::vector<token> &tokens, int &start_pos){
     AST_node retMe;
@@ -486,6 +497,14 @@ AST_node parse_export(const std::vector<token> &tokens, int &start_pos){
 std::string indent = "";
 void AST_node::print(){
     std::cout << indent << tok.text << "\n";
+    indent += "    ";
+    for( unsigned int i = 0; i < children.size(); i++ )
+        children[i].print();
+    indent.resize(indent.size()-4);
+}
+
+void AST_node::print_with_types(){
+    std::cout << indent << tok.type << "" << tok.text << "\n";
     indent += "    ";
     for( unsigned int i = 0; i < children.size(); i++ )
         children[i].print();

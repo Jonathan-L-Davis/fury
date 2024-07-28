@@ -15,23 +15,50 @@
 
 bool is_valid_literal( std::string str );
 bool is_hex(uint8_t c);
-std::vector<token> lex( const std::string &file_name );
+
+std::string token_type_to_string(uint32_t convertMe){
+    switch(convertMe){
+        case epsilon        : return "epsilon        ";
+        case keyword        : return "keyword        ";
+        case Operator       : return "Operator       ";
+        case type           : return "type           ";
+        case identifier     : return "identifier     ";
+        case parser         : return "parser         ";
+        case scoping        : return "scoping        ";
+        case literal        : return "literal        ";
+        case error          : return "error          ";
+        case root           : return "root           ";
+        case sigma          : return "sigma          ";
+        case paren          : return "paren          ";
+        case binary_operator: return "binary_operator";
+    }
+}
+
 int main(int argc, char**argv){
     
-    auto tokens = lex("./file.txt");
+    symbol_table the_context;
+    
+    auto tokens = lex("./the_context.txt");
     int start_pos = 0;
+    
+    for(token tok : tokens){
+        std::cout << token_type_to_string(tok.type) << ":" << tok.text << std::endl;
+    }
+    
+    std::cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::" << std::endl;
+    
+    //std::cout << operators.size() << "|" << keywords.size() << "|" << types.size() << std::endl;
     
     AST_node parsed_file = parse(tokens,start_pos);
     parsed_file.print();
     
     std::cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::" << std::endl;
     
-    symbol_table sym_tbl = anal(parsed_file);
-    sym_tbl.print();
+    parsed_file.print_with_types();
     
-    /*for( symbol sym : sym_tbl.symbols ){
-        std::cout << "|" << sym.name << "|\n";
-    }//*/
+    
+    //symbol_table sym_tbl = anal(parsed_file);
+    //sym_tbl.print();
     
     return 0;
 }

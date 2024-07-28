@@ -17,6 +17,7 @@ std::vector<std::string> keywords
     "if",
     "import",
     "oct",
+    "operator",
     "quad",
     "return",
     "struct",
@@ -27,7 +28,7 @@ std::vector<std::string> keywords
 std::vector<std::string> operators
 {
     "+",//arithmetic
-    "-",
+    "-",// subtraction and negation
     "*",
     "/",
     "%",
@@ -73,7 +74,6 @@ std::vector<std::string> boperators
     "<O<",
     "&",
     "|",
-    "~",
     "^",
 
     "==",//comparison
@@ -83,8 +83,9 @@ std::vector<std::string> boperators
     ">=",
     "<=",
 
-    ",",//sub-expression separator
+    ",",//sub-expression separator - probably not adding to the language.
 
+    /// Can be added later. Don't need to add for the first version.
     "::",//scoping, add later
     ".",//member access & scoping current
     "..",//scoping backstep
@@ -146,7 +147,7 @@ bool alpha_numeric(uint8_t c){
 }
 
 // for _ A-Za-z0-9
-bool _alpha_numeric(uint8_t c){
+bool is_alpha_numeric_or_(uint8_t c){
     return _alpha(c) || numeric(c);
 }
 
@@ -156,7 +157,7 @@ bool is_valid_identifier( std::string str ){
     if( !_alpha(str[0]) ) return false;
 
     for( unsigned int i = 1; i < str.size(); i++ ){
-        if( !_alpha_numeric(str[0]) ) return false;
+        if( !is_alpha_numeric_or_(str[0]) ) return false;
     }
 
     return true;
@@ -251,15 +252,80 @@ bool is_paren( std::string str ){
     return false;
 }
 
-bool ws( char am_i_space ){//common whitespaces
-    return ( am_i_space == ' ' || ( 0x7 <= am_i_space && am_i_space <= 0xD ) );
+bool is_ws( char am_i_space ){//common whitespaces
+    return ( am_i_space == ' ' || ( 0x9 <= am_i_space && am_i_space <= 0xD ) );
 }
 
 std::vector<token> lex( const std::string &file_name ){
     std::vector<token> retMe;
 
     std::fstream file(file_name,std::ios::in);
+    
+    file.seekg(0,std::ios::end);
+    uint64_t file_size = file.tellg();
+    file.seekg(0,std::ios::beg);
+    
+    token current_token;
+    for( uint64_t i = 0; i < file_size; i++ ){
+        uint8_t byte;
+        file.read((char*)&byte,1);
+        
+        
+        
+        
+        
+        if( is_keyword( current_token.text ) && !is_alpha_numeric_or_(byte) ){
+            
+            if( current_token.text.size() > 0 ){
+                current_token.type = get_token_type( current_token.text );
+                retMe.push_back( current_token );
+                current_token = token();
+            }
+        }
+        
+        if( is_ws( byte ) ){
+            
+            if( current_token.text.size() > 0 ){
+                current_token.type = get_token_type( current_token.text );
+                retMe.push_back( current_token );
+                current_token = token();
+            }
+            
+            continue;
+        }
+        
+        if( byte == ';' ){
+            
+            if( current_token.text.size() > 0 ){
+                current_token.type = get_token_type( current_token.text );
+                retMe.push_back( current_token );
+                current_token = token();
+            }
+            
+            current_token.text += byte;
+            
+            retMe.push_back(current_token);
+            current_token = token();
+            continue;
+            
+        }
+        current_token.text += byte;
+        
+        
+    }
+    
+    if( current_token.text.size() > 0 ){
+        current_token.type = get_token_type( current_token.text );
+        retMe.push_back( current_token );
+        current_token = token();
+    }
+    
+    
+    
 
+    return retMe;
+    
+    /*
     char current_character = 0;
     token current_token;
     current_token.line_no = 1;
@@ -293,7 +359,7 @@ std::vector<token> lex( const std::string &file_name ){
             }
         }assert( i <= 1 );
 
-        if( ws(current_character) || !buffer ){// if on ws or last character push token
+        if( is_ws(current_character) || !buffer ){// if on ws or last character push token
             if( current_token.text.size() > 0 )
                 retMe.push_back(current_token);
             current_token = {};
@@ -356,7 +422,7 @@ std::vector<token> lex( const std::string &file_name ){
         }
     }
 
-    return retMe;
+    return retMe;//*/
 }
 
 // not all types are used, at this point built in types are only recognized as keywords
@@ -367,8 +433,8 @@ token_type get_token_type( std::string type_me ){
         return type;
     if( is_keyword( type_me ) )
         return keyword;
-    if( is_binary_operator( type_me ) )
-        return binary_operator;
+    //if( is_binary_operator( type_me ) )
+    //    return binary_operator;
     if( is_operator( type_me ) )
         return Operator;
     if( is_valid_identifier( type_me ) )
@@ -376,6 +442,8 @@ token_type get_token_type( std::string type_me ){
     if( is_valid_literal( type_me ) )
         return literal;
     if( is_scoping( type_me ) )
+        return scoping;
+    if( is_paren(type_me ) )
         return paren;
     return error;
 }
