@@ -43,31 +43,4 @@ int main(int argc, char**argv){
     AST_node something_new("./function.fury",the_context);
     
     return 0;
-    
-    auto tokens = lex("./the_context.txt");
-    int start_pos = 0;
-    
-    for(token tok : tokens){
-        std::cout << token_type_to_string(tok.type) << ":" << tok.text << std::endl;
-    }
-    
-    std::cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::" << std::endl;
-    
-    //std::cout << operators.size() << "|" << keywords.size() << "|" << types.size() << std::endl;
-    
-    AST_node parsed_file;
-    try{
-    parsed_file = parse(tokens,start_pos);
-    }catch(char f){}
-    parsed_file.print();
-    
-    std::cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::" << std::endl;
-    
-    parsed_file.print_with_types();
-    
-    
-    symbol_table sym_tbl = anal(parsed_file);
-    sym_tbl.print();
-    
-    return 0;
 }
