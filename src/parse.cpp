@@ -381,13 +381,18 @@ AST_node parse_function(const std::vector<token> &tokens, int &start_pos){
     }
     start_pos++;
     
-    function_id->children.push_back( parse_expression(tokens,start_pos) );//function body
+    bool terminated = false;
+    if((unsigned) start_pos < tokens.size() && tokens[start_pos].text == ";"){//function declaration
+        retMe.children.push_back({tokens[start_pos]});
+        start_pos++;
+        terminated = true;
+    }else function_id->children.push_back( parse_expression(tokens,start_pos) );//function body
     
-    if((unsigned) start_pos < tokens.size() && tokens[start_pos].text == ";"){//terminate function
+    if( !terminated && (unsigned) start_pos < tokens.size() && tokens[start_pos].text == ";"){//terminate function
         retMe.children.push_back({tokens[start_pos]});
         start_pos++;
     }
-    
+    retMe.print();
     return retMe;
 }
 
@@ -396,6 +401,44 @@ AST_node parse_operator(const std::vector<token> &tokens, int &start_pos){
     AST_node* active = &retMe;
     AST_node* operator_id;
     
+    if( (unsigned) start_pos < tokens.size() && tokens[start_pos].text == "operator" ){
+        retMe.tok = tokens[start_pos];
+        start_pos++;
+    }else assert(false);
+    
+    // parse return type and ID
+    if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == type ){//built in return type
+        active->children.push_back( {tokens[start_pos]} );
+        start_pos++;
+        
+        if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ) {//operator name
+            active->children.push_back( {tokens[start_pos]} );
+            active = &(active->children[1]);
+            start_pos++;
+        }else { std::cout << tokens[start_pos].type << std::endl; assert(false);}
+    }else if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ) {//could be void function id or custom return type
+        active->children.push_back( {tokens[start_pos]} );
+        start_pos++;
+        // may not happen, void functions have no return type
+        if( (unsigned) start_pos < tokens.size() && tokens[start_pos].type == identifier ) {//id if custom type, doesn't appear if it's a void function
+            active->children.push_back( {tokens[start_pos]} );
+            active = &(active->children[1]);
+            start_pos++;
+        }else{
+            active = &(active->children[0]);// set function id as active for void functions
+        }
+    }else assert(false);
+    
+    operator_id = active;
+    std::cout << operator_id->tok.text << std::endl;
+    while( (unsigned) start_pos < tokens.size() && tokens[start_pos].text != ";" ){
+        if( tokens[start_pos].text == "(" ){
+            
+        }
+    }
+    
+    
+    retMe.print();
     return retMe;
 }
 

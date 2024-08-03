@@ -41,6 +41,8 @@ enum scope_type:uint32_t{
     scope_type_root = 5,
 };
 
+
+/**    ASSUMES THAT parent == nullptr IFF scope== ""    **/
 struct symbol_table{
     
     symbol_table* parent; //non owning
@@ -54,12 +56,13 @@ struct symbol_table{
     
     std::string get_full_scope();//returns absolute scope
     
-    bool contains_id(std::string);
-    bool id_exists(std::string find_me);
+    bool contains_id(std::string);//in this particular scope.
+    bool id_exists(std::string find_me);//in this or parent scope.
     bool contains_scope(std::string);
     bool scope_exists(std::string find_me);
     void add_symbol(symbol);
     void add_scope(std::string scope, scope_type);
+    bool id_starts_with_substr(std::string);
     
     void print();
     

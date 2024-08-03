@@ -21,7 +21,7 @@ std::vector<std::string> keywords
     "quad",
     "return",
     "struct",
-    "union",// might remove from language eventually
+    "type",
     "while",
 };
 
@@ -261,71 +261,7 @@ std::vector<token> lex( const std::string &file_name ){
 
     std::fstream file(file_name,std::ios::in);
     
-    file.seekg(0,std::ios::end);
-    uint64_t file_size = file.tellg();
-    file.seekg(0,std::ios::beg);
-    
-    token current_token;
-    for( uint64_t i = 0; i < file_size; i++ ){
-        uint8_t byte;
-        file.read((char*)&byte,1);
-        
-        
-        
-        
-        
-        if( is_keyword( current_token.text ) && !is_alpha_numeric_or_(byte) ){
-            
-            if( current_token.text.size() > 0 ){
-                current_token.type = get_token_type( current_token.text );
-                retMe.push_back( current_token );
-                current_token = token();
-            }
-        }
-        
-        if( is_ws( byte ) ){
-            
-            if( current_token.text.size() > 0 ){
-                current_token.type = get_token_type( current_token.text );
-                retMe.push_back( current_token );
-                current_token = token();
-            }
-            
-            continue;
-        }
-        
-        if( byte == ';' ){
-            
-            if( current_token.text.size() > 0 ){
-                current_token.type = get_token_type( current_token.text );
-                retMe.push_back( current_token );
-                current_token = token();
-            }
-            
-            current_token.text += byte;
-            
-            retMe.push_back(current_token);
-            current_token = token();
-            continue;
-            
-        }
-        current_token.text += byte;
-        
-        
-    }
-    
-    if( current_token.text.size() > 0 ){
-        current_token.type = get_token_type( current_token.text );
-        retMe.push_back( current_token );
-        current_token = token();
-    }
-    
-    
-    
-
-    return retMe;
-    
-    /*
+    //*
     char current_character = 0;
     token current_token;
     current_token.line_no = 1;
@@ -436,7 +372,7 @@ token_type get_token_type( std::string type_me ){
     //if( is_binary_operator( type_me ) )
     //    return binary_operator;
     if( is_operator( type_me ) )
-        return Operator;
+        return identifier;
     if( is_valid_identifier( type_me ) )
         return identifier;
     if( is_valid_literal( type_me ) )

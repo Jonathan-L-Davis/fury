@@ -34,9 +34,15 @@ std::string token_type_to_string(uint32_t convertMe){
     }
 }
 
+AST_node something_new(std::string,symbol_table);
+
 int main(int argc, char**argv){
     
     symbol_table the_context;
+    
+    AST_node something_new("./function.fury",the_context);
+    
+    return 0;
     
     auto tokens = lex("./the_context.txt");
     int start_pos = 0;
@@ -49,7 +55,10 @@ int main(int argc, char**argv){
     
     //std::cout << operators.size() << "|" << keywords.size() << "|" << types.size() << std::endl;
     
-    AST_node parsed_file = parse(tokens,start_pos);
+    AST_node parsed_file;
+    try{
+    parsed_file = parse(tokens,start_pos);
+    }catch(char f){}
     parsed_file.print();
     
     std::cout << "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::" << std::endl;
@@ -57,8 +66,8 @@ int main(int argc, char**argv){
     parsed_file.print_with_types();
     
     
-    //symbol_table sym_tbl = anal(parsed_file);
-    //sym_tbl.print();
+    symbol_table sym_tbl = anal(parsed_file);
+    sym_tbl.print();
     
     return 0;
 }

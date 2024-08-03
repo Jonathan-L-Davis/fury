@@ -381,6 +381,18 @@ bool symbol_table::id_exists(std::string find_me){
     
 }
 
+bool symbol_table::id_starts_with_substr(std::string find_me){
+    
+    for( unsigned int i = 0; i < symbols.size(); i++ ){
+        if( symbols[i].name.size() >= find_me.size() && symbols[i].name.substr(0,find_me.size()) == find_me )
+            return true;
+    }
+    
+    if( scope != "" ) return parent->id_starts_with_substr(find_me);
+    return false;
+    
+}
+
 bool symbol_table::contains_scope(std::string find_me){
     
     for( unsigned int i = 0; i < sub_scopes.size(); i++ ){
