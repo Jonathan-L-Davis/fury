@@ -32,6 +32,7 @@ std::string token_type_to_string(uint32_t convertMe){
         case paren          : return "paren          ";
         case binary_operator: return "binary_operator";
     }
+    assert(false);//yuh
 }
 
 AST_node something_new(std::string,symbol_table);
@@ -40,7 +41,7 @@ int main(int argc, char**argv){
     
     symbol_table the_context;
     
-    AST_node something_new("./function.fury",the_context);
+    AST_node node = something_new("./function.fury",the_context);
     
     return 0;
 }

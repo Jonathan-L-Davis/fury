@@ -1,2 +1,5 @@
 /*
 !src/
+!build.sh
+!function.fury
+!.gitignore
