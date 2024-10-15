@@ -42,6 +42,8 @@ int main(int argc, char**argv){
     symbol_table the_context;
     
     AST_node node = something_new("./function.fury",the_context);
+
+    node.print();
     
     return 0;
 }

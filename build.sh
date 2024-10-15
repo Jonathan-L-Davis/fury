@@ -7,7 +7,7 @@ mkdir -p obj
 for file in "${Source_Files[@]}" ; do
     
     if [[ $file =~ [[:space:]]+ ]] ; then
-        echo "File path: \"$file\" Contains a space and should not. This is naughty. Fix yourself."
+        echo "File path: \"$file\" Contains a space and should not. This is wrong. Fix yourself."
         exit 1
     fi
     

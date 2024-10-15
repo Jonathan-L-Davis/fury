@@ -114,8 +114,8 @@ AST_node something_new(std::string file_name,symbol_table context){
         uint8_t byte;
         file.read((char*)&byte,1);
         
-        if( !in_range(byte) ) {
-            std::cout << "ascii character is out of acceptable range ' ' to '~' or in hex \"0x20 to 0x7E\"" << std::endl;
+        if( !in_range(byte) && !is_ws(byte) ) {
+            std::cout << "ascii character \"" << char(byte) << "\" is out of acceptable range ' ' to '~' or in hex \"0x" << std::hex << int(byte) << "\" \"0x20 to 0x7E\" and is not white space." << std::endl;
             assert( false );
         };
         
