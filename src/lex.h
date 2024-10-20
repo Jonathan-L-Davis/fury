@@ -26,7 +26,7 @@ enum token_type:uint32_t{
     root = 9,
     sigma = 10,
     paren = 11,
-    binary_operator = 12,
+    binary_operator = 12,// needs to be removed soon. As soon as new parser is done it will be gone.
 };
 
 struct token{

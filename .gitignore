@@ -1,5 +1,6 @@
 /*
+!.gitignore
 !src/
 !build.sh
+!README.md
 !function.fury
-!.gitignore

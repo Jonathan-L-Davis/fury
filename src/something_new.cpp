@@ -28,6 +28,9 @@ function function T identity(T) (type T){
 };
 ```
 
+how do you get the inner function?
+
+
 interestingly the type T is not defined until after it is used. Must be careful to make sure it's defined immediately in the parameter bracket.
 probably need some comptime to make sure it works out. but not sure where to make comptime.
 
@@ -100,64 +103,69 @@ this means that parsing happens at the same time as semantic analysis.
 #include <iostream>
 
 AST_node something_new(std::string file_name,symbol_table context){
-    AST_node retMe;
+    AST_node retMe = { { std::string("\0root",5), 0, root }, {} };
     std::vector<token> tokens;
-
+    std::vector<AST_node*> node_stack = {&retMe};
+    AST_node *current_node = &retMe;
+    
+    auto pick_off_token = [&](){
+        
+        // might not be used yet, will manually do this a few times, and see if it's meaningful to try to make into a function. Might be different each time.
+        
+    };
+    
+    // deliberately not using vector to force file_buffer max size. Want to crash on large inputs right now. Obviously not a final feature, just bounds the complexity I have to take on.
+    uint8_t file_buffer[1024*1024];
+    
     std::fstream file(file_name,std::ios::in);
     
     file.seekg(0,std::ios::end);
     uint64_t file_size = file.tellg();
     file.seekg(0,std::ios::beg);
     
-    token current_token;
+    assert( file_size <= 1024*1024 );
+    
     for( uint64_t i = 0; i < file_size; i++ ){
-        uint8_t byte;
-        file.read((char*)&byte,1);
+        file.read((char*)&file_buffer[i],1);
+    }
+    
+    token current_token;
+    uint64_t line_no = 1;
+    for( uint64_t i = 0; i < file_size; i++ ){
+        current_token.text += file_buffer[i];
         
-        if( !in_range(byte) && !is_ws(byte) ) {
-            std::cout << "ascii character \"" << char(byte) << "\" is out of acceptable range ' ' to '~' or in hex \"0x" << std::hex << int(byte) << "\" \"0x20 to 0x7E\" and is not white space." << std::endl;
-            assert( false );
-        };
-        
-        
-        
-        if( is_keyword( current_token.text ) && !context.id_starts_with_substr( current_token.text+std::string(1,byte) ) ){
-            
-            if( current_token.text.size() > 0 ){
-                current_token.type = get_token_type( current_token.text );
-                tokens.push_back( current_token );
-                current_token = token();
-            }
+        // check if current token + next char is a valid identifier/start of identifier.
+        if( (i+1 < file_size) && context.id_starts_with_substr( current_token.text + (char) file_buffer[i] ) ){
+            assert(false);//obviously should be handled, but not yet.
         }
         
-        if( is_ws( byte ) ){
-            
-            if( current_token.text.size() > 0 ){
-                current_token.type = get_token_type( current_token.text );
-                tokens.push_back( current_token );
+        // else check for keyword.
+        if( is_keyword(current_token.text) ){
+            if( current_token.text == "function" ){
+                
+                current_token.type = keyword;
+                current_token.line_no = line_no;
+                
+                current_node->children.push_back({current_token,{}});
+                
                 current_token = token();
             }
-            
-            continue;
-        }
-        
-        if( byte == ';' ){
-            
-            if( current_token.text.size() > 0 ){
-                current_token.type = get_token_type( current_token.text );
-                tokens.push_back( current_token );
-                current_token = token();
-            }
-            
-            current_token.text += byte;
-            
-            tokens.push_back(current_token);
             current_token = token();
             continue;
-            
         }
-        current_token.text += byte;
         
+        // else check for identifier
+        if( context.id_exists( current_token.text ) ){
+            assert(false);
+        }
+        
+        // else check for white space. I hope whitespace never makes it into a token identifier. Would be ass. Should be fine in strings, but eh, we'll see. Single character only should help with that.
+        // whitespace doesn't generate tokens directly so nothing needs to be updated in the AST.
+        if( current_token.text.size() == 1 && is_ws( current_token.text[0] ) ){
+            if(current_token.text[0]=='\n')line_no++;
+            current_token = token();
+            continue;
+        }
         
     }
     
@@ -171,3 +179,4 @@ AST_node something_new(std::string file_name,symbol_table context){
     return retMe;
     
 }
+
