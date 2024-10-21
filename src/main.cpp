@@ -42,10 +42,6 @@ int main(int argc, char**argv){
     symbol_table the_context;
     
     AST_node node = something_new("./function.fury",the_context);
-    using namespace std::string_literals;
-    std::string s = "\0root"s;// nice to know I guess. wtf
-    
-    std::cout << ( (std::string("\0root",5) ) == s ) << std::endl;
     
     node.print();
     

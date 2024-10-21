@@ -102,11 +102,16 @@ this means that parsing happens at the same time as semantic analysis.
 #include <assert.h>
 #include <iostream>
 
+enum class parsing_context {expression = 0, function = 1, Struct, For, While, Goto, label, identifier, If, Else, Import, Export, Operator, Return, type};
+// identifier means expect a new identifier.
+// 'Else' might not be used, could be consumed by if like in previous parser iteration.
+
 AST_node something_new(std::string file_name,symbol_table context){
     AST_node retMe = { { std::string("\0root",5), 0, root }, {} };
     std::vector<token> tokens;
     std::vector<AST_node*> node_stack = {&retMe};
     AST_node *current_node = &retMe;
+    std::vector<parsing_context> context_stack = {expression};
     
     auto pick_off_token = [&](){
         
@@ -133,10 +138,13 @@ AST_node something_new(std::string file_name,symbol_table context){
     uint64_t line_no = 1;
     for( uint64_t i = 0; i < file_size; i++ ){
         current_token.text += file_buffer[i];
-        
+        assert(context_stack.size()>0);
+        switch(context_stack[context_stack.size()-1]){
+            
+        }
         // check if current token + next char is a valid identifier/start of identifier.
         if( (i+1 < file_size) && context.id_starts_with_substr( current_token.text + (char) file_buffer[i] ) ){
-            assert(false);//obviously should be handled, but not yet.
+            continue;// if current partial token might be part of a larger token, we don't want to chop it off prematurely. Maybe we should in certain contexts.
         }
         
         // else check for keyword.
@@ -158,6 +166,8 @@ AST_node something_new(std::string file_name,symbol_table context){
         if( context.id_exists( current_token.text ) ){
             assert(false);
         }
+        
+        //std::cout << "|\n" << current_token.text << "\n|\n";
         
         // else check for white space. I hope whitespace never makes it into a token identifier. Would be ass. Should be fine in strings, but eh, we'll see. Single character only should help with that.
         // whitespace doesn't generate tokens directly so nothing needs to be updated in the AST.
