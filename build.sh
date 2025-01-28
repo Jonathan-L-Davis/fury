@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-Source_Files=( "main.cpp" "lex.cpp" "parse.cpp" "something_new.cpp" "symbol_table.cpp" )
+Source_Files=( "main.cpp" "lex.cpp" "parse.cpp" "symbol_table.cpp" "parse2.cpp" )
 Object_Files=()
 
 mkdir -p obj
@@ -18,11 +18,11 @@ for file in "${Source_Files[@]}" ; do
     #echo "$file ---> $object_file"
     Object_Files+=( "${object_file}" )
     mkdir -p "obj/$path" # otherwise clang++/g++ complain about non-existing directory
-    clang++ "$file" -c -o "${object_file}" -std=c++17
+    zig c++ "$file" -c -o "${object_file}" -std=c++20
 done
 
 for object in "${Object_Files[@]}" ; do
     file_glob+=" $object"
 done
 
-clang++ $file_glob -o "fury"
+zig c++ $file_glob -o "fury"

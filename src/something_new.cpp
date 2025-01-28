@@ -102,7 +102,7 @@ this means that parsing happens at the same time as semantic analysis.
 #include <assert.h>
 #include <iostream>
 
-enum class parsing_context {expression = 0, function = 1, Struct, For, While, Goto, label, identifier, If, Else, Import, Export, Operator, Return, type};
+enum class parsing_context { Expression = 0, Function = 1, Struct = 2, For = 3, While = 4, Goto = 5, Label = 6, Identifier = 7, If = 8, Else = 9, Import = 10, Export = 11, Operator = 12, Return = 13, Type = 14, Syntax = 15, Namespace = 16 };
 // identifier means expect a new identifier.
 // 'Else' might not be used, could be consumed by if like in previous parser iteration.
 
@@ -137,45 +137,48 @@ AST_node something_new(std::string file_name,symbol_table context){
     token current_token;
     uint64_t line_no = 1;
     for( uint64_t i = 0; i < file_size; i++ ){
-        current_token.text += file_buffer[i];
+        current_token.text += file_buffer[i];// if executing custom syntax don't want to do this do we? actually, it makes sense for string & integer literals. so a syntax consumes some characters and produces a type? Like "argh" produces standard string & 42960 defines an integer... hmm that might work.
+        //what about comments? integers & strings return a type if valid & nothing if not. actually integers return early... 429 in a naive implementation returns early on just the char 4... How do I specify the ending of a syntax?
         assert(context_stack.size()>0);
         switch(context_stack[context_stack.size()-1]){
-            
-        }
-        // check if current token + next char is a valid identifier/start of identifier.
-        if( (i+1 < file_size) && context.id_starts_with_substr( current_token.text + (char) file_buffer[i] ) ){
-            continue;// if current partial token might be part of a larger token, we don't want to chop it off prematurely. Maybe we should in certain contexts.
-        }
-        
-        // else check for keyword.
-        if( is_keyword(current_token.text) ){
-            if( current_token.text == "function" ){
+            case :{
+                // check if current token + next char is a valid identifier/start of identifier.
+                if( (i+1 < file_size) && context.id_starts_with_substr( current_token.text + (char) file_buffer[i] ) ){
+                    continue;// if current partial token might be part of a larger token, we don't want to chop it off prematurely. Maybe we should in certain contexts.
+                }
                 
-                current_token.type = keyword;
-                current_token.line_no = line_no;
+                // else check for keyword.
+                if( is_keyword(current_token.text) ){
+                    if( current_token.text == "function" ){
+                        
+                        current_token.type = keyword;
+                        current_token.line_no = line_no;
+                        
+                        current_node->children.push_back({current_token,{}});
+                        
+                        current_token = token();
+                    }
+                    current_token = token();
+                    continue;
+                }
                 
-                current_node->children.push_back({current_token,{}});
+                // else check for identifier
+                if( context.id_exists( current_token.text ) ){
+                    assert(false);
+                }
                 
-                current_token = token();
-            }
-            current_token = token();
-            continue;
+                //std::cout << "|\n" << current_token.text << "\n|\n";
+                
+                // else check for white space. I hope whitespace never makes it into a token identifier. Would be ass. Should be fine in strings, but eh, we'll see. Single character only should help with that.
+                // whitespace doesn't generate tokens directly so nothing needs to be updated in the AST.
+                if( current_token.text.size() == 1 && is_ws( current_token.text[0] ) ){
+                    if(current_token.text[0]=='\n')line_no++;
+                    current_token = token();
+                    continue;
+                }
+            }break;
         }
         
-        // else check for identifier
-        if( context.id_exists( current_token.text ) ){
-            assert(false);
-        }
-        
-        //std::cout << "|\n" << current_token.text << "\n|\n";
-        
-        // else check for white space. I hope whitespace never makes it into a token identifier. Would be ass. Should be fine in strings, but eh, we'll see. Single character only should help with that.
-        // whitespace doesn't generate tokens directly so nothing needs to be updated in the AST.
-        if( current_token.text.size() == 1 && is_ws( current_token.text[0] ) ){
-            if(current_token.text[0]=='\n')line_no++;
-            current_token = token();
-            continue;
-        }
         
     }
     

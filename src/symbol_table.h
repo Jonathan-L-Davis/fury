@@ -63,6 +63,7 @@ struct symbol_table{
     void add_symbol(symbol);
     void add_scope(std::string scope, scope_type);
     bool id_starts_with_substr(std::string);
+    bool type_starts_with_substr(std::string);
     
     void print();
     

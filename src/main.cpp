@@ -35,13 +35,14 @@ std::string token_type_to_string(uint32_t convertMe){
     assert(false);//yuh
 }
 
-AST_node something_new(std::string,symbol_table);
+//AST_node something_new(std::string,symbol_table);
+AST_node parse2(std::string,symbol_table&);
 
 int main(int argc, char**argv){
     
     symbol_table the_context;
     
-    AST_node node = something_new("./function.fury",the_context);
+    AST_node node = parse2("function.fury",the_context);//something_new("./function.fury",the_context);
     
     node.print();
     
