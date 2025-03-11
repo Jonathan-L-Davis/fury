@@ -13,9 +13,11 @@ std::vector<std::string> keywords
     "export",
     "for",
     "function",
-    "goto",//not used? meh
+    "goto",
     "if",
     "import",
+    "label"
+    "namespace",
     "oct",
     "operator",
     "quad",

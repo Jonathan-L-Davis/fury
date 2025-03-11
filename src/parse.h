@@ -3,16 +3,39 @@
 
 #include <vector>
 #include <string>
-#include "lex.h"
+#include <iostream>
+
+//just going to expand this enum a lot as the language expands.
+enum class node_t: uint32_t {
+    root,
+    keyword,
+    id,
+    paren,
+    curly,
+    semicolon,// the terminal operator/token
+};
+
+template<typename T>
+std::basic_ostream<T>& operator << ( std::basic_ostream<T>& fillMe, node_t printMe){
+    switch(printMe){
+        case node_t::root        : fillMe << "root";        break;
+        case node_t::keyword     : fillMe << "keyword";     break;
+        case node_t::id          : fillMe << "function id"; break;
+        case node_t::paren       : fillMe << "paren";       break;
+        case node_t::curly       : fillMe << "curly";       break;
+        case node_t::semicolon   : fillMe << "semicolon";   break;
+    }
+    
+    return fillMe;
+}
 
 struct AST_node{
-    token tok;
+    std::string text;
+    uint32_t line_no;
+    node_t type;
     std::vector<AST_node> children;
     void print();
     void print_with_types();
 };
-
-AST_node parse(const std::vector<token> &tokens, int &start_pos);
-AST_node parse_expression(const std::vector<token> &tokens, int &start_pos);
 
 #endif//PARSE_H

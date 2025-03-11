@@ -2,92 +2,164 @@
 #include <fstream>
 #include <iostream>
 
-#include "lex.h"
 #include "parse.h"
 #include "symbol_table.h"
+#include "program.h"
 #include <vector>
 #include <assert.h>
 
-AST_node parse2(std::string file_name, symbol_table& the_context){
-    AST_node retMe = {{":",0,root},{}};// should be the only node/token with a line_no of 0. 
-    AST_node* currentNode = &retMe;
-    std::fstream file(file_name);
+enum token_type:uint32_t{
+    epsilon = 0,
+    keyword = 1,
+    Operator = 2,
+    type = 3,
+    identifier = 4,
+    parser = 5,
+    scoping = 6,
+    literal = 7,
+    error = 8,
+    root = 9,
+    sigma = 10,
+    paren = 11,
+    binary_operator = 12,// needs to be removed soon. As soon as new parser is done it will be gone.
+};
+
+program parse2(std::string file_name){
+    program retMe;
+    retMe.root = {{":--:",0,root},{}};// should be the only node/token with a line_no of 0.
+    std::fstream file(file_name);// If I cared about performance I could at a minimum preallocate the number of bytes in the file.
     
     std::vector<uint8_t> file_buffer;
-    std::vector<token> tokenPool = {};
-    std::vector<AST_node> nodeStack = {};
+    std::vector<AST_node> nodePool = {};// for constucting nodes without forcing them into a tree immediately
     
     uint8_t q;
     while(file.read((char*)&q,1)){
-        file_buffer.push_back(q);
+        file_buffer.push_back(q);//should obviously preallocate the size in one go & 1 memcpy.
     }
     
     uint32_t line_no = 1;
-    token currentToken;
+    std::string completeToken;
+    std::string currentToken;
+    
     for(uint8_t byte : file_buffer){
         
-        // construct tokens
-        std::cout << "|" << currentNode->tok.text << "|" << currentNode->tok.type << std::endl;
-        if( currentToken.text == "" ) currentToken.line_no = line_no;
-        if( byte == '\n' ) line_no++;
-        
-        if( byte == ' ' || byte == '\n' ){// if white space, only assuming this one kind of ws for now.
-            if( currentToken.text != ""){
-                if( currentToken.text == "function" ) currentToken.type = keyword; else assert(false);
-                tokenPool.push_back(currentToken);
-                std::cout << currentToken.text << std::endl;
-                currentToken = token();
-                goto end_token_construction;
-            }
+        if( !( byte=='\n' || (byte>=' ' && byte<127) ) ){// fuck your \r -- but seriously, the 127 restriction is to allow for forward compatibility with utf-8. If you're reading this, please take a moment of silence fore the Unicode Consortium, our unsung heroes.
+            std::cout << (int) byte << std::endl;
+            assert(byte=='\n' || ( byte>=' ' && byte<127) );
         }
-        else if( currentNode->tok.text == "function" ){
-            assert( currentNode->tok.type == keyword );
+        
+        
+        
+        if(byte == ' ' || byte == '\n'){
+            std::cout << "ws\n";
+            completeToken = currentToken;
+            currentToken = "";
             
-            std::cout << currentToken.text << std::endl;
-            if( currentNode->children.size() == 0 ){// looking for type
-                std::string byte_str;byte_str.push_back(byte);
-                if( !the_context.type_starts_with_substr(currentToken.text+byte_str ) ){// no known type, means we have a new id
-                    if(!is_alpha_numeric_or_(byte)){
-                        currentToken.type = identifier;
-                        tokenPool.push_back(currentToken);
-                        std::cout << currentToken.text << std::endl;
-                        currentToken = token();
-                        currentToken.text += byte;
-                        goto end_token_construction;
-                    }
+            if(byte == '\n') line_no++;
+        }else if(byte=='('||byte==')'||byte=='{'||byte=='}'||byte==';'){// characters are forced to be single character tokens.
+            std::cout << "special chars\n";
+            if(currentToken!=""){
+                nodePool.push_back({currentToken,line_no,node_t::id});// not a general solution. Need to fix.
+                currentToken="";
+            }
+            
+            nodePool.push_back({std::string(1,byte),line_no,node_t::paren});
+            completeToken = "Sick hack, since this token won't be read, it doesn't matter what it is so long as it's not empty.";
+            
+        }else{
+            std::cout << "normal chars\n";
+            currentToken += byte;
+        }
+        
+        // will get tricky when I add syntax here. Will probably parse '#' as comment syntax definition & implement a special function for it in the parser.
+        
+        if( completeToken == "" ) continue;
+        // there's an obvious optimization we're skipping where we skip over if we don't add a new token after our last reduce step (from the perspective of per byte). -- completeToken being "" might be that check actually.
+        
+        
+        
+        // there is a better way to generalize for keywords, but I only need this one for right now. This is helping me work out the general shift reduce structure first. Then I can organize my thousand rules.
+        if( completeToken == "function" ){
+            
+            AST_node node;
+            
+            node.line_no = line_no;
+            node.text = completeToken;
+            node.type = node_t::keyword;
+            
+            nodePool.push_back(node);
+        }
+        
+        
+        
+        
+        
+        
+        completeToken = "";// don't reparse a completed token, duh.
+        
+        for(auto nod:nodePool)
+            nod.print();
+        
+        
+        /// ----------------------------------------------------    Reduction Rules Start Here    ---------------------------------------------------------- ///
+        
+        for( int i = 0; i < nodePool.size(); i++ ){
+            
+            
+            if( nodePool[i].text=="("){
+                //need to handle commas as well for function declarations.
+                // should everything in a () be fully reduced before this runs? That seems reasonable.
+                if( i<nodePool.size()-1 && nodePool[i+1].text == ")" ){
+                    nodePool[i].children.push_back(nodePool[i+1]);
+                    nodePool.erase(nodePool.begin()+i+1);
+                    continue;
+                }//else assert(false); // guess you get to implement proper '(' reduction today. LMAO nerd.
+            }
+            
+            if( nodePool[i].text=="function"){// totally ignores return types, oh well for now. Just need it to work.
+                //need to handle commas as well for function declarations.
+                // should everything in a () be fully reduced before this runs? That seems reasonable.
+                if( i+2<nodePool.size() &&
                     
+                    nodePool[i+1].type == node_t::id &&
                     
+                    nodePool[i+2].text == "(" &&
+                    nodePool[i+2].children.size()>0 && nodePool[i+2].children[nodePool[i+2].children.size()-1].text == ")" ){
+                    //
                     
-                }else if( the_context.id_starts_with_substr(currentToken.text ) ){// we have either a complete type or a new id, if no type
+                    nodePool[i+1].children.push_back(nodePool[i+2]);
+                    nodePool[i].children.push_back(nodePool[i+1]);
                     
-                    assert(false);// id or type, dunno
-                    
+                    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);// removes only 2 nodes [ i+1, i+3 ) o [i+1,i+2]
+                    continue;
                 }
-            }else assert(false);
-        }
-        currentToken.text += byte;
-        
-        end_token_construction:;
-        // construct AST_nodes
-        if(tokenPool.size()==0) continue;std::cout << "handling tokens\n";
-        std::cout << tokenPool[0].text << std::endl;
-        if(tokenPool[0].text == "function"){
-            nodeStack.push_back({tokenPool[0],{}});
-            tokenPool.erase(tokenPool.begin());
+            }
+            
+            
         }
         
-        // construct AST's
         
-        if(nodeStack.size()==0) continue;std::cout << "handling AST_nodes\n";
-        std::cout << nodeStack[0].tok.text << std::endl;
-        if(nodeStack[0].tok.text == "function"){
-            std::cout << "pqzy\n";
-            currentNode->children.push_back(nodeStack[0]);
-            currentNode = &currentNode->children[currentNode->children.size()-1];
-            nodeStack.erase(nodeStack.begin());
-        }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
-    std::cout << currentToken.text << std::endl;
     
     return retMe;
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-Source_Files=( "main.cpp" "lex.cpp" "parse.cpp" "symbol_table.cpp" "parse2.cpp" )
+Source_Files=( "main.cpp" "symbol_table.cpp" "parse.cpp" "parse2.cpp" )
 Object_Files=()
 
 mkdir -p obj

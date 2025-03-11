@@ -6,23 +6,6 @@
 
 #include "parse.h"
 
-enum type_type:uint32_t{
-    semantic_epsilon = 0,//void
-    semantic_function = 1,//includes operators,
-    semantic_byte = 2,
-    semantic_dual = 3,
-    semantic_quad = 4,
-    semantic_oct = 5,
-    semantic_struct = 6,//includes unions
-    semantic_type = 7,// type is type? generic? not used for the first version.
-    semantic_label = 8,// used for goto's, labels will be explicitly marked like variables. should be able to make them pointers somehow.
-    semantic_literal = 9,
-};
-
-struct type_t{
-    type_type my_type = semantic_epsilon;
-};//not needed yet. as soon as things can pass back functions or structs, this'll be a nasty refactor, but I need something working before that even matters.
-
 struct symbol{
     std::string type;
     std::string name;
@@ -37,8 +20,10 @@ enum scope_type:uint32_t{
     scope_t_if = 1,
     scope_t_for = 2,
     scope_t_while = 3,
-    scope_t_anonymous = 4,
+    scope_t_anonymous = 4,// random {} blocks, quite useful in C++.
     scope_type_root = 5,
+    scope_type_operator = 6,
+    scope_type_syntax = 7,
 };
 
 
@@ -68,7 +53,5 @@ struct symbol_table{
     void print();
     
 };
-
-symbol_table anal( const AST_node& frisk_me );
 
 #endif//SYMBOL_TABLE_H
