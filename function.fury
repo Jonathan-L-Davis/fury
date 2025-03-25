@@ -1,1 +1,11 @@
+function g();
+
 function f(){f();};
+
+g();
+g();
+g();
+
+byte a;
+
+f();

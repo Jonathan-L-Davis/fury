@@ -2,7 +2,7 @@
 #define PROGRAM_H
 
 #include "symbol_table.h"
-#include "parse.h"
+#include "node.h"
 
 // This struct does not necessarily represent a fully completed compilable & executable program, merely a program fragment.
 struct program{

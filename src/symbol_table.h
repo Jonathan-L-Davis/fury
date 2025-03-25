@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "parse.h"
+#include "node.h"
 
 enum symbol_type:uint32_t{
     sym_t_byte     = 1,

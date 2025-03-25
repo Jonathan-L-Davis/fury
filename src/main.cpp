@@ -8,11 +8,11 @@
 #include <vector>
 #include <assert.h>
 
-program parse2(std::string file_name);
+
 
 int main(int argc, char**argv){
     
-    program p1 = parse2("function.fury");
+    program p1 = parse("function.fury");
     
     //std::cout << "----------------------------------------------------------------------------------\n";
     //p1.root.print();
