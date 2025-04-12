@@ -21,9 +21,17 @@ bool is_terminated(const AST_node* const amITerminated){
     return false;
 }
 
+/// need a valid_parenthesis & valid_curly_bracket concept.
+
+bool is_closed_parenthesis(const AST_node* checkMe){
+    
+    if( checkMe->children.size()>0 && checkMe->children[checkMe->children.size()-1]->text == ")"  ) return true;
+    return false;
+}
+
 bool is_closed_curly_bracket(const AST_node* const amIClosed){
     
-    const AST_node* const checkMe = get_rightmost_bottommost_non_terminal(amIClosed);
+    const AST_node* const checkMe = get_rightmost_bottommost_non_terminal(amIClosed);// lazy, should do the one layer end checking.
     if( amIClosed->text != "{" ) return false;
     if( checkMe->text == "}" ){
         return true;
@@ -49,9 +57,15 @@ bool is_unterminated_closed_parentehsis(const AST_node* const amIClosed){
  * 
 **/
 bool is_terminable(const AST_node* const checkMe, const symbol_table* const context){
-    
-    if(is_terminated(checkMe))
-        return false;
+    return !is_terminated(checkMe) && is_valid(checkMe,context);
+}
+
+/**
+ * 
+ *  A node is valid if it is a 'complete' Fury expression
+ * 
+**/
+bool is_valid(const AST_node* const checkMe, const symbol_table* const context){
     
     if(is_function_declaration(checkMe))
         return true;
@@ -60,6 +74,21 @@ bool is_terminable(const AST_node* const checkMe, const symbol_table* const cont
         return true;
     
     if(is_function_call(checkMe,context))
+        return true;
+    
+    if(is_byte_declaration(checkMe))
+        return true;
+    
+    if(is_dual_declaration(checkMe))
+        return true;
+    
+    if(is_quad_declaration(checkMe))
+        return true;
+    
+    if(is_oct_declaration(checkMe))
+        return true;
+    
+    if(is_comma_expression(checkMe))
         return true;
     
     return false;
@@ -96,11 +125,13 @@ bool is_function_declaration(const AST_node* const checkMe){
     int f_id_count = 0;
     const AST_node* f_id;
     for( int i = 0; i < checkMe->children.size(); i++ ){
-        if( checkMe->children[i]->type == node_t::id ){
+        if( checkMe->children[i]->type == node_t::function_id ){
             f_id_count++;
             f_id = checkMe->children[i];
+            assert(i>=0 && i < 2);// only the type can come before the id
         }
     }
+    
     assert(f_id_count == 1);
     
     /**
@@ -122,7 +153,7 @@ bool is_function_declaration(const AST_node* const checkMe){
     *     [function body]
     **/
     
-    if(f_id->children[0]->children.size()!=1 || f_id->children[0]->children[0]->text != ")") return false;
+    if( ( f_id->children[0]->children.size()==1 && f_id->children[0]->children[0]->text == ")" ) || ( f_id->children[0]->children.size()==2 && f_id->children[0]->children[1]->text == ")" ) ) return true;
     
     /**
     * 
@@ -133,9 +164,57 @@ bool is_function_declaration(const AST_node* const checkMe){
     *             )
     *     [function body]
     **/
-    return true;
+    return false;
 }
 
+bool is_function_partial_declaration(const AST_node* const checkMe){
+    
+    if(!is_function_declaration(checkMe)) return false;
+    
+    //using comments for pictures of tree structure after each check.
+    
+    if( checkMe->text != "function" ){
+        return false;
+    }
+    
+    /**
+    * 
+    * function
+    * 
+    **/
+    if( checkMe->children.size() == 0 ){
+        return false;
+    }
+    
+    /**
+    * 
+    * function
+    *     ...
+    **/
+    
+    int f_id_count = 0;
+    const AST_node* f_id;
+    for( int i = 0; i < checkMe->children.size(); i++ ){
+        if( checkMe->children[i]->type == node_t::function_id ){
+            f_id_count++;
+            f_id = checkMe->children[i];
+            assert(i>=0 && i < 2);// only the type can come before the id
+            assert(i==checkMe->children.size()-1);// id is the last thing in the function partial. No body or arguments yet.
+        }
+    }
+    
+    /**
+    * 
+    * function
+    *     [return type]
+    *     f_id
+    **/
+    assert(f_id_count == 1);
+    
+    if(f_id->children.size()!=0) return false;
+    
+    return true;
+}
 
 /**
  * 
@@ -166,6 +245,60 @@ bool is_function_call(const AST_node* const checkMe, const symbol_table* const c
     
     auto k = checkMe->children[0]->children.size()-1;
     assert(checkMe->children[0]->children[k]->text == ")");
+    
+    return true;
+}
+
+bool is_byte_declaration(const AST_node* const checkMe){
+    if( checkMe->text != "byte" )
+        return false;
+    
+    if( checkMe->children.size() != 1 || checkMe->children[0]->type != node_t::id )
+        return false;
+    
+    return true;
+}
+
+bool is_dual_declaration(const AST_node* const checkMe){
+    if( checkMe->text != "dual" )
+        return false;
+    
+    if( checkMe->children.size() != 1 || checkMe->children[0]->type != node_t::id )
+        return false;
+    
+    return true;
+}
+
+bool is_quad_declaration(const AST_node* const checkMe){
+    if( checkMe->text != "quad" )
+        return false;
+    
+    if( checkMe->children.size() != 1 || checkMe->children[0]->type != node_t::id )
+        return false;
+    
+    return true;
+}
+
+bool is_oct_declaration(const AST_node* const checkMe){
+    if( checkMe->text != "oct" )
+        return false;
+    
+    if( checkMe->children.size() != 1 || checkMe->children[0]->type != node_t::id )
+        return false;
+    
+    return true;
+}
+
+bool is_empty_comma(const AST_node* const checkMe){
+    if(checkMe->text != "," || checkMe->children.size()!=0)
+        return false;
+    
+    return true;
+}
+
+bool is_comma_expression(const AST_node* const checkMe){
+    if(checkMe->text != "," || checkMe->children.size()<2)// complete comma expressions must contain 2 or more sub-expressions.
+        return false;
     
     return true;
 }

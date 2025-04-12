@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 
+#include "lex.h"
 #include "parse.h"
 #include "parse_util.h"
 #include "symbol_table.h"
@@ -27,27 +28,30 @@ enum token_type:uint32_t{
 
 program parse(std::string file_name){
     program retMe;
-    retMe.root = {{":--:",0,root},{}};// should be the only node/token with a line_no of 0.
-    std::fstream file(file_name);// If I cared about performance I could at a minimum preallocate the number of bytes in the file.
+    retMe.root = {{":--:",0,root},{}};
+    std::fstream file(file_name);
     
     std::vector<uint8_t> file_buffer;
-    std::vector<AST_node*> nodePool = {};// for constucting nodes without forcing them into a tree immediately
+    std::vector<AST_node*> nodePool = {};
+    
     
     uint8_t q;
     while(file.read((char*)&q,1)){
-        file_buffer.push_back(q);//should obviously preallocate the size in one go & 1 memcpy.
+        file_buffer.push_back(q);
     }
     
     std::cout << "Parsing file: function.fury\n";
     std::cout << "----------------------------------------------------------------------------------\n";
     for( auto c : file_buffer ) std::cout << c;
+    std::cout << "\n";
+    
     uint32_t line_no = 1;
     std::string completeToken;
     std::string currentToken;
     
     for(uint8_t byte : file_buffer){
         
-        if( !( byte=='\n' || (byte>=' ' && byte<127) ) ){// fuck your \r -- but seriously, the 127 restriction is to allow for forward compatibility with utf-8, will do 'proper' character handling eventually. If you're reading this, please take a moment of silence fore the Unicode Consortium, our unsung heroes.
+        if( !( byte=='\n' || (byte>=' ' && byte<127) ) ){
             std::cout << (int) byte << std::endl;
             assert(byte=='\n' || ( byte>=' ' && byte<127) );
         }
@@ -62,7 +66,7 @@ program parse(std::string file_name){
             currentToken = "";
             
             if(byte == '\n') line_no++;
-        }else if(byte=='('||byte==')'||byte=='{'||byte=='}'||byte==','||byte==';'){// characters are forced to be single character tokens.
+        }else if(byte=='('||byte==')'||byte=='{'||byte=='}'||byte==','||byte==';'){// these characters are forced to be single character tokens, cannot be part of other tokens. period.
             if(currentToken!=""){
                 AST_node* n = new AST_node;
                 *n = {currentToken,line_no,node_t::id};
@@ -81,8 +85,7 @@ program parse(std::string file_name){
         
         if( completeToken == "" ) continue;
         
-        // there is a better way to generalize for keywords, but I only need this one for right now. This is helping me work out the general shift reduce structure first. Then I can organize my thousand rules.
-        if( completeToken == "function" ){
+        if( is_keyword(completeToken) ){
             
             AST_node* node = new AST_node;
             
@@ -115,6 +118,12 @@ program parse(std::string file_name){
                         nodePool.erase(nodePool.begin()+i+1);
                         break;
                     }
+                    if( i<nodePool.size()-2 && nodePool[i+2]->text == ")" && is_terminable(nodePool[i+1],&retMe.the_context) ){
+                        nodePool[i]->children.push_back(nodePool[i+1]);
+                        nodePool[i]->children.push_back(nodePool[i+2]);
+                        nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);
+                        break;
+                    }
                 }
                 
                 if( nodePool[i]->text=="{"){
@@ -143,7 +152,6 @@ program parse(std::string file_name){
                 }
                 
                 if( nodePool[i]->text=="function" ){
-                    
                     if( is_function_declaration(nodePool[i]) && !is_function_definition(nodePool[i]) && !is_terminated(nodePool[i]) &&
                         i+1 < nodePool.size() && is_closed_curly_bracket(nodePool[i+1]) ){
                         
@@ -153,12 +161,10 @@ program parse(std::string file_name){
                     }
                     
                     if( i+2<nodePool.size() && !is_function_declaration(nodePool[i]) &&
-                        
                         nodePool[i+1]->type == node_t::id &&
-                        
-                        nodePool[i+2]->text == "(" &&
-                        nodePool[i+2]->children.size()>0 && nodePool[i+2]->children[nodePool[i+2]->children.size()-1]->text == ")"
+                        is_closed_parenthesis(nodePool[i+2])
                     ){
+                        nodePool[i+1]->type = node_t::function_id;
                         
                         nodePool[i+1]->children.push_back(nodePool[i+2]);
                         nodePool[i]->children.push_back(nodePool[i+1]);
@@ -170,12 +176,61 @@ program parse(std::string file_name){
                     }
                 }
                 
+                if( nodePool[i]->text=="byte" ){
+                    
+                    if( i+1<nodePool.size() && nodePool[i+1]->type == node_t::id ){
+                        assert( !retMe.the_context.id_exists(nodePool[i+1]->text) );
+                        
+                        nodePool[i]->children.push_back(nodePool[i+1]);
+                        retMe.the_context.add_symbol({sym_t_byte,"byte",nodePool[i+1]->text,nodePool[i]});
+                        nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
+                        break;
+                    }
+                    
+                }
+                
+                if( nodePool[i]->text=="dual" ){
+                    
+                    if( i+1<nodePool.size() && nodePool[i+1]->type == node_t::id ){
+                        assert( !retMe.the_context.id_exists(nodePool[i+1]->text) );
+                        
+                        nodePool[i]->children.push_back(nodePool[i+1]);
+                        retMe.the_context.add_symbol({sym_t_dual,"dual",nodePool[i+1]->text,nodePool[i]});
+                        nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
+                        break;
+                    }
+                    
+                }
+                
+                if( nodePool[i]->text=="quad" ){
+                    
+                    if( i+1<nodePool.size() && nodePool[i+1]->type == node_t::id ){
+                        assert( !retMe.the_context.id_exists(nodePool[i+1]->text) );
+                        
+                        nodePool[i]->children.push_back(nodePool[i+1]);
+                        retMe.the_context.add_symbol({sym_t_quad,"quad",nodePool[i+1]->text,nodePool[i]});
+                        nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
+                        break;
+                    }
+                    
+                }
+                
+                if( nodePool[i]->text=="oct" ){
+                    
+                    if( i+1<nodePool.size() && nodePool[i+1]->type == node_t::id ){
+                        assert( !retMe.the_context.id_exists(nodePool[i+1]->text) );
+                        
+                        nodePool[i]->children.push_back(nodePool[i+1]);
+                        retMe.the_context.add_symbol({sym_t_oct,"oct",nodePool[i+1]->text,nodePool[i]});
+                        nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
+                        break;
+                    }
+                    
+                }
+                
                 if( retMe.the_context.function_exists(nodePool[i]->text) && nodePool[i]->children.size() == 0 ){// is a function
                     
-                    if( i+1<nodePool.size() &&
-                        
-                        nodePool[i+1]->type == node_t::paren && nodePool[i+1]->text == "(" &&
-                        nodePool[i+1]->children.size()>0 && nodePool[i+1]->children[nodePool[i+1]->children.size()-1]->text == ")"
+                    if( i+1<nodePool.size() && is_closed_parenthesis(nodePool[i+1])
                     ){
                         
                         nodePool[i]->children.push_back(nodePool[i+1]);
@@ -184,6 +239,25 @@ program parse(std::string file_name){
                         nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
                         break;
                     }
+                }
+                
+                if( is_terminable(nodePool[i],&retMe.the_context) &&
+                    i+1 < nodePool.size() && is_empty_comma(nodePool[i+1]) &&
+                    i+2 < nodePool.size() && is_terminable(nodePool[i+2],&retMe.the_context)
+                ){
+                    if( nodePool[i]->text == "," ){
+                        nodePool[i]->children.push_back(nodePool[i+2]);
+                        delete nodePool[i+1];// pointer fun
+                    }else{
+                        nodePool[i+1]->children.push_back(nodePool[i]);
+                        nodePool[i+1]->children.push_back(nodePool[i+2]);
+                        
+                        nodePool[i] = nodePool[i+1];
+                    }
+                    
+                    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);
+                    
+                    break;
                 }
                 
                 if( is_terminable(nodePool[i],&retMe.the_context) &&
@@ -200,6 +274,9 @@ program parse(std::string file_name){
             }
         }while(i<nodePool.size());
     }
+    
+    for( AST_node* node : nodePool ) assert( is_terminated(node) );
+    
     retMe.root.children = nodePool;
     return retMe;
 }

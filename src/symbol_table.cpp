@@ -1,4 +1,5 @@
 #include "symbol_table.h"
+#include "parse_util.h"
 #include <assert.h>
 #include <iostream>
 
@@ -59,7 +60,12 @@ void symbol_table::add_symbol( symbol add_me ){
         case sym_t_function:{
             for( unsigned int i = 0; i < functions.size(); i++){
                 if( functions[i].name == add_me.name ){
-                    assert(false);
+                    if( is_function_definition(add_me.value) && is_function_definition(functions[i].value) ){
+                        assert(false);// defining a previously defined function.
+                    }else{
+                        functions[i] = add_me;
+                        break;
+                    }
                 }
             }
             
@@ -128,16 +134,39 @@ symbol_table::symbol_table( symbol_table* parent_ptr, std::string scope, scope_t
 }
 
 std::string sym_tbl_indent = "";
-void symbol_table::print(){/*
+void symbol_table::print(){
     std::cout << sym_tbl_indent << get_full_scope() << "\n";
     sym_tbl_indent += "    ";
-    for( unsigned int i = 0; i < symbols.size(); i++ ){
-        std::cout << sym_tbl_indent; symbols[i].print();
+    
+    std::cout << "bytes:\n";
+    for( unsigned int i = 0; i < bytes.size(); i++ ){
+        std::cout << sym_tbl_indent << bytes[i].name << "\n";
+    }
+    
+    std::cout << "duals:\n";
+    for( unsigned int i = 0; i < duals.size(); i++ ){
+        std::cout << sym_tbl_indent << duals[i].name << "\n";
+    }
+    
+    std::cout << "quads:\n";
+    for( unsigned int i = 0; i < quads.size(); i++ ){
+        std::cout << sym_tbl_indent << quads[i].name << "\n";
+    }
+    
+    std::cout << "octs:\n";
+    for( unsigned int i = 0; i < octs.size(); i++ ){
+        std::cout << sym_tbl_indent << octs[i].name << "\n";
+    }
+    
+    std::cout << "functions:\n";
+    for( unsigned int i = 0; i < functions.size(); i++ ){
+        std::cout << sym_tbl_indent << functions[i].name << "\n";
     }
     
     for( unsigned int i = 0; i < sub_scopes.size(); i++ )
         sub_scopes[i].print();
-    sym_tbl_indent.resize(sym_tbl_indent.size()-4);//*/
+    
+    sym_tbl_indent.resize(sym_tbl_indent.size()-4);
 }
 
 void symbol::print(){
@@ -398,5 +427,49 @@ symbol symbol_table::get_function(std::string getMe) const{
             return functions[i];
     }
     
-    return parent->get_function(getMe);
+    return parent->get_function(getMe);// will null dereference if there isn't one.
+}
+
+// assumes byte exists.
+symbol symbol_table::get_byte(std::string getMe) const{
+    
+    for( int i = 0; i < bytes.size(); i++){
+        if( bytes[i].name == getMe )
+            return bytes[i];
+    }
+    
+    return parent->get_byte(getMe);// will null dereference if there isn't one.
+}
+
+// assumes byte exists.
+symbol symbol_table::get_dual(std::string getMe) const{
+    
+    for( int i = 0; i < duals.size(); i++){
+        if( duals[i].name == getMe )
+            return duals[i];
+    }
+    
+    return parent->get_dual(getMe);// will null dereference if there isn't one.
+}
+
+// assumes byte exists.
+symbol symbol_table::get_quad(std::string getMe) const{
+    
+    for( int i = 0; i < quads.size(); i++){
+        if( quads[i].name == getMe )
+            return quads[i];
+    }
+    
+    return parent->get_quad(getMe);// will null dereference if there isn't one.
+}
+
+// assumes byte exists.
+symbol symbol_table::get_oct(std::string getMe) const{
+    
+    for( int i = 0; i < octs.size(); i++){
+        if( octs[i].name == getMe )
+            return octs[i];
+    }
+    
+    return parent->get_oct(getMe);// will null dereference if there isn't one.
 }

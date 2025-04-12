@@ -1,11 +1,10 @@
-function g();
+byte a,byte b,
+dual c,dual d;
 
-function f(){f();};
+function f(){}; function g(){ f(); };
 
-g();
-g();
-g();
+quad myQuad,quad myOtherQuad;
 
-byte a;
+oct octagon;
 
-f();
+function h(byte l,byte p){};

@@ -1,26 +1,7 @@
 #include "interpret.h"
+#include "stack.h"
+
 #include <cassert>
-
-stackObject& stack::active(){
-    assert(theStack.size()>0);
-    return theStack[theStack.size()-1];
-}
-
-void stack::pop(){
-    theStack.erase( theStack.end()-1, theStack.end() );
-}
-
-void stack::push(stackObject pushMe){
-    
-    if( theStack.size() == theStack.capacity() ){
-        
-        std::cout << "Stack Overflow. Program exiting.\n";
-        
-        std::exit(-1);
-    }
-    
-    theStack.push_back(pushMe);
-}
 
 void exec(stack &prog_stack, program &prog);
 
@@ -28,7 +9,7 @@ void exec(stack &prog_stack, program &prog);
 void interpret(program runMe){
     
     stack theStack;
-    theStack.theStack.reserve(10);
+    theStack.theStack.reserve(100);
     
     stackObject a;
     a.object = &runMe.root;
@@ -42,18 +23,78 @@ void interpret(program runMe){
         
     }
     
+    std::cout << "Program Halted. Exiting with success.\n";
+    
 }
 
 bool is_function_definition(AST_node const*);
 
 void exec(stack &prog_stack, program &prog){
-    std::cout << "exec\n";
     if( prog_stack.theStack.size() == 0 ) return;
     
+    prog_stack.print();
+    
     stackObject &obj = prog_stack.active();
+    if( obj.idx >= obj.object->children.size() ) {
+        
+        while( &obj != &prog_stack.theStack[ prog_stack.theStack.size()-1 ] ) prog_stack.pop();
+        prog_stack.pop();
+        
+        
+        return;
+    }
     
     if( obj.object->children[obj.idx]->text == "function" ){
-        std::cout << "    function\n";
+        obj.idx++;
+        return;
+    }
+    
+    if( obj.object->children[obj.idx]->text == "byte" ){
+        
+        stackObject a;
+        
+        a.object = prog.the_context.get_byte(obj.object->children[obj.idx]->children[0]->text).value;
+        a.idx = 0;
+        prog_stack.push(a);
+        
+        obj.idx++;
+        return;
+    }
+    
+    if( obj.object->children[obj.idx]->text == "dual" ){
+        
+        stackObject a;
+        a.object = prog.the_context.get_dual(obj.object->children[obj.idx]->children[0]->text).value;
+        a.idx = 0;
+        prog_stack.push(a);
+        
+        
+        obj.idx++;
+        return;
+    }
+    
+    if( obj.object->children[obj.idx]->text == "quad" ){
+        
+        stackObject a;
+        
+        a.object = prog.the_context.get_quad(obj.object->children[obj.idx]->children[0]->text).value;
+        a.idx = 0;
+        prog_stack.push(a);
+        
+        
+        obj.idx++;
+        return;
+    }
+    
+    if( obj.object->children[obj.idx]->text == "oct" ){
+        
+        stackObject a;
+        
+        a.object = prog.the_context.get_oct(obj.object->children[obj.idx]->children[0]->text).value;
+        a.idx = 0;
+        prog_stack.push(a);
+        
+        
         obj.idx++;
         return;
     }
@@ -65,7 +106,6 @@ void exec(stack &prog_stack, program &prog){
         a.idx = 0;
         
         
-        std::cout << "    " << a.object->children[0]->text << "\n";
         
         if( !is_function_definition(a.object) ){
             a.object->print();
@@ -75,20 +115,18 @@ void exec(stack &prog_stack, program &prog){
         
         a.object = a.object->children[1];
         prog_stack.push(a);
-        
         obj.idx++;
         return;
     }
     
     if( obj.object->children[obj.idx]->text == "}" ){
-        std::cout << "    }\n";
         prog_stack.pop();
         obj = prog_stack.active();
         obj.idx++;
         return;
     }
     
-    std::cout << obj.object->text << "\n";
-    
-    /** TODO ADD { / } **/
+    std::cout << "   " << obj.object->text << "\n";
+    prog_stack.print();
+    assert(false);// should not be encountering objects where we don't know how to execute them.
 }

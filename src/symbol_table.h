@@ -102,6 +102,10 @@ struct symbol_table{
     
     
     symbol get_function(std::string) const;
+    symbol get_byte(std::string) const;
+    symbol get_dual(std::string) const;
+    symbol get_quad(std::string) const;
+    symbol get_oct(std::string) const;
     
     //
     

@@ -4,7 +4,7 @@
 #include <iomanip>
 
 std::string indent = "";
-void AST_node::print(){
+void AST_node::print() const {
     std::cout << indent << text << "\n";
     indent += "    ";
     for( unsigned int i = 0; i < children.size(); i++ )
@@ -12,7 +12,7 @@ void AST_node::print(){
     indent.resize(indent.size()-4);
 }
 
-void AST_node::print_with_types(){
+void AST_node::print_with_types() const{
     std::ios_base::fmtflags stream_state( std::cout.flags() );
     
     std::cout << std::left << std::setw(12) << type;

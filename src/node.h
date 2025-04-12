@@ -13,6 +13,7 @@ enum class node_t: uint32_t {
     curly,
     semicolon,
     comma,
+    function_id,
 };
 
 template<typename T>
@@ -25,6 +26,7 @@ std::basic_ostream<T>& operator << ( std::basic_ostream<T>& fillMe, node_t print
         case node_t::curly       : fillMe << "curly";       break;
         case node_t::semicolon   : fillMe << "semicolon";   break;
         case node_t::comma       : fillMe << "comma";       break;
+        case node_t::function_id : fillMe << "function_id"; break;
     }
     
     return fillMe;
@@ -35,8 +37,8 @@ struct AST_node{
     uint32_t line_no;
     node_t type;
     std::vector<AST_node*> children;
-    void print();
-    void print_with_types();
+    void print() const;
+    void print_with_types() const;
 };
 
 #endif//NODE_H
