@@ -91,6 +91,9 @@ bool is_valid(const AST_node* const checkMe, const symbol_table* const context){
     if(is_comma_expression(checkMe))
         return true;
     
+    if(is_closed_parenthesis(checkMe))
+        return true;
+    
     return false;
 }
 

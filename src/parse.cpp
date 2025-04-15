@@ -7,6 +7,7 @@
 #include "parse_util.h"
 #include "symbol_table.h"
 #include "program.h"
+#include "grammer.h"
 
 #include <vector>
 #include <assert.h>
@@ -106,24 +107,20 @@ program parse(std::string file_name){
         /// ----------------------------------------------------    Reduction Rules Start Here    ---------------------------------------------------------- ///
         int i = 0;
         do{
+            restart_reductions:;
             i = 0;
             for( i = 0; i < nodePool.size(); i++ ){
                 
                 if( is_terminated(nodePool[i]) )
                     continue;
                 
-                if( nodePool[i]->text=="("){
-                    if( i<nodePool.size()-1 && nodePool[i+1]->text == ")" ){
-                        nodePool[i]->children.push_back(nodePool[i+1]);
-                        nodePool.erase(nodePool.begin()+i+1);
-                        break;
+                std::vector<rule> rules = fury_grammer_rules();
+                for( int j = 0; j < rules.size(); j++ ){
+                    if( rules[i].rule_applies(nodePool,&retMe.the_context,i) ){
+                        rules[i].apply_rule(nodePool,&retMe.the_context,i);
+                        goto restart_reductions;
                     }
-                    if( i<nodePool.size()-2 && nodePool[i+2]->text == ")" && is_terminable(nodePool[i+1],&retMe.the_context) ){
-                        nodePool[i]->children.push_back(nodePool[i+1]);
-                        nodePool[i]->children.push_back(nodePool[i+2]);
-                        nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);
-                        break;
-                    }
+                    
                 }
                 
                 if( nodePool[i]->text=="{"){
@@ -160,7 +157,7 @@ program parse(std::string file_name){
                         break;
                     }
                     
-                    if( i+2<nodePool.size() && !is_function_declaration(nodePool[i]) &&
+                    if( i+2<nodePool.size() && is_function_partial_declaration(nodePool[i]) && !is_function_declaration(nodePool[i]) &&
                         nodePool[i+1]->type == node_t::id &&
                         is_closed_parenthesis(nodePool[i+2])
                     ){
@@ -174,6 +171,8 @@ program parse(std::string file_name){
                         nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);
                         break;
                     }
+                    
+                    if( !is_function_partial_declaration(nodePool[i]) && !is_function_declaration(nodePool[i]) ){}
                 }
                 
                 if( nodePool[i]->text=="byte" ){
@@ -275,7 +274,7 @@ program parse(std::string file_name){
         }while(i<nodePool.size());
     }
     
-    for( AST_node* node : nodePool ) assert( is_terminated(node) );
+    for( AST_node* node : nodePool ) assert( is_terminated(node) );// if this fails you have bad grammer.
     
     retMe.root.children = nodePool;
     return retMe;
