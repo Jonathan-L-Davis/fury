@@ -94,6 +94,9 @@ bool is_valid(const AST_node* const checkMe, const symbol_table* const context){
     if(is_closed_parenthesis(checkMe))
         return true;
     
+    if(is_closed_curly_bracket(checkMe))
+        return true;
+    
     return false;
 }
 

@@ -116,37 +116,14 @@ program parse(std::string file_name){
                 
                 std::vector<rule> rules = fury_grammer_rules();
                 for( int j = 0; j < rules.size(); j++ ){
-                    if( rules[i].rule_applies(nodePool,&retMe.the_context,i) ){
-                        rules[i].apply_rule(nodePool,&retMe.the_context,i);
+                    if( rules[j].rule_applies(nodePool,&retMe.the_context,i) ){
+                        rules[j].apply_rule(nodePool,&retMe.the_context,i);
                         goto restart_reductions;
                     }
                     
                 }
                 
-                if( nodePool[i]->text=="{"){
-                    bool valid_sequence = false;
-                    int start_sequence = i+1;
-                    int end_sequence   = start_sequence;
-                    while( end_sequence<nodePool.size()-1 ){
-                        
-                        if( nodePool[end_sequence]->text == "}" ){
-                            valid_sequence = true;
-                            break;
-                        }
-                        
-                        if( !is_terminated(nodePool[end_sequence]) )
-                            break;
-                        end_sequence++;
-                    }
-                    
-                    if(valid_sequence){
-                        for( int j = start_sequence; j < end_sequence+1; j++ )
-                            nodePool[i]->children.push_back( nodePool[j] );
-                        nodePool.erase(nodePool.begin()+start_sequence,nodePool.begin()+end_sequence);
-                        break;
-                    }
-                    
-                }
+                /*
                 
                 if( nodePool[i]->text=="function" ){
                     if( is_function_declaration(nodePool[i]) && !is_function_definition(nodePool[i]) && !is_terminated(nodePool[i]) &&
@@ -268,12 +245,13 @@ program parse(std::string file_name){
                     nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
                     
                     break;
-                }
+                }//*/
                 
             }
         }while(i<nodePool.size());
     }
     
+    for( AST_node* node : nodePool ) node->print();
     for( AST_node* node : nodePool ) assert( is_terminated(node) );// if this fails you have bad grammer.
     
     retMe.root.children = nodePool;
