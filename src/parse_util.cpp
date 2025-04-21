@@ -199,15 +199,20 @@ bool is_function_partial_declaration(const AST_node* const checkMe){
     **/
     
     int f_id_count = 0;
+    int f_id_idx = 0;
     const AST_node* f_id;
     for( int i = 0; i < checkMe->children.size(); i++ ){
         if( checkMe->children[i]->type == node_t::function_id ){
             f_id_count++;
             f_id = checkMe->children[i];
+            f_id_idx = i;
             assert(i>=0 && i < 2);// only the type can come before the id
             assert(i==checkMe->children.size()-1);// id is the last thing in the function partial. No body or arguments yet.
         }
     }
+    
+    if( f_id_idx == 1 )
+        assert( checkMe->children[0]->type == node_t::type );
     
     /**
     * 

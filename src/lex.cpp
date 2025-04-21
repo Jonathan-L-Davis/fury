@@ -171,6 +171,12 @@ bool is_keyword( std::string str ){
     return false;
 }
 
+bool is_keyword_type( std::string str ){
+    if( str == "byte" || str == "dual" || str == "quad" || str == "oct" )
+        return true;
+    return false;
+}
+
 bool is_operator( std::string str ){
     if( std::find(operators.begin(), operators.end(), str ) != operators.end() )
         return true;

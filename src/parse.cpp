@@ -70,34 +70,41 @@ program parse(std::string file_name){
         }else if(byte=='('||byte==')'||byte=='{'||byte=='}'||byte==','||byte==';'){// these characters are forced to be single character tokens, cannot be part of other tokens. period.
             if(currentToken!=""){
                 AST_node* n = new AST_node;
-                *n = {currentToken,line_no,node_t::id};
-                nodePool.push_back(n);// not a general solution. Need to fix.
+                node_t node_type = node_t::id;
+                if(is_keyword(completeToken)) node_type = node_t::keyword;
+                *n = {currentToken,line_no,node_type};
+                nodePool.push_back(n);
                 currentToken="";
             }
-            AST_node* n = new AST_node;
-            node_t node_type = ( (byte=='('||byte==')') ? node_t::paren : (byte=='{'||byte=='}') ? node_t::curly : (byte==',') ? node_t::comma : node_t::semicolon );
-            *n = {std::string(1,byte),line_no,node_type};
-            nodePool.push_back(n);
-            completeToken = "Sick hack, since this token won't be read, it doesn't matter what it is so long as it's not empty.";
-            
+            completeToken = std::string(1,byte);
         }else{
             currentToken += byte;
         }
         
         if( completeToken == "" ) continue;
         
-        if( is_keyword(completeToken) ){
-            
-            AST_node* node = new AST_node;
+        {
+        AST_node* node = new AST_node;
             
             node->line_no = line_no;
             node->text = completeToken;
-            node->type = node_t::keyword;
+            if( is_keyword(completeToken) ){
+                node->type = node_t::keyword;
+                if( is_keyword_type(completeToken) ){
+                    node->type = node_t::type;
+                }
+            }else if(byte=='('||byte==')')
+                node->type = node_t::paren;
+            else if(byte=='{'||byte=='}')
+                node->type = node_t::curly;
+            else if(byte==',')
+                node->type = node_t::comma;
+            else if(byte==';')
+                node->type = node_t::semicolon;
+            else node->type = node_t::id;
             
             nodePool.push_back(node);
         }
-        
-        
         
         
         // if we haven't completed a token, & we have a match for a syntax.
@@ -251,7 +258,7 @@ program parse(std::string file_name){
         }while(i<nodePool.size());
     }
     
-    for( AST_node* node : nodePool ) node->print();
+    for( AST_node* node : nodePool ) node->print_with_types();
     for( AST_node* node : nodePool ) assert( is_terminated(node) );// if this fails you have bad grammer.
     
     retMe.root.children = nodePool;

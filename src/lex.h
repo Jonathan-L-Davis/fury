@@ -32,6 +32,7 @@ bool alpha_numeric(uint8_t c);
 bool is_alpha_numeric_or_(uint8_t c);
 bool is_valid_identifier( std::string str );
 bool is_keyword( std::string str );
+bool is_keyword_type( std::string str );
 bool is_operator( std::string str );
 bool is_binary_operator( std::string str );
 bool is_type( std::string str );

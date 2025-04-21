@@ -2,6 +2,8 @@
 
 There is some redundant info here, & lots missing. Work in Progress.<br>
 
+Fury is a low-level language, that aims to be expressive enough to 
+
 The fury lanugage has several compiler goals<br>
 v(not doing version control seriously at this stage) - produce binary code, for any subset of the language, for a platform, real or not.<br>
 v0.0 - minimal C-like language, most of the core type system, minus the abstract stuff. multi file handling, compiling on a real platform.<br>
@@ -18,43 +20,25 @@ Since the pure language is extremely minimal, I plan to have 2 standard librarie
 One called "core" to include what you'd actually expect out of a low level language, like floats & pointers.<br>
 One called "std" to include what you'd expect from a typical standard library.<br>
 
-### Direct access to interpreter internals
+### Direct access to interpreter/compiler internals
 This is how things like operator precedence will be controlled, for both interpreted & compiled code<br>
-Basically there will be a std library module that returns you a reference
-
-### No abstract machine
-All operations are just described in the fury language as operations on bytes, meaning there are almost no assumptions about physical hardware.<br>
-the trade off here is that the ISA target has to be described in fury in the first place and that the compiler has to prove certain operations equivalent.<br>
-This description is intended to be part of a "backend library", obviously most people don't want to touch that to write a hello world.<br>
-I think this is ultimately a boon, since that means the compiler backend not only serves as a functional compiler, but also as documentation for the ISA.<br>
-I'm not yet sure how to encode the binary for each instruction, but this is a backend problem not a user one.<br>
-
-Obviously, to some degree it's impossible to remove all undefined/implementation defined behavior. But the intent is to eliminate as much as possible.<br>
-If it's single threaded, it should be nearly fully definable. Only thing I'm currently iffy about is memory alignment of structs. But that should be fine-ish.
-
-Things like pointers are not built in very intentionally, even though this is a low level language.<br>
-I want more direct control over hardware, in ways current hardware doesn't really support.<br>
-Such as direct control over the cache or in processor memories.<br>
-Having built in pointers reduces your flexibility.<br>
+Basically there will be a std library module that returns you a reference to the interpreter context.<br>
+Metaprogramming can be done with either the AST, returned from the standard libraries parsing function,<br>
+or it can be done by grabbing the interpreter context & modifying it as it's running.<br>
 
 ### Keywords
 byte<br>
 dual<br>
 quad<br>
 oct<br>
-<br>
 struct<br>
-<br>
 function<br>
 operator<br>
 syntax<br>
-<br>
 label<br>
 type<br>
-<br>
 import<br>
 export<br>
-<br>
 if<br>
 else<br>
 for<br>
