@@ -175,14 +175,11 @@ bool is_function_declaration(const AST_node* const checkMe){
 
 bool is_function_partial_declaration(const AST_node* const checkMe){
     
-    if(!is_function_declaration(checkMe)) return false;
-    
     //using comments for pictures of tree structure after each check.
     
     if( checkMe->text != "function" ){
         return false;
     }
-    
     /**
     * 
     * function
@@ -207,7 +204,7 @@ bool is_function_partial_declaration(const AST_node* const checkMe){
             f_id = checkMe->children[i];
             f_id_idx = i;
             assert(i>=0 && i < 2);// only the type can come before the id
-            assert(i==checkMe->children.size()-1);// id is the last thing in the function partial. No body or arguments yet.
+            if(i!=checkMe->children.size()-1) return false;// id is the last thing in the function partial. No body or arguments yet.
         }
     }
     

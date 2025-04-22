@@ -16,10 +16,10 @@ void function_partial_folding(std::vector<AST_node*>& nodePool, symbol_table* co
 
 bool function_declaration_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
 void function_declaration_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
-/*
+
 bool function_definition_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
 void function_definition_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
-
+/*
 bool syntax_partial_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
 void syntax_partial_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
 
@@ -36,8 +36,8 @@ std::vector<rule> fury_grammer_rules(){
     retMe.push_back( {"curly-bracket-closure", curly_bracket_closure_applies, curly_bracket_closure_folding} );
     retMe.push_back( {"termination", termination_applies, termination_folding} );
     retMe.push_back( {"function-partial", function_partial_applies, function_partial_folding} );// function partials out of pure tokens -- with scoping implications.
-    //retMe.push_back( {"function-declaration", function_declaration_applies, function_declaration_folding} );// function declarations out of function partials & function parameter clauses.
-    //retMe.push_back( {"function-definition", function_definition_applies, function_definition_folding} );// function definitions out of declarations & body definitions.
+    retMe.push_back( {"function-declaration", function_declaration_applies, function_declaration_folding} );// function declarations out of function partials & function parameter clauses.
+    retMe.push_back( {"function-definition", function_definition_applies, function_definition_folding} );// function definitions out of declarations & body definitions.
     
     return retMe;
 }
@@ -158,28 +158,30 @@ void function_partial_folding(std::vector<AST_node*>& nodePool, symbol_table* co
 }
 
 bool function_declaration_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
-    return (is_function_partial_declaration(nodePool,context,i) &&
-            i+1 < is_closed_parenthesis(nodePool[i+1]) );
+    return (is_function_partial_declaration(nodePool[i]) && !is_function_declaration(nodePool[i]) &&
+            i+1 < nodePool.size() && is_closed_parenthesis(nodePool[i+1]) );
 }
 
 void function_declaration_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
+    assert(function_declaration_applies(nodePool,context,i));
     
+    int f_id_idx = nodePool[i]->children.size()-1;
+    nodePool[i]->children[f_id_idx]->children.push_back(nodePool[i+1]);
+    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
+    
+    return;
 }
 
+bool function_definition_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
+    return (is_function_declaration(nodePool[i]) && !is_function_definition(nodePool[i]) &&
+            i+1 < nodePool.size() && is_closed_curly_bracket(nodePool[i+1]) );
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+void function_definition_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
+    assert(function_definition_applies(nodePool,context,i));
+    
+    nodePool[i]->children.push_back(nodePool[i+1]);
+    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
+    
+    return;
+}

@@ -18,7 +18,7 @@ for file in "${Source_Files[@]}" ; do
     #echo "$file ---> $object_file"
     Object_Files+=( "${object_file}" )
     mkdir -p "obj/$path" # otherwise clang++/g++ complain about non-existing directory
-    zig c++ "$file" -c -o "${object_file}" -std=c++20
+    zig c++ "$file" -c -g -o "${object_file}" -std=c++20 -O0 
 done
 
 for object in "${Object_Files[@]}" ; do

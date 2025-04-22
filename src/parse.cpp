@@ -12,6 +12,8 @@
 #include <vector>
 #include <assert.h>
 
+bool termination_applies(std::vector<AST_node*>&,symbol_table*,int);
+
 enum token_type:uint32_t{
     epsilon = 0,
     keyword = 1,
@@ -125,39 +127,12 @@ program parse(std::string file_name){
                 for( int j = 0; j < rules.size(); j++ ){
                     if( rules[j].rule_applies(nodePool,&retMe.the_context,i) ){
                         rules[j].apply_rule(nodePool,&retMe.the_context,i);
+                        i= 0;
                         goto restart_reductions;
                     }
                     
                 }
-                
                 /*
-                
-                if( nodePool[i]->text=="function" ){
-                    if( is_function_declaration(nodePool[i]) && !is_function_definition(nodePool[i]) && !is_terminated(nodePool[i]) &&
-                        i+1 < nodePool.size() && is_closed_curly_bracket(nodePool[i+1]) ){
-                        
-                        nodePool[i]->children.push_back(nodePool[i+1]);
-                        nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);
-                        break;
-                    }
-                    
-                    if( i+2<nodePool.size() && is_function_partial_declaration(nodePool[i]) && !is_function_declaration(nodePool[i]) &&
-                        nodePool[i+1]->type == node_t::id &&
-                        is_closed_parenthesis(nodePool[i+2])
-                    ){
-                        nodePool[i+1]->type = node_t::function_id;
-                        
-                        nodePool[i+1]->children.push_back(nodePool[i+2]);
-                        nodePool[i]->children.push_back(nodePool[i+1]);
-                        
-                        retMe.the_context.add_symbol({sym_t_function,"function",nodePool[i+1]->text,nodePool[i]});
-                        
-                        nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);
-                        break;
-                    }
-                    
-                    if( !is_function_partial_declaration(nodePool[i]) && !is_function_declaration(nodePool[i]) ){}
-                }
                 
                 if( nodePool[i]->text=="byte" ){
                     
@@ -211,19 +186,6 @@ program parse(std::string file_name){
                     
                 }
                 
-                if( retMe.the_context.function_exists(nodePool[i]->text) && nodePool[i]->children.size() == 0 ){// is a function
-                    
-                    if( i+1<nodePool.size() && is_closed_parenthesis(nodePool[i+1])
-                    ){
-                        
-                        nodePool[i]->children.push_back(nodePool[i+1]);
-                        
-                        
-                        nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
-                        break;
-                    }
-                }
-                
                 if( is_terminable(nodePool[i],&retMe.the_context) &&
                     i+1 < nodePool.size() && is_empty_comma(nodePool[i+1]) &&
                     i+2 < nodePool.size() && is_terminable(nodePool[i+2],&retMe.the_context)
@@ -241,24 +203,12 @@ program parse(std::string file_name){
                     nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);
                     
                     break;
-                }
-                
-                if( is_terminable(nodePool[i],&retMe.the_context) &&
-                    i+1 < nodePool.size() && nodePool[i+1]->text == ";"
-                ){
-                    AST_node* end_node = get_rightmost_bottommost(nodePool[i]);
-                    end_node->children.push_back(nodePool[i+1]);
-                    
-                    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
-                    
-                    break;
                 }//*/
                 
             }
         }while(i<nodePool.size());
     }
     
-    for( AST_node* node : nodePool ) node->print_with_types();
     for( AST_node* node : nodePool ) assert( is_terminated(node) );// if this fails you have bad grammer.
     
     retMe.root.children = nodePool;
