@@ -19,6 +19,9 @@ void function_declaration_folding(std::vector<AST_node*>& nodePool, symbol_table
 
 bool function_definition_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
 void function_definition_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
+
+bool comma_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
+void comma_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
 /*
 bool syntax_partial_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
 void syntax_partial_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
@@ -38,6 +41,7 @@ std::vector<rule> fury_grammer_rules(){
     retMe.push_back( {"function-partial", function_partial_applies, function_partial_folding} );// function partials out of pure tokens -- with scoping implications.
     retMe.push_back( {"function-declaration", function_declaration_applies, function_declaration_folding} );// function declarations out of function partials & function parameter clauses.
     retMe.push_back( {"function-definition", function_definition_applies, function_definition_folding} );// function definitions out of declarations & body definitions.
+    retMe.push_back( {"comma", comma_applies, comma_folding} );
     
     return retMe;
 }
@@ -184,4 +188,24 @@ void function_definition_folding(std::vector<AST_node*>& nodePool, symbol_table*
     nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
     
     return;
+}
+
+bool comma_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
+    return is_terminable(nodePool[i],context) &&
+            i+1 < nodePool.size() && is_empty_comma(nodePool[i+1]) &&
+            i+2 < nodePool.size() && is_terminable(nodePool[i+2],context);
+}
+
+void comma_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
+    if( nodePool[i]->text == "," ){
+        nodePool[i]->children.push_back(nodePool[i+2]);
+        delete nodePool[i+1];// pointer fun
+    }else{
+        nodePool[i+1]->children.push_back(nodePool[i]);
+        nodePool[i+1]->children.push_back(nodePool[i+2]);
+        
+        nodePool[i] = nodePool[i+1];
+    }
+    
+    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);
 }

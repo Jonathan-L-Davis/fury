@@ -209,6 +209,7 @@ program parse(std::string file_name){
         }while(i<nodePool.size());
     }
     
+    //for( AST_node* node : nodePool ) node->print_with_types();
     for( AST_node* node : nodePool ) assert( is_terminated(node) );// if this fails you have bad grammer.
     
     retMe.root.children = nodePool;
