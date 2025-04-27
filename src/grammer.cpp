@@ -22,6 +22,9 @@ void function_definition_folding(std::vector<AST_node*>& nodePool, symbol_table*
 
 bool comma_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
 void comma_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
+
+bool type_declaration_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
+void type_declaration_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
 /*
 bool syntax_partial_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
 void syntax_partial_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
@@ -32,17 +35,31 @@ void syntax_declaration_folding(std::vector<AST_node*>& nodePool, symbol_table* 
 bool syntax_definition_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
 void syntax_definition_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
 //*/
+
+symbol_table fury_default_context(){
+    symbol_table retMe;
+    
+    retMe.add_symbol({sym_t_type,"byte","byte",nullptr});
+    retMe.add_symbol({sym_t_type,"dual","dual",nullptr});
+    retMe.add_symbol({sym_t_type,"quad","quad",nullptr});
+    retMe.add_symbol({sym_t_type,"oct","oct",nullptr});
+    retMe.add_symbol({sym_t_type,"type","type",nullptr});
+    retMe.add_symbol({sym_t_type,"label","label",nullptr});
+    
+    return retMe;
+}
+
 std::vector<rule> fury_grammer_rules(){
     std::vector<rule> retMe;
     
     retMe.push_back( {"paren-closure", paren_closure_applies, paren_closure_folding} );
     retMe.push_back( {"curly-bracket-closure", curly_bracket_closure_applies, curly_bracket_closure_folding} );
-    retMe.push_back( {"termination", termination_applies, termination_folding} );
     retMe.push_back( {"function-partial", function_partial_applies, function_partial_folding} );// function partials out of pure tokens -- with scoping implications.
     retMe.push_back( {"function-declaration", function_declaration_applies, function_declaration_folding} );// function declarations out of function partials & function parameter clauses.
     retMe.push_back( {"function-definition", function_definition_applies, function_definition_folding} );// function definitions out of declarations & body definitions.
     retMe.push_back( {"comma", comma_applies, comma_folding} );
-    
+    retMe.push_back( {"type-declaration", type_declaration_applies, type_declaration_folding} );
+    retMe.push_back( {"termination", termination_applies, termination_folding} );
     return retMe;
 }
 
@@ -208,4 +225,30 @@ void comma_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int 
     }
     
     nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);
+}
+
+bool type_declaration_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
+    if( nodePool[i]->type!=node_t::type || nodePool[i]->children.size() != 0 )
+        return false;
+    
+    
+    
+    if( i+1 >= nodePool.size() || nodePool[i+1]->type != node_t::id )
+        return false;
+    
+    return true;
+}
+
+void type_declaration_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
+    assert(type_declaration_applies(nodePool,context,i));
+    
+    if( nodePool[i]->type == node_t::function_id ){
+        
+    }
+    
+    //for()
+    
+    nodePool[i]->children.push_back(nodePool[i+1]);
+    
+    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
 }

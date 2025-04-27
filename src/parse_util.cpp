@@ -76,16 +76,7 @@ bool is_valid(const AST_node* const checkMe, const symbol_table* const context){
     if(is_function_call(checkMe,context))
         return true;
     
-    if(is_byte_declaration(checkMe))
-        return true;
-    
-    if(is_dual_declaration(checkMe))
-        return true;
-    
-    if(is_quad_declaration(checkMe))
-        return true;
-    
-    if(is_oct_declaration(checkMe))
+    if(is_type_declaration(checkMe,context))
         return true;
     
     if(is_comma_expression(checkMe))
@@ -257,38 +248,12 @@ bool is_function_call(const AST_node* const checkMe, const symbol_table* const c
     return true;
 }
 
-bool is_byte_declaration(const AST_node* const checkMe){
-    if( checkMe->text != "byte" )
+bool is_type_declaration(const AST_node* const checkMe, const symbol_table* const context){
+    
+    if( checkMe->type!=node_t::type )
         return false;
     
-    if( checkMe->children.size() != 1 || checkMe->children[0]->type != node_t::id )
-        return false;
-    
-    return true;
-}
-
-bool is_dual_declaration(const AST_node* const checkMe){
-    if( checkMe->text != "dual" )
-        return false;
-    
-    if( checkMe->children.size() != 1 || checkMe->children[0]->type != node_t::id )
-        return false;
-    
-    return true;
-}
-
-bool is_quad_declaration(const AST_node* const checkMe){
-    if( checkMe->text != "quad" )
-        return false;
-    
-    if( checkMe->children.size() != 1 || checkMe->children[0]->type != node_t::id )
-        return false;
-    
-    return true;
-}
-
-bool is_oct_declaration(const AST_node* const checkMe){
-    if( checkMe->text != "oct" )
+    if( !context->type_exists(checkMe->text) )
         return false;
     
     if( checkMe->children.size() != 1 || checkMe->children[0]->type != node_t::id )

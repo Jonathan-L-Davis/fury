@@ -32,6 +32,7 @@ enum token_type:uint32_t{
 program parse(std::string file_name){
     program retMe;
     retMe.root = {{":--:",0,root},{}};
+    retMe.the_context = fury_default_context();
     std::fstream file(file_name);
     
     std::vector<uint8_t> file_buffer;
@@ -133,7 +134,6 @@ program parse(std::string file_name){
                     
                 }
                 /*
-                
                 if( nodePool[i]->text=="byte" ){
                     
                     if( i+1<nodePool.size() && nodePool[i+1]->type == node_t::id ){
@@ -184,32 +184,13 @@ program parse(std::string file_name){
                         break;
                     }
                     
-                }
-                
-                if( is_terminable(nodePool[i],&retMe.the_context) &&
-                    i+1 < nodePool.size() && is_empty_comma(nodePool[i+1]) &&
-                    i+2 < nodePool.size() && is_terminable(nodePool[i+2],&retMe.the_context)
-                ){
-                    if( nodePool[i]->text == "," ){
-                        nodePool[i]->children.push_back(nodePool[i+2]);
-                        delete nodePool[i+1];// pointer fun
-                    }else{
-                        nodePool[i+1]->children.push_back(nodePool[i]);
-                        nodePool[i+1]->children.push_back(nodePool[i+2]);
-                        
-                        nodePool[i] = nodePool[i+1];
-                    }
-                    
-                    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);
-                    
-                    break;
                 }//*/
                 
             }
         }while(i<nodePool.size());
     }
     
-    //for( AST_node* node : nodePool ) node->print_with_types();
+    std::cout << "--------------------------------------------------------------------------------\n";for( AST_node* node : nodePool ){node->print_with_types();std::cout << is_type_declaration( node,&retMe.the_context ) << "\n";};
     for( AST_node* node : nodePool ) assert( is_terminated(node) );// if this fails you have bad grammer.
     
     retMe.root.children = nodePool;

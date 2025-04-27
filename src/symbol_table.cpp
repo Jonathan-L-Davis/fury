@@ -105,7 +105,7 @@ void symbol_table::add_symbol( symbol add_me ){
                 }
             }
             
-            labels.push_back(add_me);
+            types.push_back(add_me);
         }break;
     }
 }
@@ -158,9 +158,34 @@ void symbol_table::print(){
         std::cout << sym_tbl_indent << octs[i].name << "\n";
     }
     
+    std::cout << "structs:\n";
+    for( unsigned int i = 0; i < structs.size(); i++ ){
+        std::cout << sym_tbl_indent << structs[i].name << "\n";
+    }
+    
     std::cout << "functions:\n";
     for( unsigned int i = 0; i < functions.size(); i++ ){
         std::cout << sym_tbl_indent << functions[i].name << "\n";
+    }
+    
+    std::cout << "operators:\n";
+    for( unsigned int i = 0; i < operators.size(); i++ ){
+        std::cout << sym_tbl_indent << operators[i].name << "\n";
+    }
+    
+    std::cout << "syntaxes:\n";
+    for( unsigned int i = 0; i < syntaxes.size(); i++ ){
+        std::cout << sym_tbl_indent << syntaxes[i].name << "\n";
+    }
+    
+    std::cout << "labels:\n";
+    for( unsigned int i = 0; i < labels.size(); i++ ){
+        std::cout << sym_tbl_indent << labels[i].name << "\n";
+    }
+    
+    std::cout << "types:\n";
+    for( unsigned int i = 0; i < types.size(); i++ ){
+        std::cout << sym_tbl_indent << types[i].name << "\n";
     }
     
     for( unsigned int i = 0; i < sub_scopes.size(); i++ )

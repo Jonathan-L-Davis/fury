@@ -16,5 +16,6 @@ struct rule{
 };
 
 std::vector<rule> fury_grammer_rules();
+symbol_table fury_default_context();
 
 #endif//GRAMMER_H
