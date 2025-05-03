@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-typedef bool (*reduction_applies)(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
-typedef void (*reduction)        (std::vector<AST_node*>& nodePool, symbol_table* context, int index);
+typedef bool (*reduction_applies)(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+typedef void (*reduction)        (std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 
 struct rule{
     std::string name;

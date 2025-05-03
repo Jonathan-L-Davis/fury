@@ -6,7 +6,7 @@
 
 // This struct does not necessarily represent a fully completed compilable & executable program, merely a program fragment.
 struct program{
-    symbol_table the_context;
+    symbol_table context;
     AST_node root;
 };
 

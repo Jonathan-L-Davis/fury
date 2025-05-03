@@ -107,6 +107,7 @@ struct symbol_table{
     symbol get_quad(std::string) const;
     symbol get_oct(std::string) const;
     
+    symbol_table& get_subscope(std::string);
     //
     
     void add_symbol(symbol);

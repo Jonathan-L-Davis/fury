@@ -32,11 +32,12 @@ enum token_type:uint32_t{
 program parse(std::string file_name){
     program retMe;
     retMe.root = {{":--:",0,root},{}};
-    retMe.the_context = fury_default_context();
+    retMe.context = fury_default_context();
     std::fstream file(file_name);
     
     std::vector<uint8_t> file_buffer;
     std::vector<AST_node*> nodePool = {};
+    std::vector<symbol_table*> context_stack = {&retMe.context};
     
     
     uint8_t q;
@@ -60,8 +61,11 @@ program parse(std::string file_name){
             assert(byte=='\n' || ( byte>=' ' && byte<127) );
         }
         
-        if(retMe.the_context.syntax_exists(currentToken+(char)byte)){
+        if( context_stack[context_stack.size()-1]->syntax_exists(currentToken+(char)byte) ){
+            std::cout << (currentToken+(char)byte) << "\n";
             std::cout << "Syntax execution is not supported yet.\n";
+            
+            context_stack[0]->print();
             std::exit(-1);
         }
         
@@ -111,7 +115,7 @@ program parse(std::string file_name){
         
         
         // if we haven't completed a token, & we have a match for a syntax.
-        if( completeToken == "" && retMe.the_context.syntax_exists(currentToken) ) assert(false);// need the interpreter to continue this feature further.
+        if( completeToken == "" && retMe.context.syntax_exists(currentToken) ) assert(false);// need the interpreter to continue this feature further.
         completeToken = "";// don't reparse a completed token, duh.
         
         /// ----------------------------------------------------    Reduction Rules Start Here    ---------------------------------------------------------- ///
@@ -126,71 +130,17 @@ program parse(std::string file_name){
                 
                 std::vector<rule> rules = fury_grammer_rules();
                 for( int j = 0; j < rules.size(); j++ ){
-                    if( rules[j].rule_applies(nodePool,&retMe.the_context,i) ){
-                        rules[j].apply_rule(nodePool,&retMe.the_context,i);
-                        i= 0;
+                    if( rules[j].rule_applies(nodePool,context_stack,i) ){
+                        rules[j].apply_rule(nodePool,context_stack,i);
+                        i = 0;
                         goto restart_reductions;
                     }
-                    
                 }
-                /*
-                if( nodePool[i]->text=="byte" ){
-                    
-                    if( i+1<nodePool.size() && nodePool[i+1]->type == node_t::id ){
-                        assert( !retMe.the_context.id_exists(nodePool[i+1]->text) );
-                        
-                        nodePool[i]->children.push_back(nodePool[i+1]);
-                        retMe.the_context.add_symbol({sym_t_byte,"byte",nodePool[i+1]->text,nodePool[i]});
-                        nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
-                        break;
-                    }
-                    
-                }
-                
-                if( nodePool[i]->text=="dual" ){
-                    
-                    if( i+1<nodePool.size() && nodePool[i+1]->type == node_t::id ){
-                        assert( !retMe.the_context.id_exists(nodePool[i+1]->text) );
-                        
-                        nodePool[i]->children.push_back(nodePool[i+1]);
-                        retMe.the_context.add_symbol({sym_t_dual,"dual",nodePool[i+1]->text,nodePool[i]});
-                        nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
-                        break;
-                    }
-                    
-                }
-                
-                if( nodePool[i]->text=="quad" ){
-                    
-                    if( i+1<nodePool.size() && nodePool[i+1]->type == node_t::id ){
-                        assert( !retMe.the_context.id_exists(nodePool[i+1]->text) );
-                        
-                        nodePool[i]->children.push_back(nodePool[i+1]);
-                        retMe.the_context.add_symbol({sym_t_quad,"quad",nodePool[i+1]->text,nodePool[i]});
-                        nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
-                        break;
-                    }
-                    
-                }
-                
-                if( nodePool[i]->text=="oct" ){
-                    
-                    if( i+1<nodePool.size() && nodePool[i+1]->type == node_t::id ){
-                        assert( !retMe.the_context.id_exists(nodePool[i+1]->text) );
-                        
-                        nodePool[i]->children.push_back(nodePool[i+1]);
-                        retMe.the_context.add_symbol({sym_t_oct,"oct",nodePool[i+1]->text,nodePool[i]});
-                        nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
-                        break;
-                    }
-                    
-                }//*/
-                
             }
         }while(i<nodePool.size());
     }
     
-    std::cout << "--------------------------------------------------------------------------------\n";for( AST_node* node : nodePool ){node->print_with_types();std::cout << is_type_declaration( node,&retMe.the_context ) << "\n";};
+    std::cout << "--------------------------------------------------------------------------------\n";for( AST_node* node : nodePool ){node->print_with_types();std::cout << is_type_declaration( node,&retMe.context ) << "\n";};
     for( AST_node* node : nodePool ) assert( is_terminated(node) );// if this fails you have bad grammer.
     
     retMe.root.children = nodePool;

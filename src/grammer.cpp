@@ -2,29 +2,29 @@
 #include "parse_util.h"
 #include <cassert>
 
-bool paren_closure_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
-void paren_closure_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
+bool paren_closure_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+void paren_closure_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 
-bool curly_bracket_closure_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
-void curly_bracket_closure_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
+bool curly_bracket_closure_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+void curly_bracket_closure_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 
-bool termination_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
-void termination_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
+bool termination_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+void termination_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 
-bool function_partial_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
-void function_partial_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
+bool function_partial_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+void function_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 
-bool function_declaration_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
-void function_declaration_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
+bool function_declaration_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+void function_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 
-bool function_definition_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
-void function_definition_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
+bool function_definition_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+void function_definition_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 
-bool comma_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
-void comma_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
+bool comma_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+void comma_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 
-bool type_declaration_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
-void type_declaration_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
+bool type_declaration_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+void type_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 /*
 bool syntax_partial_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
 void syntax_partial_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
@@ -63,13 +63,13 @@ std::vector<rule> fury_grammer_rules(){
     return retMe;
 }
 
-bool paren_closure_applies(std::vector<AST_node*>& nodePool, symbol_table* context,int i){
+bool paren_closure_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context,int i){
     return nodePool[i]->text=="(" && !is_closed_parenthesis(nodePool[i]) &&
     (   ( i+1 < nodePool.size() && nodePool[i+1]->text == ")" ) || // empty ()
-        ( i+2 < nodePool.size() && nodePool[i+2]->text == ")" && is_terminable(nodePool[i+1],context) ) ); // enclosed (expr)
+        ( i+2 < nodePool.size() && nodePool[i+2]->text == ")" && is_terminable(nodePool[i+1],context[context.size()-1]) ) ); // enclosed (expr)
 }
 
-void paren_closure_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
+void paren_closure_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     
     assert( nodePool[i]->text == "(" );
     
@@ -79,7 +79,7 @@ void paren_closure_folding(std::vector<AST_node*>& nodePool, symbol_table* conte
         nodePool.erase(nodePool.begin()+i+1);
         return;
     }
-    if( i<nodePool.size()-2 && nodePool[i+2]->text == ")" && is_terminable(nodePool[i+1],context) ){
+    if( i<nodePool.size()-2 && nodePool[i+2]->text == ")" && is_terminable(nodePool[i+1],context[context.size()-1]) ){
         nodePool[i]->children.push_back(nodePool[i+1]);
         nodePool[i]->children.push_back(nodePool[i+2]);
         nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);
@@ -88,7 +88,7 @@ void paren_closure_folding(std::vector<AST_node*>& nodePool, symbol_table* conte
     assert(false);
 }
 
-bool curly_bracket_closure_applies(std::vector<AST_node*>& nodePool, symbol_table* context,int i){
+bool curly_bracket_closure_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context,int i){
     if( nodePool[i]->text!="{" || is_closed_curly_bracket(nodePool[i]) )
         return false;
     
@@ -104,7 +104,7 @@ bool curly_bracket_closure_applies(std::vector<AST_node*>& nodePool, symbol_tabl
     return false;
 }
 
-void curly_bracket_closure_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
+void curly_bracket_closure_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>&  context, int i){
     assert( curly_bracket_closure_applies(nodePool,context,i) );
     
     bool valid_sequence = false;
@@ -130,32 +130,39 @@ void curly_bracket_closure_folding(std::vector<AST_node*>& nodePool, symbol_tabl
     assert(false);
 }
 
-bool termination_applies(std::vector<AST_node*>& nodePool, symbol_table* context,int i){
-    return is_terminable(nodePool[i],context) && i+1 < nodePool.size() && nodePool[i+1]->text == ";";
+bool termination_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context,int i){
+    return is_terminable(nodePool[i],context[context.size()-1]) && i+1 < nodePool.size() && nodePool[i+1]->text == ";";
 }
 
-void termination_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
+void termination_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     assert( termination_applies(nodePool,context,i)  );
     
     AST_node* end_node = get_rightmost_bottommost(nodePool[i]);
     end_node->children.push_back(nodePool[i+1]);
     
     nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
+    
+    if( nodePool[i]->text == "function" )
+        context.resize(context.size()-1);
 }
 
-bool function_partial_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
+bool function_partial_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     return nodePool[i]->text == "function" && nodePool[i]->children.size() == 0 && (
     (i+1<nodePool.size() && nodePool[i+1]->type == node_t::id ) ||
     (i+2<nodePool.size() && nodePool[i+2]->type == node_t::id && nodePool[i+1]->type == node_t::type )
     );
 }
 
-void function_partial_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
+void function_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     assert( function_partial_applies(nodePool,context,i) );
     
     bool is_folded_correctly = false;
     if( i+1<nodePool.size() && nodePool[i+1]->type == node_t::id ){
         nodePool[i+1]->type = node_t::function_id;
+        
+        context[context.size()-1]->add_symbol({sym_t_function,"",nodePool[i+1]->text,nodePool[i]});
+        context[context.size()-1]->add_scope(nodePool[i+1]->text,scope_type::scope_t_function);
+        context.push_back( &context[context.size()-1]->get_subscope(nodePool[i+1]->text) );
         
         nodePool[i]->children.push_back(nodePool[i+1]);
         nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
@@ -164,6 +171,10 @@ void function_partial_folding(std::vector<AST_node*>& nodePool, symbol_table* co
     else
     if( i+2<nodePool.size() && nodePool[i+2]->type == node_t::id && nodePool[i+1]->type == node_t::type ){
         nodePool[i+2]->type = node_t::function_id;
+            
+        context[context.size()-1]->add_symbol({sym_t_function,nodePool[i+1]->text,nodePool[i+2]->text,nodePool[i]});
+        context[context.size()-1]->add_scope(nodePool[i+2]->text,scope_type::scope_t_function);
+        context.push_back( &context[context.size()-1]->get_subscope(nodePool[i+2]->text) );
         
         nodePool[i]->children.push_back(nodePool[i+1]);
         nodePool[i]->children.push_back(nodePool[i+2]);
@@ -178,12 +189,12 @@ void function_partial_folding(std::vector<AST_node*>& nodePool, symbol_table* co
     assert(false);
 }
 
-bool function_declaration_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
+bool function_declaration_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     return (is_function_partial_declaration(nodePool[i]) && !is_function_declaration(nodePool[i]) &&
             i+1 < nodePool.size() && is_closed_parenthesis(nodePool[i+1]) );
 }
 
-void function_declaration_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
+void function_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     assert(function_declaration_applies(nodePool,context,i));
     
     int f_id_idx = nodePool[i]->children.size()-1;
@@ -193,12 +204,12 @@ void function_declaration_folding(std::vector<AST_node*>& nodePool, symbol_table
     return;
 }
 
-bool function_definition_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
+bool function_definition_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     return (is_function_declaration(nodePool[i]) && !is_function_definition(nodePool[i]) &&
             i+1 < nodePool.size() && is_closed_curly_bracket(nodePool[i+1]) );
 }
 
-void function_definition_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
+void function_definition_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     assert(function_definition_applies(nodePool,context,i));
     
     nodePool[i]->children.push_back(nodePool[i+1]);
@@ -207,13 +218,13 @@ void function_definition_folding(std::vector<AST_node*>& nodePool, symbol_table*
     return;
 }
 
-bool comma_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
-    return is_terminable(nodePool[i],context) &&
+bool comma_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    return is_terminable(nodePool[i],context[context.size()-1]) &&
             i+1 < nodePool.size() && is_empty_comma(nodePool[i+1]) &&
-            i+2 < nodePool.size() && is_terminable(nodePool[i+2],context);
+            i+2 < nodePool.size() && is_terminable(nodePool[i+2],context[context.size()-1]);
 }
 
-void comma_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
+void comma_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     if( nodePool[i]->text == "," ){
         nodePool[i]->children.push_back(nodePool[i+2]);
         delete nodePool[i+1];// pointer fun
@@ -227,7 +238,7 @@ void comma_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int 
     nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);
 }
 
-bool type_declaration_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
+bool type_declaration_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     if( nodePool[i]->type!=node_t::type || nodePool[i]->children.size() != 0 )
         return false;
     
@@ -239,14 +250,17 @@ bool type_declaration_applies(std::vector<AST_node*>& nodePool, symbol_table* co
     return true;
 }
 
-void type_declaration_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int i){
+void type_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     assert(type_declaration_applies(nodePool,context,i));
     
-    if( nodePool[i]->type == node_t::function_id ){
-        
-    }
-    
-    //for()
+    symbol_type sym_type;
+    if( nodePool[i]->text == "byte" ) sym_type = sym_t_byte;
+    if( nodePool[i]->text == "dual" ) sym_type = sym_t_dual;
+    if( nodePool[i]->text == "quad" ) sym_type = sym_t_quad;
+    if( nodePool[i]->text == "oct" ) sym_type = sym_t_oct;
+    if( nodePool[i]->text == "type" ) sym_type = sym_t_type;
+    if( nodePool[i]->text == "label" ) sym_type = sym_t_label;
+    context[context.size()-1]->add_symbol({sym_type,nodePool[i]->text,nodePool[i+1]->text,nodePool[i]});
     
     nodePool[i]->children.push_back(nodePool[i+1]);
     

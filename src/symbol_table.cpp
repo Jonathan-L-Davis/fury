@@ -136,58 +136,59 @@ symbol_table::symbol_table( symbol_table* parent_ptr, std::string scope, scope_t
 std::string sym_tbl_indent = "";
 void symbol_table::print(){
     std::cout << sym_tbl_indent << get_full_scope() << "\n";
-    sym_tbl_indent += "    ";
     
-    std::cout << "bytes:\n";
+    if(bytes.size()>0) std::cout << sym_tbl_indent << "bytes:\n";
     for( unsigned int i = 0; i < bytes.size(); i++ ){
-        std::cout << sym_tbl_indent << bytes[i].name << "\n";
+        std::cout << sym_tbl_indent << "    " << bytes[i].name << "\n";
     }
     
-    std::cout << "duals:\n";
+    if(duals.size()>0) std::cout << sym_tbl_indent << "duals:\n";
     for( unsigned int i = 0; i < duals.size(); i++ ){
-        std::cout << sym_tbl_indent << duals[i].name << "\n";
+        std::cout << sym_tbl_indent << "    " << duals[i].name << "\n";
     }
     
-    std::cout << "quads:\n";
+    if(quads.size()>0) std::cout << sym_tbl_indent << "quads:\n";
     for( unsigned int i = 0; i < quads.size(); i++ ){
-        std::cout << sym_tbl_indent << quads[i].name << "\n";
+        std::cout << sym_tbl_indent << "    " << quads[i].name << "\n";
     }
     
-    std::cout << "octs:\n";
+    if(octs.size()>0) std::cout << sym_tbl_indent << "octs:\n";
     for( unsigned int i = 0; i < octs.size(); i++ ){
-        std::cout << sym_tbl_indent << octs[i].name << "\n";
+        std::cout << sym_tbl_indent << "    " << octs[i].name << "\n";
     }
     
-    std::cout << "structs:\n";
+    if(structs.size()>0) std::cout << sym_tbl_indent << "structs:\n";
     for( unsigned int i = 0; i < structs.size(); i++ ){
-        std::cout << sym_tbl_indent << structs[i].name << "\n";
+        std::cout << sym_tbl_indent << "    " << structs[i].name << "\n";
     }
     
-    std::cout << "functions:\n";
+    if(functions.size()>0) std::cout << sym_tbl_indent << "functions:\n";
     for( unsigned int i = 0; i < functions.size(); i++ ){
-        std::cout << sym_tbl_indent << functions[i].name << "\n";
+        std::cout << sym_tbl_indent << "    " << functions[i].name << "\n";
     }
     
-    std::cout << "operators:\n";
+    if(operators.size()>0) std::cout << sym_tbl_indent << "operators:\n";
     for( unsigned int i = 0; i < operators.size(); i++ ){
-        std::cout << sym_tbl_indent << operators[i].name << "\n";
+        std::cout << sym_tbl_indent << "    " << operators[i].name << "\n";
     }
     
-    std::cout << "syntaxes:\n";
+    if(syntaxes.size()>0) std::cout << sym_tbl_indent << "syntaxes:\n";
     for( unsigned int i = 0; i < syntaxes.size(); i++ ){
-        std::cout << sym_tbl_indent << syntaxes[i].name << "\n";
+        std::cout << sym_tbl_indent << "    " << syntaxes[i].name << "\n";
     }
     
-    std::cout << "labels:\n";
+    if(labels.size()>0) std::cout << sym_tbl_indent << "labels:\n";
     for( unsigned int i = 0; i < labels.size(); i++ ){
-        std::cout << sym_tbl_indent << labels[i].name << "\n";
+        std::cout << sym_tbl_indent << "    " << labels[i].name << "\n";
     }
     
-    std::cout << "types:\n";
+    if(types.size()>0) std::cout << sym_tbl_indent << "types:\n";
     for( unsigned int i = 0; i < types.size(); i++ ){
-        std::cout << sym_tbl_indent << types[i].name << "\n";
+        std::cout << sym_tbl_indent << "    " << types[i].name << "\n";
     }
     
+    if(sub_scopes.size()>0) std::cout << sym_tbl_indent << "sub-scopes\n";
+    sym_tbl_indent += "    ";
     for( unsigned int i = 0; i < sub_scopes.size(); i++ )
         sub_scopes[i].print();
     
@@ -285,7 +286,7 @@ bool symbol_table::byte_exists(std::string id) const{
             return true;
     }
     
-    if( scope != "" ) return parent->id_exists(id);
+    if( scope != "" ) return parent->byte_exists(id);
     return false;
     
 }
@@ -297,7 +298,7 @@ bool symbol_table::dual_exists(std::string id) const{
             return true;
     }
     
-    if( scope != "" ) return parent->id_exists(id);
+    if( scope != "" ) return parent->dual_exists(id);
     return false;
     
 }
@@ -309,7 +310,7 @@ bool symbol_table::quad_exists(std::string id) const{
             return true;
     }
     
-    if( scope != "" ) return parent->id_exists(id);
+    if( scope != "" ) return parent->quad_exists(id);
     return false;
     
 }
@@ -321,7 +322,7 @@ bool symbol_table::oct_exists(std::string id) const{
             return true;
     }
     
-    if( scope != "" ) return parent->id_exists(id);
+    if( scope != "" ) return parent->oct_exists(id);
     return false;
     
 }
@@ -333,7 +334,7 @@ bool symbol_table::struct_exists(std::string id) const{
             return true;
     }
     
-    if( scope != "" ) return parent->id_exists(id);
+    if( scope != "" ) return parent->struct_exists(id);
     return false;
     
 }
@@ -345,7 +346,7 @@ bool symbol_table::function_exists(std::string id) const{
             return true;
     }
     
-    if( scope != "" ) return parent->id_exists(id);
+    if( scope != "" ) return parent->function_exists(id);
     return false;
     
 }
@@ -357,7 +358,7 @@ bool symbol_table::operator_exists(std::string id) const{
             return true;
     }
     
-    if( scope != "" ) return parent->id_exists(id);
+    if( scope != "" ) return parent->operator_exists(id);
     return false;
     
 }
@@ -369,7 +370,7 @@ bool symbol_table::syntax_exists(std::string id) const{
             return true;
     }
     
-    if( scope != "" ) return parent->id_exists(id);
+    if( scope != "" ) return parent->syntax_exists(id);
     return false;
     
 }
@@ -381,7 +382,7 @@ bool symbol_table::label_exists(std::string id) const{
             return true;
     }
     
-    if( scope != "" ) return parent->id_exists(id);
+    if( scope != "" ) return parent->label_exists(id);
     return false;
     
 }
@@ -393,7 +394,7 @@ bool symbol_table::type_exists(std::string id) const{
             return true;
     }
     
-    if( scope != "" ) return parent->id_exists(id);
+    if( scope != "" ) return parent->type_exists(id);
     return false;
     
 }
@@ -421,6 +422,16 @@ bool symbol_table::type_starts_with_substr(std::string find_me){
     if( scope != "" ) return parent->id_starts_with_substr(find_me);//*/
     return false;
     
+}
+
+symbol_table& symbol_table::get_subscope(std::string findMe){
+    
+    for( int i = 0; i < sub_scopes.size(); i++ ){
+        if( sub_scopes[i].scope == findMe )
+            return sub_scopes[i];
+    }
+    
+    assert(false);
 }
 
 bool symbol_table::contains_scope(std::string find_me) const{

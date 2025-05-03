@@ -2,7 +2,11 @@
 
 There is some redundant info here, & lots missing. Work in Progress.<br>
 
-Fury is a low-level language, that aims to be expressive enough to 
+Fury is a low-level language, that aims to be expressive enough to run on very unique hardware devices.
+One of my major reasons for developing the language is I want to write hardware with lots of control over low level details & C doesn't handle all of those well.
+For example I want to make fpga designs that play with the memory model compared to "normal" & I want to make custom IEEE-754 extensions, and C wouldn't abstract either of those well.
+For the memory model stuff, I want the ability to have multiple pointer types recognized at both the language & hardware level instead of memory mapped IO.
+And I want enough abstraction to implement something like the floating point extensions in a way that feels like normal float syntax without being builtin to the compiler.
 
 The fury lanugage has several compiler goals<br>
 v(not doing version control seriously at this stage) - produce binary code, for any subset of the language, for a platform, real or not.<br>
@@ -39,6 +43,7 @@ label<br>
 type<br>
 import<br>
 export<br>
+namespace<br>
 if<br>
 else<br>
 for<br>

@@ -53,7 +53,7 @@ void exec(stack &prog_stack, program &prog){
         
         stackObject a;
         
-        a.object = prog.the_context.get_byte(obj.object->children[obj.idx]->children[0]->text).value;
+        a.object = prog.context.get_byte(obj.object->children[obj.idx]->children[0]->text).value;
         a.idx = 0;
         prog_stack.push(a);
         
@@ -64,7 +64,7 @@ void exec(stack &prog_stack, program &prog){
     if( obj.object->children[obj.idx]->text == "dual" ){
         
         stackObject a;
-        a.object = prog.the_context.get_dual(obj.object->children[obj.idx]->children[0]->text).value;
+        a.object = prog.context.get_dual(obj.object->children[obj.idx]->children[0]->text).value;
         a.idx = 0;
         prog_stack.push(a);
         
@@ -77,7 +77,7 @@ void exec(stack &prog_stack, program &prog){
         
         stackObject a;
         
-        a.object = prog.the_context.get_quad(obj.object->children[obj.idx]->children[0]->text).value;
+        a.object = prog.context.get_quad(obj.object->children[obj.idx]->children[0]->text).value;
         a.idx = 0;
         prog_stack.push(a);
         
@@ -90,7 +90,7 @@ void exec(stack &prog_stack, program &prog){
         
         stackObject a;
         
-        a.object = prog.the_context.get_oct(obj.object->children[obj.idx]->children[0]->text).value;
+        a.object = prog.context.get_oct(obj.object->children[obj.idx]->children[0]->text).value;
         a.idx = 0;
         prog_stack.push(a);
         
@@ -99,10 +99,10 @@ void exec(stack &prog_stack, program &prog){
         return;
     }
     
-    if( prog.the_context.function_exists(obj.object->children[obj.idx]->text) ){
+    if( prog.context.function_exists(obj.object->children[obj.idx]->text) ){
         
         stackObject a;
-        a.object = prog.the_context.get_function(obj.object->children[obj.idx]->text).value;
+        a.object = prog.context.get_function(obj.object->children[obj.idx]->text).value;
         a.idx = 0;
         
         
