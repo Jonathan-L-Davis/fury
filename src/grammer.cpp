@@ -39,12 +39,19 @@ void syntax_definition_folding(std::vector<AST_node*>& nodePool, symbol_table* c
 symbol_table fury_default_context(){
     symbol_table retMe;
     
-    retMe.add_symbol({sym_t_type,"byte","byte",nullptr});
-    retMe.add_symbol({sym_t_type,"dual","dual",nullptr});
-    retMe.add_symbol({sym_t_type,"quad","quad",nullptr});
-    retMe.add_symbol({sym_t_type,"oct","oct",nullptr});
-    retMe.add_symbol({sym_t_type,"type","type",nullptr});
-    retMe.add_symbol({sym_t_type,"label","label",nullptr});
+    // the basic complete types
+    retMe.add_symbol({sym_t_type,{"type"},"byte",nullptr});
+    retMe.add_symbol({sym_t_type,{"type"},"dual",nullptr});
+    retMe.add_symbol({sym_t_type,{"type"},"quad",nullptr});
+    retMe.add_symbol({sym_t_type,{"type"},"oct",nullptr});
+    retMe.add_symbol({sym_t_type,{"type"},"type",nullptr});
+    retMe.add_symbol({sym_t_type,{"type"},"label",nullptr});
+    
+    /* the basic incomplete types
+    retMe.add_symbol({sym_t_type,{"type"},"function",nullptr});
+    retMe.add_symbol({sym_t_type,{"type"},"operator",nullptr});
+    retMe.add_symbol({sym_t_type,{"type"},"syntax",nullptr});
+    retMe.add_symbol({sym_t_type,{"type"},"struct",nullptr});//*/
     
     return retMe;
 }
@@ -160,7 +167,7 @@ void function_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symb
     if( i+1<nodePool.size() && nodePool[i+1]->type == node_t::id ){
         nodePool[i+1]->type = node_t::function_id;
         
-        context[context.size()-1]->add_symbol({sym_t_function,"",nodePool[i+1]->text,nodePool[i]});
+        context[context.size()-1]->add_symbol({sym_t_function,{""},nodePool[i+1]->text,nodePool[i]});
         context[context.size()-1]->add_scope(nodePool[i+1]->text,scope_type::scope_t_function);
         context.push_back( &context[context.size()-1]->get_subscope(nodePool[i+1]->text) );
         
@@ -172,7 +179,7 @@ void function_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symb
     if( i+2<nodePool.size() && nodePool[i+2]->type == node_t::id && nodePool[i+1]->type == node_t::type ){
         nodePool[i+2]->type = node_t::function_id;
             
-        context[context.size()-1]->add_symbol({sym_t_function,nodePool[i+1]->text,nodePool[i+2]->text,nodePool[i]});
+        context[context.size()-1]->add_symbol({sym_t_function,{nodePool[i+1]->text},nodePool[i+2]->text,nodePool[i]});
         context[context.size()-1]->add_scope(nodePool[i+2]->text,scope_type::scope_t_function);
         context.push_back( &context[context.size()-1]->get_subscope(nodePool[i+2]->text) );
         
@@ -260,7 +267,7 @@ void type_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<symb
     if( nodePool[i]->text == "oct" ) sym_type = sym_t_oct;
     if( nodePool[i]->text == "type" ) sym_type = sym_t_type;
     if( nodePool[i]->text == "label" ) sym_type = sym_t_label;
-    context[context.size()-1]->add_symbol({sym_type,nodePool[i]->text,nodePool[i+1]->text,nodePool[i]});
+    context[context.size()-1]->add_symbol({sym_type,{nodePool[i]->text},nodePool[i+1]->text,nodePool[i]});
     
     nodePool[i]->children.push_back(nodePool[i+1]);
     

@@ -121,7 +121,6 @@ program parse(std::string file_name){
         /// ----------------------------------------------------    Reduction Rules Start Here    ---------------------------------------------------------- ///
         int i = 0;
         do{
-            restart_reductions:;
             i = 0;
             for( i = 0; i < nodePool.size(); i++ ){
                 
@@ -140,7 +139,7 @@ program parse(std::string file_name){
         }while(i<nodePool.size());
     }
     
-    std::cout << "--------------------------------------------------------------------------------\n";for( AST_node* node : nodePool ){node->print_with_types();std::cout << is_type_declaration( node,&retMe.context ) << "\n";};
+    //std::cout << "--------------------------------------------------------------------------------\n";for( AST_node* node : nodePool ){node->print_with_types();std::cout << is_type_declaration( node,&retMe.context ) << "\n";};
     for( AST_node* node : nodePool ) assert( is_terminated(node) );// if this fails you have bad grammer.
     
     retMe.root.children = nodePool;

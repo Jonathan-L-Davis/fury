@@ -184,7 +184,8 @@ void symbol_table::print(){
     
     if(types.size()>0) std::cout << sym_tbl_indent << "types:\n";
     for( unsigned int i = 0; i < types.size(); i++ ){
-        std::cout << sym_tbl_indent << "    " << types[i].name << "\n";
+        std::cout << "    ";
+        types[i].print();
     }
     
     if(sub_scopes.size()>0) std::cout << sym_tbl_indent << "sub-scopes\n";
@@ -196,7 +197,16 @@ void symbol_table::print(){
 }
 
 void symbol::print(){
-    std::cout << "|" << type << "|" << name << "|" << value << "|\n";
+    std::string type_str = "<";
+    
+    for( std::set<std::string>::iterator iter = type.begin(); iter != type.end(); iter = std::next(iter) ){
+        type_str += *iter;
+        if( std::next(iter) != type.end() )
+            type_str += ",";
+    }
+    type_str += ">";
+    
+    std::cout << sym_tbl_indent << "|" << type_str << "|" << name << "|" << value << "|\n";
 }
 
 // is id in local scope

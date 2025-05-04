@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 
 #include "node.h"
 
@@ -23,7 +24,7 @@ struct symbol{
     
     symbol_type sym_type;// used for differentiating what bucket the sym 
     
-    std::string type;// 'evaluated type', think functions return type. After the function evaluates, it sort of is it's eval type, even though it's 'real' type is 'function T * (...)'
+    std::set<std::string> type;// 'evaluated type', think functions return type. After the function evaluates, it sort of is it's eval type, even though it's 'real' type is 'function T * (...)'
     std::string name;
     AST_node* value;
     
