@@ -133,7 +133,7 @@ program parse(std::string file_name){
                     if( rules[j].rule_applies(nodePool,context_stack,i) ){
                         rules[j].apply_rule(nodePool,context_stack,i);
                         i = 0;
-                        goto restart_reductions;
+                        break;
                     }
                 }
             }
