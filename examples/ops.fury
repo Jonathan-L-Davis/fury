@@ -1,0 +1,123 @@
+# byte operators
+# arithmetic operators
+operator byte + (byte a)+(byte b);
+operator byte - (byte a)-(byte b);
+operator byte * (byte a)*(byte b);
+operator byte / (byte a)/(byte b);
+operator byte % (byte a)%(byte b);
+operator byte = (byte a)=(byte b);
+
+# bitwise operators
+operator byte ~         ~(byte b);
+operator byte & (byte a)&(byte b);
+operator byte | (byte a)|(byte b);
+operator byte ^ (byte a)^(byte b);
+
+# shift operators
+operator byte >> (byte a)>>(byte b);
+operator byte << (byte a)<<(byte b);
+operator byte >O> (byte a)>O>(byte b);
+operator byte <O< (byte a)<O<(byte b);
+
+# comparison operators
+operator byte == (byte a)==(byte b);
+operator byte != (byte a)!=(byte b);
+operator byte >= (byte a)>=(byte b);
+operator byte >  (byte a)> (byte b);
+operator byte <= (byte a)<=(byte b);
+operator byte <  (byte a)< (byte b);
+
+
+
+# dual operators
+# arithmetic operators
+operator dual + (dual a)+(dual b);
+operator dual - (dual a)-(dual b);
+operator dual * (dual a)*(dual b);
+operator dual / (dual a)/(dual b);
+operator dual % (dual a)%(dual b);
+operator dual = (dual a)=(dual b);
+
+# bitwise operators
+operator dual ~         ~(dual b);
+operator dual & (dual a)&(dual b);
+operator dual | (dual a)|(dual b);
+operator dual ^ (dual a)^(dual b);
+
+# shift operators
+operator dual >> (dual a)>>(dual b);
+operator dual << (dual a)<<(dual b);
+operator dual >O> (dual a)>O>(dual b);
+operator dual <O< (dual a)<O<(dual b);
+
+# comparison operators
+operator dual == (dual a)==(dual b);
+operator dual != (dual a)!=(dual b);
+operator dual >= (dual a)>=(dual b);
+operator dual >  (dual a)> (dual b);
+operator dual <= (dual a)<=(dual b);
+operator dual <  (dual a)< (dual b);
+
+
+
+# quad operators
+# arithmetic operators
+operator quad + (quad a)+(quad b);
+operator quad - (quad a)-(quad b);
+operator quad * (quad a)*(quad b);
+operator quad / (quad a)/(quad b);
+operator quad % (quad a)%(quad b);
+operator quad = (quad a)=(quad b);
+
+# bitwise operators
+operator quad ~         ~(quad b);
+operator quad & (quad a)&(quad b);
+operator quad | (quad a)|(quad b);
+operator quad ^ (quad a)^(quad b);
+
+# shift operators
+operator quad >> (quad a)>>(quad b);
+operator quad << (quad a)<<(quad b);
+operator quad >O> (quad a)>O>(quad b);
+operator quad <O< (quad a)<O<(quad b);
+
+# comparison operators
+operator quad == (quad a)==(quad b);
+operator quad != (quad a)!=(quad b);
+operator quad >= (quad a)>=(quad b);
+operator quad >  (quad a)> (quad b);
+operator quad <= (quad a)<=(quad b);
+operator quad <  (quad a)< (quad b);
+
+
+
+# oct operators
+# arithmetic operators
+operator oct + (oct a)+(oct b);
+operator oct - (oct a)-(oct b);
+operator oct * (oct a)*(oct b);
+operator oct / (oct a)/(oct b);
+operator oct % (oct a)%(oct b);
+operator oct = (oct a)=(oct b);
+
+# bitwise operators
+operator oct ~         ~(oct b);
+operator oct & (oct a)&(oct b);
+operator oct | (oct a)|(oct b);
+operator oct ^ (oct a)^(oct b);
+
+# shift operators
+operator oct >> (oct a)>>(oct b);
+operator oct << (oct a)<<(oct b);
+operator oct >O> (oct a)>O>(oct b);
+operator oct <O< (oct a)<O<(oct b);
+
+# comparison operators
+operator oct == (oct a)==(oct b);
+operator oct != (oct a)!=(oct b);
+operator oct >= (oct a)>=(oct b);
+operator oct >  (oct a)> (oct b);
+operator oct <= (oct a)<=(oct b);
+operator oct <  (oct a)< (oct b);
+
+

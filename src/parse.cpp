@@ -31,6 +31,7 @@ enum token_type:uint32_t{
 
 program parse(std::string file_name){
     program retMe;
+    retMe.file_name = file_name;
     retMe.root = {{":--:",0,root},{}};
     retMe.context = fury_default_context();
     std::fstream file(file_name);
@@ -45,10 +46,10 @@ program parse(std::string file_name){
         file_buffer.push_back(q);
     }
     
-    std::cout << "Parsing file: function.fury\n";
-    std::cout << "----------------------------------------------------------------------------------\n";
-    for( auto c : file_buffer ) std::cout << c;
-    std::cout << "\n";
+    //std::cout << "Parsing file: function.fury\n";
+    //std::cout << "----------------------------------------------------------------------------------\n";
+    //for( auto c : file_buffer ) std::cout << c;
+    //std::cout << "\n";
     
     uint32_t line_no = 1;
     std::string completeToken;
@@ -139,8 +140,8 @@ program parse(std::string file_name){
         }while(i<nodePool.size());
     }
     
-    //std::cout << "--------------------------------------------------------------------------------\n";for( AST_node* node : nodePool ){node->print_with_types();std::cout << is_type_declaration( node,&retMe.context ) << "\n";};
-    for( AST_node* node : nodePool ) assert( is_terminated(node) );// if this fails you have bad grammer.
+    //std::cout << "--------------------------------------------------------------------------------\n";for( AST_node* node : nodePool ){node->print_with_types();};
+    //for( AST_node* node : nodePool ) assert( is_terminated(node) );// if this fails you have bad grammer.
     
     retMe.root.children = nodePool;
     return retMe;

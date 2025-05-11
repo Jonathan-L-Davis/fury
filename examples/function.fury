@@ -1,0 +1,11 @@
+function f();
+
+function g(){f();};
+
+function f(){};
+
+function byte h(){
+    g();
+    h();
+}
+

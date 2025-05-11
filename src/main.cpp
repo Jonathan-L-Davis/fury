@@ -12,18 +12,24 @@
 
 int main(int argc, char**argv){
     // currently leaks memory on exit. Not a big deal (yet). Just need to define destructors for AST_node's.
-    program p1 = parse("function.fury");
-    std::cout << "----------------------------------------------------------------------------------\n";
-    p1.root.print_with_types();
-    std::cout << "----------------------------------------------------------------------------------\n";
-    p1.context.print();
+    std::vector<program> prog_frags;
     
-    
-    std::cout << "----------------------------------------------------------------------------------\n";
-    std::cout << "Running program function.fury\n";
-    std::cout << "----------------------------------------------------------------------------------\n";
-    
-    //interpret( p1 );
-    
+    bool print = false;
+    for( int i = 1; i < argc; i++ ){
+        if(std::string(argv[i])=="-p"){
+            print = true;
+            continue;
+        }else
+        prog_frags.push_back( parse( argv[i] ) );
+    }
+
+    if(print){
+        for(auto prog_frag:prog_frags){
+            std::cout << prog_frag.file_name << "\n";
+            prog_frag.root.print_with_types();
+        }
+    }
+        
     return 0;
 }
+

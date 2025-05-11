@@ -1,5 +1,0 @@
-byte b;
-
-function f(){byte a; byte b;}; function g();
-
-dual a;
