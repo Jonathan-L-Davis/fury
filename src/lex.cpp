@@ -23,6 +23,7 @@ std::vector<std::string> keywords
     "quad",
     "return",
     "struct",
+    "syntax",
     "type",
     "while",
 };

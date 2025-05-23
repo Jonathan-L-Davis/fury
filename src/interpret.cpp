@@ -1,5 +1,6 @@
 #include "interpret.h"
 #include "stack.h"
+#include "type_util.h"
 
 #include <cassert>
 
@@ -99,10 +100,10 @@ void exec(stack &prog_stack, program &prog){
         return;
     }
     
-    if( prog.context.function_exists(obj.object->children[obj.idx]->text) ){
+    if( prog.context.function_exists(obj.object->children[obj.idx]->text,get_function_param_types(obj.object)) ){
         
         stackObject a;
-        a.object = prog.context.get_function(obj.object->children[obj.idx]->text).value;
+        a.object = prog.context.get_function(obj.object->children[obj.idx]->text,get_function_param_types(obj.object)).value;
         a.idx = 0;
         
         

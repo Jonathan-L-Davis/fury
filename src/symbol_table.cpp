@@ -1,5 +1,6 @@
 #include "symbol_table.h"
 #include "parse_util.h"
+#include "type_util.h"
 #include <assert.h>
 #include <iostream>
 
@@ -7,7 +8,10 @@ void symbol_table::add_symbol( symbol add_me ){
     //*
     for( unsigned int i = 0; i < sub_scopes.size(); i++){
         if( sub_scopes[i].scope == add_me.name ){
-            assert(false);
+            add_me.value->print_with_types();
+            if( !(add_me.sym_type == sym_t_function || add_me.sym_type == sym_t_operator || add_me.sym_type == sym_t_syntax) ){// basically allows overloading of functionals. The grammer rules have to be responsible and do their own validity checking.
+                assert(false);
+            }
         }
     }
     
@@ -63,7 +67,7 @@ void symbol_table::add_symbol( symbol add_me ){
                     if( is_function_definition(add_me.value) && is_function_definition(functions[i].value) ){
                         assert(false);// defining a previously defined function.
                     }else{
-                        functions[i] = add_me;
+                        functions[i] = add_me;// need to handle namespaces for function overloads, can't support overloads correctly until that happens
                         break;
                     }
                 }
@@ -286,7 +290,7 @@ bool symbol_table::contains_type(std::string id) const{
 
 // is id in any scope
 bool symbol_table::id_exists(std::string id) const{
-    return byte_exists(id) || dual_exists(id) || quad_exists(id) || oct_exists(id) || struct_exists(id) || function_exists(id) || operator_exists(id) || syntax_exists(id) || label_exists(id) || type_exists(id);
+    return byte_exists(id) || dual_exists(id) || quad_exists(id) || oct_exists(id) || struct_exists(id) || function_id_exists(id) || operator_exists(id) || syntax_exists(id) || label_exists(id) || type_exists(id);
 }
 
 bool symbol_table::byte_exists(std::string id) const{
@@ -349,14 +353,26 @@ bool symbol_table::struct_exists(std::string id) const{
     
 }
 
-bool symbol_table::function_exists(std::string id) const{
+bool symbol_table::function_id_exists(std::string id) const{
     
     for( unsigned int i = 0; i < functions.size(); i++ ){
         if( functions[i].name == id )
             return true;
     }
     
-    if( scope != "" ) return parent->function_exists(id);
+    if( scope != "" ) return parent->function_id_exists(id);
+    return false;
+    
+}
+
+bool symbol_table::function_exists(std::string id,std::vector<std::string>params) const{
+    
+    for( unsigned int i = 0; i < functions.size(); i++ ){
+        if( functions[i].name == id && get_function_param_types(functions[i].value) == params )
+            return true;
+    }
+    
+    if( scope != "" ) return parent->function_exists(id,params);
     return false;
     
 }
@@ -466,14 +482,14 @@ bool symbol_table::scope_exists(std::string find_me) const{
 }
 
 // assumes function exists.
-symbol symbol_table::get_function(std::string getMe) const{
+symbol symbol_table::get_function(std::string getMe, std::vector<std::string> param_types) const{
     
     for( int i = 0; i < functions.size(); i++){
         if( functions[i].name == getMe )
             return functions[i];
     }
     
-    return parent->get_function(getMe);// will null dereference if there isn't one.
+    return parent->get_function(getMe,param_types);// will null dereference if there isn't one.
 }
 
 // assumes byte exists.

@@ -38,9 +38,9 @@ enum scope_type:uint32_t{
     scope_t_for = 2,
     scope_t_while = 3,
     scope_t_anonymous = 4,
-    scope_type_root = 5,
-    scope_type_operator = 6,
-    scope_type_syntax = 7,
+    scope_t_root = 5,
+    scope_t_operator = 6,
+    scope_t_syntax = 7,
 };
 
 
@@ -92,7 +92,8 @@ struct symbol_table{
     bool quad_exists(std::string) const;
     bool oct_exists(std::string) const;
     bool struct_exists(std::string) const;
-    bool function_exists(std::string) const;
+    bool function_id_exists(std::string) const;
+    bool function_exists(std::string,std::vector<std::string>) const;
     bool operator_exists(std::string) const;
     bool syntax_exists(std::string) const;
     bool label_exists(std::string) const;
@@ -102,7 +103,7 @@ struct symbol_table{
     //
     
     
-    symbol get_function(std::string) const;
+    symbol get_function(std::string,std::vector<std::string>) const;
     symbol get_byte(std::string) const;
     symbol get_dual(std::string) const;
     symbol get_quad(std::string) const;

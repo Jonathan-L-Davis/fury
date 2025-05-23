@@ -1,4 +1,5 @@
 #include "parse_util.h"
+#include "type_util.h"
 #include "assert.h"
 
 
@@ -74,6 +75,9 @@ bool is_valid(const AST_node* const checkMe, const symbol_table* const context){
         return true;
     
     if(is_function_call(checkMe,context))
+        return true;
+    
+    if(is_syntax_declaration(checkMe))
         return true;
     
     if(is_type_declaration(checkMe,context))
@@ -231,7 +235,8 @@ bool is_function_definition(const AST_node* const checkMe){
 }
 
 bool is_function_call(const AST_node* const checkMe, const symbol_table* const context){
-    if( !context->function_exists(checkMe->text))
+    
+    if( !context->function_id_exists(checkMe->text) )
         return false;
     
     if( checkMe->children.size() != 1 )
@@ -248,9 +253,129 @@ bool is_function_call(const AST_node* const checkMe, const symbol_table* const c
     return true;
 }
 
+bool is_syntax_declaration(const AST_node* const checkMe){
+    
+    //using comments for pictures of tree structure after each check.
+    
+    if( checkMe->text != "syntax" ){
+        return false;
+    }
+    
+    /**
+    * 
+    * function
+    * 
+    **/
+    if( checkMe->children.size() == 0 ){
+        return false;
+    }
+    
+    /**
+    * 
+    * function
+    *     ...
+    **/
+    
+    int s_id_count = 0;
+    const AST_node* s_id;
+    for( int i = 0; i < checkMe->children.size(); i++ ){
+        if( checkMe->children[i]->type == node_t::syntax_id ){
+            s_id_count++;
+            s_id = checkMe->children[i];
+            assert(i>=0 && i < 2);// only the type can come before the id
+        }
+    }
+    
+    assert(s_id_count == 1);
+    
+    /**
+    * 
+    * function
+    *     [return type]
+    *     f_id
+    *     [function body]
+    **/
+    
+    if(s_id->children.size()!=1 || s_id->children[0]->text != "(") return false;
+    
+    /**
+    * 
+    * function
+    *     [return type]
+    *     f_id
+    *         (
+    *     [function body]
+    **/
+    
+    if( s_id->children[0]->children.size()==2 && s_id->children[0]->children[0]->text == "byte" && s_id->children[0]->children[1]->text == ")" ) return true;
+    
+    /**
+    * 
+    * function
+    *     [return type]
+    *     s_id
+    *         (
+    *             byte        
+    *             )
+    *     [function body]
+    **/
+    return false;
+}
+
+bool is_syntax_partial_declaration(const AST_node* const checkMe){
+    
+    //using comments for pictures of tree structure after each check.
+    
+    if( checkMe->text != "syntax" ){
+        return false;
+    }
+    /**
+    * 
+    * function
+    * 
+    **/
+    if( checkMe->children.size() == 0 ){
+        return false;
+    }
+    
+    /**
+    * 
+    * function
+    *     ...
+    **/
+    
+    int s_id_count = 0;
+    int s_id_idx = 0;
+    const AST_node* s_id;
+    for( int i = 0; i < checkMe->children.size(); i++ ){
+        if( checkMe->children[i]->type == node_t::syntax_id ){
+            s_id_count++;
+            s_id = checkMe->children[i];
+            s_id_idx = i;
+            assert(i>=0 && i < 2);// only the type can come before the id
+            if(i!=checkMe->children.size()-1) return false;// id is the last thing in the function partial. No body or arguments yet.
+        }
+    }
+    
+    if( s_id_idx == 1 )
+        assert( checkMe->children[0]->type == node_t::type );
+    
+    /**
+    * 
+    * function
+    *     [return type]
+    *     f_id
+    **/
+    assert(s_id_count == 1);
+    
+    if(s_id->children.size()!=0) return false;
+    
+    return true;
+}
+
 bool is_type_declaration(const AST_node* const checkMe, const symbol_table* const context){
     
-    if( checkMe->type!=node_t::type )
+        if( checkMe->type!=node_t::type )
         return false;
     
     if( !context->type_exists(checkMe->text) )

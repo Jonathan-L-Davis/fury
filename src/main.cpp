@@ -23,7 +23,7 @@ int main(int argc, char**argv){
         prog_frags.push_back( parse( argv[i] ) );
     }
 
-    if(print){
+    if(true||print){
         for(auto prog_frag:prog_frags){
             std::cout << prog_frag.file_name << "\n";
             prog_frag.root.print_with_types();

@@ -1,5 +1,7 @@
 #include "grammer.h"
 #include "parse_util.h"
+#include "type_util.h"
+
 #include <cassert>
 
 bool paren_closure_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
@@ -20,20 +22,23 @@ void function_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<
 bool function_definition_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 void function_definition_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 
+bool function_call_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+void function_call_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+
 bool comma_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 void comma_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 
 bool type_declaration_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 void type_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
-/*
-bool syntax_partial_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
-void syntax_partial_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
+//*
+bool syntax_partial_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+void syntax_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 
-bool syntax_declaration_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
-void syntax_declaration_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
+bool syntax_declaration_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+void syntax_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 
-bool syntax_definition_applies(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
-void syntax_definition_folding(std::vector<AST_node*>& nodePool, symbol_table* context, int index);
+bool syntax_definition_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+void syntax_definition_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 //*/
 
 symbol_table fury_default_context(){
@@ -61,9 +66,16 @@ std::vector<rule> fury_grammer_rules(){
     
     retMe.push_back( {"paren-closure", paren_closure_applies, paren_closure_folding} );
     retMe.push_back( {"curly-bracket-closure", curly_bracket_closure_applies, curly_bracket_closure_folding} );
+    
     retMe.push_back( {"function-partial", function_partial_applies, function_partial_folding} );// function partials out of pure tokens -- with scoping implications.
     retMe.push_back( {"function-declaration", function_declaration_applies, function_declaration_folding} );// function declarations out of function partials & function parameter clauses.
     retMe.push_back( {"function-definition", function_definition_applies, function_definition_folding} );// function definitions out of declarations & body definitions.
+    
+    retMe.push_back( {"syntax-partial", syntax_partial_applies, syntax_partial_folding} );// syntax partials out of pure tokens -- with scoping implications.
+    retMe.push_back( {"syntax-declaration", syntax_declaration_applies, syntax_declaration_folding} );// syntax declarations out of function partials & function parameter clauses.
+//    retMe.push_back( {"syntax-definition", syntax_definition_applies, syntax_definition_folding} );// syntax definitions out of declarations & body definitions.
+    
+    retMe.push_back( {"function-call", function_call_applies, function_call_folding} );
     retMe.push_back( {"comma", comma_applies, comma_folding} );
     retMe.push_back( {"type-declaration", type_declaration_applies, type_declaration_folding} );
     retMe.push_back( {"termination", termination_applies, termination_folding} );
@@ -225,6 +237,21 @@ void function_definition_folding(std::vector<AST_node*>& nodePool, std::vector<s
     return;
 }
 
+bool function_call_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    return context[context.size()-1]->function_id_exists(nodePool[i]->text) && nodePool.size()>i+1&& is_closed_parenthesis(nodePool[i+1]);
+}
+
+void function_call_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    assert(function_call_applies(nodePool,context,i));
+    
+    nodePool[i+1]->type = node_t::function_id;
+    
+    nodePool[i]->children.push_back(nodePool[i+1]);
+    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
+    
+    return;
+}
+
 bool comma_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     return is_terminable(nodePool[i],context[context.size()-1]) &&
             i+1 < nodePool.size() && is_empty_comma(nodePool[i+1]) &&
@@ -249,8 +276,6 @@ bool type_declaration_applies(std::vector<AST_node*>& nodePool, std::vector<symb
     if( nodePool[i]->type!=node_t::type || nodePool[i]->children.size() != 0 )
         return false;
     
-    
-    
     if( i+1 >= nodePool.size() || nodePool[i+1]->type != node_t::id )
         return false;
     
@@ -267,9 +292,69 @@ void type_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<symb
     if( nodePool[i]->text == "oct" ) sym_type = sym_t_oct;
     if( nodePool[i]->text == "type" ) sym_type = sym_t_type;
     if( nodePool[i]->text == "label" ) sym_type = sym_t_label;
-    context[context.size()-1]->add_symbol({sym_type,{nodePool[i]->text},nodePool[i+1]->text,nodePool[i]});
     
     nodePool[i]->children.push_back(nodePool[i+1]);
     
     nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
+    
+    context[context.size()-1]->add_symbol({sym_type,{nodePool[i]->text},nodePool[i+1]->text,nodePool[i]});
+}
+
+bool syntax_partial_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    return nodePool[i]->text == "syntax" && nodePool[i]->children.size() == 0 && (
+    (i+1<nodePool.size() && nodePool[i+1]->type == node_t::id ) ||
+    (i+2<nodePool.size() && nodePool[i+2]->type == node_t::id && nodePool[i+1]->type == node_t::type )
+    );
+}
+
+void syntax_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    assert( syntax_partial_applies(nodePool,context,i) );
+    
+    bool is_folded_correctly = false;
+    if( i+1<nodePool.size() && nodePool[i+1]->type == node_t::id ){
+        nodePool[i+1]->type = node_t::syntax_id;
+        
+        context[context.size()-1]->add_symbol({sym_t_function,{""},nodePool[i+1]->text,nodePool[i]});
+        context[context.size()-1]->add_scope(nodePool[i+1]->text,scope_type::scope_t_syntax);
+        context.push_back( &context[context.size()-1]->get_subscope(nodePool[i+1]->text) );
+        
+        nodePool[i]->children.push_back(nodePool[i+1]);
+        nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
+        is_folded_correctly = true;
+    }
+    else
+    if( i+2<nodePool.size() && nodePool[i+2]->type == node_t::id && nodePool[i+1]->type == node_t::type ){
+        nodePool[i+2]->type = node_t::syntax_id;
+        
+        context[context.size()-1]->add_symbol({sym_t_function,{nodePool[i+1]->text},nodePool[i+2]->text,nodePool[i]});
+        context[context.size()-1]->add_scope(nodePool[i+2]->text,scope_type::scope_t_syntax);
+        context.push_back( &context[context.size()-1]->get_subscope(nodePool[i+2]->text) );
+        
+        nodePool[i]->children.push_back(nodePool[i+1]);
+        nodePool[i]->children.push_back(nodePool[i+2]);
+        nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);
+        is_folded_correctly = true;
+    }
+    
+    if(is_folded_correctly){
+        
+        return;
+    }
+    assert(false);
+}
+
+bool syntax_declaration_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    return (is_syntax_partial_declaration(nodePool[i]) && !is_syntax_declaration(nodePool[i]) &&
+            i+1 < nodePool.size() && is_closed_parenthesis(nodePool[i+1]) ) &&
+            nodePool[i+1]->children.size() == 2 && nodePool[i+1]->children[0]->text == "byte";// type checking the param type of syntax, which can only be a single byte type.
+}
+
+void syntax_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    assert(syntax_declaration_applies(nodePool,context,i));
+    
+    int f_id_idx = nodePool[i]->children.size()-1;
+    nodePool[i]->children[f_id_idx]->children.push_back(nodePool[i+1]);
+    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
+    
+    return;
 }
