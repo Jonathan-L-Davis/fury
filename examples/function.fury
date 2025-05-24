@@ -4,8 +4,9 @@ function g(){f();};
 
 function f(){};
 
-syntax "(byte b);
-"
+syntax "(byte b){
+    return ";
+};
 
 function byte h(){
     g();

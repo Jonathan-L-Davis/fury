@@ -322,6 +322,17 @@ bool is_syntax_declaration(const AST_node* const checkMe){
     return false;
 }
 
+bool is_syntax_definition(const AST_node* const checkMe){
+    if(!is_syntax_declaration(checkMe))
+        return false;
+    if(checkMe->children[ checkMe->children.size()-1 ]->text != "{")
+        return false;
+    if( is_closed_curly_bracket(checkMe->children[ checkMe->children.size()-1 ]) )
+        return true;
+    return false;
+}
+
+
 bool is_syntax_partial_declaration(const AST_node* const checkMe){
     
     //using comments for pictures of tree structure after each check.

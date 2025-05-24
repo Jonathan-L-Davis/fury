@@ -101,7 +101,7 @@ struct symbol_table{
     
     bool scope_exists(std::string find_me) const;
     //
-    
+    bool inside_syntax();
     
     symbol get_function(std::string,std::vector<std::string>) const;
     symbol get_byte(std::string) const;

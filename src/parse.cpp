@@ -62,7 +62,7 @@ program parse(std::string file_name){
             assert(byte=='\n' || ( byte>=' ' && byte<127) );
         }
         
-        if( context_stack[context_stack.size()-1]->syntax_exists(currentToken+(char)byte) ){
+        if( !context_stack[context_stack.size()-1]->inside_syntax() && context_stack[context_stack.size()-1]->syntax_exists(currentToken+(char)byte) ){
             std::cout << (currentToken+(char)byte) << "\n";
             std::cout << "Syntax execution is not supported yet.\n";
             
@@ -81,8 +81,8 @@ program parse(std::string file_name){
                 node_t node_type = node_t::id;
                 if(is_keyword(completeToken)) node_type = node_t::keyword;
                 *n = {currentToken,line_no,node_type};
-                nodePool.push_back(n);
                 currentToken="";
+                nodePool.push_back(n);
             }
             completeToken = std::string(1,byte);
         }else{

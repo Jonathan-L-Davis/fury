@@ -73,7 +73,7 @@ std::vector<rule> fury_grammer_rules(){
     
     retMe.push_back( {"syntax-partial", syntax_partial_applies, syntax_partial_folding} );// syntax partials out of pure tokens -- with scoping implications.
     retMe.push_back( {"syntax-declaration", syntax_declaration_applies, syntax_declaration_folding} );// syntax declarations out of function partials & function parameter clauses.
-//    retMe.push_back( {"syntax-definition", syntax_definition_applies, syntax_definition_folding} );// syntax definitions out of declarations & body definitions.
+    retMe.push_back( {"syntax-definition", syntax_definition_applies, syntax_definition_folding} );// syntax definitions out of declarations & body definitions.
     
     retMe.push_back( {"function-call", function_call_applies, function_call_folding} );
     retMe.push_back( {"comma", comma_applies, comma_folding} );
@@ -314,7 +314,7 @@ void syntax_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symbol
     if( i+1<nodePool.size() && nodePool[i+1]->type == node_t::id ){
         nodePool[i+1]->type = node_t::syntax_id;
         
-        context[context.size()-1]->add_symbol({sym_t_function,{""},nodePool[i+1]->text,nodePool[i]});
+        context[context.size()-1]->add_symbol({sym_t_syntax,{""},nodePool[i+1]->text,nodePool[i]});
         context[context.size()-1]->add_scope(nodePool[i+1]->text,scope_type::scope_t_syntax);
         context.push_back( &context[context.size()-1]->get_subscope(nodePool[i+1]->text) );
         
@@ -326,7 +326,7 @@ void syntax_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symbol
     if( i+2<nodePool.size() && nodePool[i+2]->type == node_t::id && nodePool[i+1]->type == node_t::type ){
         nodePool[i+2]->type = node_t::syntax_id;
         
-        context[context.size()-1]->add_symbol({sym_t_function,{nodePool[i+1]->text},nodePool[i+2]->text,nodePool[i]});
+        context[context.size()-1]->add_symbol({sym_t_syntax,{nodePool[i+1]->text},nodePool[i+2]->text,nodePool[i]});
         context[context.size()-1]->add_scope(nodePool[i+2]->text,scope_type::scope_t_syntax);
         context.push_back( &context[context.size()-1]->get_subscope(nodePool[i+2]->text) );
         
@@ -354,6 +354,20 @@ void syntax_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<sy
     
     int f_id_idx = nodePool[i]->children.size()-1;
     nodePool[i]->children[f_id_idx]->children.push_back(nodePool[i+1]);
+    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
+    
+    return;
+}
+
+bool syntax_definition_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    return (is_syntax_declaration(nodePool[i]) && !is_syntax_definition(nodePool[i]) &&
+            i+1 < nodePool.size() && is_closed_curly_bracket(nodePool[i+1]) );
+}
+
+void syntax_definition_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    assert(syntax_definition_applies(nodePool,context,i));
+    
+    nodePool[i]->children.push_back(nodePool[i+1]);
     nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
     
     return;

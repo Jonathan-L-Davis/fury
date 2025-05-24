@@ -9,7 +9,7 @@ void symbol_table::add_symbol( symbol add_me ){
     for( unsigned int i = 0; i < sub_scopes.size(); i++){
         if( sub_scopes[i].scope == add_me.name ){
             add_me.value->print_with_types();
-            if( !(add_me.sym_type == sym_t_function || add_me.sym_type == sym_t_operator || add_me.sym_type == sym_t_syntax) ){// basically allows overloading of functionals. The grammer rules have to be responsible and do their own validity checking.
+            if( !(add_me.sym_type == sym_t_function || add_me.sym_type == sym_t_operator ) ){// basically allows overloading of overloadable functionals. The grammer rules have to be responsible and do their own validity checking.
                 assert(false);
             }
         }
@@ -534,4 +534,14 @@ symbol symbol_table::get_oct(std::string getMe) const{
     }
     
     return parent->get_oct(getMe);// will null dereference if there isn't one.
+}
+
+bool symbol_table::inside_syntax(){
+    if(type==scope_t_syntax)
+        return true;
+    
+    if(parent==nullptr)
+        return false;
+    
+    return parent->inside_syntax();
 }
