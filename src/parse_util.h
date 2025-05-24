@@ -18,6 +18,8 @@ bool is_syntax_partial_declaration(const AST_node* const checkMe);
 bool is_syntax_declaration(const AST_node* const checkMe);
 bool is_syntax_definition(const AST_node* const checkMe);
 
+bool is_return_statement(const AST_node* const checkMe, const symbol_table* const context);
+
 bool is_closed_parenthesis(const AST_node* checkMe);
 bool is_closed_curly_bracket(const AST_node* const amIClosed);
 
@@ -27,6 +29,8 @@ bool is_empty_comma(const AST_node* const checkMe);
 bool is_comma_expression(const AST_node* const checkMe);
 
 bool is_complete_type(const AST_node* const checkMe);
+
+bool is_id( const AST_node* const checkMe, const symbol_table* const context);
 
 AST_node* get_rightmost_bottommost(const AST_node* const checkMe);
 AST_node* get_rightmost_bottommost_non_terminal( const AST_node* const traverseMe);

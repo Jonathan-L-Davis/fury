@@ -62,14 +62,6 @@ program parse(std::string file_name){
             assert(byte=='\n' || ( byte>=' ' && byte<127) );
         }
         
-        if( !context_stack[context_stack.size()-1]->inside_syntax() && context_stack[context_stack.size()-1]->syntax_exists(currentToken+(char)byte) ){
-            std::cout << (currentToken+(char)byte) << "\n";
-            std::cout << "Syntax execution is not supported yet.\n";
-            
-            context_stack[0]->print();
-            std::exit(-1);
-        }
-        
         if(byte == ' ' || byte == '\n'){
             completeToken = currentToken;
             currentToken = "";
@@ -80,6 +72,7 @@ program parse(std::string file_name){
                 AST_node* n = new AST_node;
                 node_t node_type = node_t::id;
                 if(is_keyword(completeToken)) node_type = node_t::keyword;
+                if(context_stack[context_stack.size()-1]->syntax_exists(currentToken+(char)byte)) node_type = node_t::syntax_id;
                 *n = {currentToken,line_no,node_type};
                 currentToken="";
                 nodePool.push_back(n);
@@ -92,7 +85,7 @@ program parse(std::string file_name){
         if( completeToken == "" ) continue;
         
         {
-        AST_node* node = new AST_node;
+            AST_node* node = new AST_node;
             
             node->line_no = line_no;
             node->text = completeToken;
@@ -109,6 +102,8 @@ program parse(std::string file_name){
                 node->type = node_t::comma;
             else if(byte==';')
                 node->type = node_t::semicolon;
+            else if(context_stack[context_stack.size()-1]->syntax_exists(currentToken))
+                node->type = node_t::syntax_id;
             else node->type = node_t::id;
             
             nodePool.push_back(node);
@@ -116,7 +111,6 @@ program parse(std::string file_name){
         
         
         // if we haven't completed a token, & we have a match for a syntax.
-        if( completeToken == "" && retMe.context.syntax_exists(currentToken) ) assert(false);// need the interpreter to continue this feature further.
         completeToken = "";// don't reparse a completed token, duh.
         
         /// ----------------------------------------------------    Reduction Rules Start Here    ---------------------------------------------------------- ///

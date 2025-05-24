@@ -545,3 +545,39 @@ bool symbol_table::inside_syntax(){
     
     return parent->inside_syntax();
 }
+
+bool symbol_table::inside_function(){
+    if(type==scope_t_function)
+        return true;
+    
+    if(parent==nullptr)
+        return false;
+    
+    return parent->inside_function();
+}
+
+bool symbol_table::inside_operator(){
+    if(type==scope_t_operator)
+        return true;
+    
+    if(scope=="")
+        return false;
+    
+    return parent->inside_operator();
+}
+
+bool symbol_table::inside_functional(){
+    return inside_syntax()||inside_function()||inside_operator();
+}
+
+bool symbol_table::lowest_functional_is_syntax(){
+    
+    if(type==scope_t_syntax)
+        return true;
+    if(type==scope_t_function||type==scope_t_operator||type==scope_t_struct)
+        return false;
+    if(scope=="")
+        return false;
+    
+    return parent->lowest_functional_is_syntax();
+}

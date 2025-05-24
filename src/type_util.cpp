@@ -9,7 +9,7 @@ std::vector<std::string> get_function_param_types( const AST_node * const knowMe
     //knowMe->print_with_types();
     assert(is_function_declaration(knowMe));
     
-    int idx = 500000000000;// massive bad value to blow up if not redefined
+    int idx = 1783793664;// massive bad value to blow up if not redefined
     if(is_function_definition(knowMe))
         idx = knowMe->children.size()-2;
     else

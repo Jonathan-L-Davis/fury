@@ -92,6 +92,12 @@ bool is_valid(const AST_node* const checkMe, const symbol_table* const context){
     if(is_closed_curly_bracket(checkMe))
         return true;
     
+    if(is_return_statement(checkMe,context))
+        return true;
+    
+    if(is_id(checkMe,context))
+        return true;
+    
     return false;
 }
 
@@ -342,7 +348,7 @@ bool is_syntax_partial_declaration(const AST_node* const checkMe){
     }
     /**
     * 
-    * function
+    * syntax
     * 
     **/
     if( checkMe->children.size() == 0 ){
@@ -351,7 +357,7 @@ bool is_syntax_partial_declaration(const AST_node* const checkMe){
     
     /**
     * 
-    * function
+    * syntax
     *     ...
     **/
     
@@ -373,7 +379,7 @@ bool is_syntax_partial_declaration(const AST_node* const checkMe){
     
     /**
     * 
-    * function
+    * syntax
     *     [return type]
     *     f_id
     **/
@@ -382,6 +388,21 @@ bool is_syntax_partial_declaration(const AST_node* const checkMe){
     if(s_id->children.size()!=0) return false;
     
     return true;
+}
+
+bool is_return_statement(const AST_node* const checkMe, const symbol_table* const context){
+    
+    if(checkMe->text!="return")
+       return false;
+    
+    if( checkMe->children.size()==1 && is_valid(checkMe->children[0],context) )
+        return true;
+    
+    return false;
+}
+
+bool is_id( const AST_node* const checkMe, const symbol_table* const context){
+    return context->id_exists(checkMe->text);
 }
 
 bool is_type_declaration(const AST_node* const checkMe, const symbol_table* const context){

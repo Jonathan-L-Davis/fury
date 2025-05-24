@@ -39,6 +39,9 @@ void syntax_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<sy
 
 bool syntax_definition_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 void syntax_definition_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+
+bool return_statement_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+void return_statement_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 //*/
 
 symbol_table fury_default_context(){
@@ -74,6 +77,8 @@ std::vector<rule> fury_grammer_rules(){
     retMe.push_back( {"syntax-partial", syntax_partial_applies, syntax_partial_folding} );// syntax partials out of pure tokens -- with scoping implications.
     retMe.push_back( {"syntax-declaration", syntax_declaration_applies, syntax_declaration_folding} );// syntax declarations out of function partials & function parameter clauses.
     retMe.push_back( {"syntax-definition", syntax_definition_applies, syntax_definition_folding} );// syntax definitions out of declarations & body definitions.
+    
+    retMe.push_back( {"return-statement", return_statement_applies, return_statement_folding} );
     
     retMe.push_back( {"function-call", function_call_applies, function_call_folding} );
     retMe.push_back( {"comma", comma_applies, comma_folding} );
@@ -372,3 +377,17 @@ void syntax_definition_folding(std::vector<AST_node*>& nodePool, std::vector<sym
     
     return;
 }
+
+bool return_statement_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    return nodePool[i]->text=="return" && i+1<nodePool.size() && nodePool[i+1] && is_valid(nodePool[i+1],context[context.size()-1]);
+}
+
+void return_statement_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    assert(return_statement_applies(nodePool,context,i));
+    
+    nodePool[i]->children.push_back(nodePool[i+1]);
+    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
+    
+    return;
+}
+

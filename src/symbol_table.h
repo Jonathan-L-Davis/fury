@@ -41,6 +41,7 @@ enum scope_type:uint32_t{
     scope_t_root = 5,
     scope_t_operator = 6,
     scope_t_syntax = 7,
+    scope_t_struct = 8,
 };
 
 
@@ -102,6 +103,11 @@ struct symbol_table{
     bool scope_exists(std::string find_me) const;
     //
     bool inside_syntax();
+    bool inside_function();
+    bool inside_operator();
+    bool inside_functional();
+    
+    bool lowest_functional_is_syntax();
     
     symbol get_function(std::string,std::vector<std::string>) const;
     symbol get_byte(std::string) const;
