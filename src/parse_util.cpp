@@ -98,6 +98,12 @@ bool is_valid(const AST_node* const checkMe, const symbol_table* const context){
     if(is_id(checkMe,context))
         return true;
     
+    if(is_if_statement(checkMe))
+        return true;
+    
+    if(is_if_statement(checkMe))
+        return true;
+    
     return false;
 }
 
@@ -386,6 +392,38 @@ bool is_syntax_partial_declaration(const AST_node* const checkMe){
     assert(s_id_count == 1);
     
     if(s_id->children.size()!=0) return false;
+    
+    return true;
+}
+
+bool is_if_statement(const AST_node* const checkMe){
+    if(checkMe->text!="if")
+        return false;
+    
+    if(checkMe->children.size()<1||checkMe->children.size()>3)
+        return false;
+    
+    if(!is_closed_parenthesis(checkMe->children[0]))
+        return false;
+    
+    // expression checks assume the validity of sub-expressions.
+    //if(checkMe->children.size()>1 && !is_valid(checkMe->children[1],context)
+    //    return false;
+    
+    
+    return true;
+}
+
+bool is_if_else_statement(const AST_node* const checkMe){
+    if(!is_if_statement(checkMe))
+        return false;
+    
+    if((*(checkMe->children.end()-1))->text!="else")
+        return false;
+    
+    // expression checks assume the validity of sub-expressions. Don't know how I feel about that. Probably means I need to always propagate context, which does make the parse util api more consistent.
+    //if(checkMe->children.size()>1 && !is_valid(checkMe->children[1],context)
+    //    return false;
     
     return true;
 }

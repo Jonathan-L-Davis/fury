@@ -1,15 +1,3 @@
-function f();
+byte c;
 
-function g(){f();};
-
-function f(){};
-
-syntax "(byte b){
-    return ";
-};
-
-function byte h(){
-    g();
-    h();
-}
-;
+if (byte b) byte a;

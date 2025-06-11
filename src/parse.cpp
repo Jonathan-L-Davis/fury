@@ -126,7 +126,7 @@ program parse(std::string file_name){
                 for( int j = 0; j < rules.size(); j++ ){
                     if( rules[j].rule_applies(nodePool,context_stack,i) ){
                         rules[j].apply_rule(nodePool,context_stack,i);
-                        i = 0;
+                        i = -1;
                         break;
                     }
                 }
