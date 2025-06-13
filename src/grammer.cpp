@@ -46,8 +46,8 @@ void return_statement_folding(std::vector<AST_node*>& nodePool, std::vector<symb
 bool if_statement_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 void if_statement_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 
-bool else_statement_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
-void else_statement_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+bool if_else_statement_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+void if_else_statement_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 
 symbol_table fury_default_context(){
     symbol_table retMe;
@@ -84,6 +84,7 @@ std::vector<rule> fury_grammer_rules(){
     retMe.push_back( {"syntax-definition", syntax_definition_applies, syntax_definition_folding} );// syntax definitions out of declarations & body definitions.
     
     retMe.push_back( {"if-statement", if_statement_applies, if_statement_folding} );
+    retMe.push_back( {"if-else-statement", if_else_statement_applies, if_else_statement_folding} );
     retMe.push_back( {"return-statement", return_statement_applies, return_statement_folding} );
     
     retMe.push_back( {"function-call", function_call_applies, function_call_folding} );
@@ -403,6 +404,8 @@ bool if_statement_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_t
 
 void if_statement_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     
+    assert(if_statement_applies(nodePool,context,i));
+    
     nodePool[i]->children.push_back(nodePool[i+1]);
     nodePool[i]->children.push_back(nodePool[i+2]);
     
@@ -412,15 +415,18 @@ void if_statement_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_t
 }
 
 bool if_else_statement_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
-    return is_if_statement(nodePool[i]) && !is_if_else_statement(nodePool[i]) && i+2<nodePool.size() && nodePool[i+1]->text=="else" && is_terminable(nodePool[i+2],*(context.end()-1));
+    return is_if_statement(nodePool[i]) && !is_if_else_statement(nodePool[i]) && i+3<nodePool.size() && nodePool[i+1]->text=="else" && is_valid(nodePool[i+2],*(context.end()-1)) && nodePool[i+3]->text==";";
 }
 
 void if_else_statement_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     
+    assert(if_else_statement_applies(nodePool,context,i));
+    
+    get_rightmost_bottommost(nodePool[i+2])->children.push_back(nodePool[i+3]);
     nodePool[i+1]->children.push_back(nodePool[i+2]);
     nodePool[i]->children.push_back(nodePool[i+1]);
     
-    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);
+    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+4);
     
     return;
 }

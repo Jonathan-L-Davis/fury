@@ -119,9 +119,6 @@ program parse(std::string file_name){
             i = 0;
             for( i = 0; i < nodePool.size(); i++ ){
                 
-                if( is_terminated(nodePool[i]) )
-                    continue;
-                
                 std::vector<rule> rules = fury_grammer_rules();
                 for( int j = 0; j < rules.size(); j++ ){
                     if( rules[j].rule_applies(nodePool,context_stack,i) ){

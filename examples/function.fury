@@ -1,3 +1,6 @@
-byte c;
+function f(){};
+function g(){};
 
-if (byte b) byte a;
+if (byte b) f();
+else if(byte q) g();
+else if(byte a) f();

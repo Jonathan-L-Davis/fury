@@ -101,7 +101,7 @@ bool is_valid(const AST_node* const checkMe, const symbol_table* const context){
     if(is_if_statement(checkMe))
         return true;
     
-    if(is_if_statement(checkMe))
+    if(is_if_else_statement(checkMe))
         return true;
     
     return false;
@@ -418,7 +418,7 @@ bool is_if_else_statement(const AST_node* const checkMe){
     if(!is_if_statement(checkMe))
         return false;
     
-    if((*(checkMe->children.end()-1))->text!="else")
+    if( (*(checkMe->children.end()-1))->text!="else")
         return false;
     
     // expression checks assume the validity of sub-expressions. Don't know how I feel about that. Probably means I need to always propagate context, which does make the parse util api more consistent.
