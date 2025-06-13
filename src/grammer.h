@@ -15,7 +15,20 @@ struct rule{
     reduction apply_rule;
 };
 
-std::vector<rule> fury_grammer_rules();
+enum class parse_dir: bool{forward,backward};
+
+struct grammer{
+    
+    void add_layer(int i,parse_dir dir);
+    void add_rule(int i,rule addMe);
+    
+    std::vector<rule>& get_layer(int i);
+    
+    std::vector<std::vector<rule>> rules;
+    std::vector<parse_dir> direction;
+};
+
+grammer fury_grammer();
 symbol_table fury_default_context();
 
 #endif//GRAMMER_H

@@ -112,8 +112,8 @@ program parse(std::string file_name){
         
         // if we haven't completed a token, & we have a match for a syntax.
         completeToken = "";// don't reparse a completed token, duh.
-        
-        /// ----------------------------------------------------    Reduction Rules Start Here    ---------------------------------------------------------- ///
+        grammer g = fury_grammer();
+        /*/ ----------------------------------------------------    Reduction Rules Start Here    ---------------------------------------------------------- ///
         int i = 0;
         do{
             i = 0;
@@ -128,7 +128,7 @@ program parse(std::string file_name){
                     }
                 }
             }
-        }while(i<nodePool.size());
+        }while(i<nodePool.size());//*/
     }
     
     //std::cout << "--------------------------------------------------------------------------------\n";for( AST_node* node : nodePool ){node->print_with_types();};

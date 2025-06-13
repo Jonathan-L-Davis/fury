@@ -1,6 +1,16 @@
 function f(){};
 function g(){};
 
-if (byte b) f();
-else if(byte q) g();
-else if(byte a) f();
+if
+    (byte b)
+    f();
+    else
+        if
+            (byte q)
+            g();
+        else
+            if
+                (byte a)
+                f();
+                else
+                    g();

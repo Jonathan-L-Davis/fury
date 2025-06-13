@@ -69,28 +69,50 @@ symbol_table fury_default_context(){
     return retMe;
 }
 
-std::vector<rule> fury_grammer_rules(){
-    std::vector<rule> retMe;
+void grammer::add_layer(int i,parse_dir dir){
     
-    retMe.push_back( {"paren-closure", paren_closure_applies, paren_closure_folding} );
-    retMe.push_back( {"curly-bracket-closure", curly_bracket_closure_applies, curly_bracket_closure_folding} );
+    assert( i>0 && i<=rules.size() );
     
-    retMe.push_back( {"function-partial", function_partial_applies, function_partial_folding} );// function partials out of pure tokens -- with scoping implications.
-    retMe.push_back( {"function-declaration", function_declaration_applies, function_declaration_folding} );// function declarations out of function partials & function parameter clauses.
-    retMe.push_back( {"function-definition", function_definition_applies, function_definition_folding} );// function definitions out of declarations & body definitions.
+    rules.insert( rules.begin()+i,{{/*God do I hate init braces sometimes*/}});
+    direction.insert(direction.begin()+i,dir);
+}
+
+void grammer::add_rule(int i,rule addMe){
+    assert( i>=0 && i<rules.size() );
+    rules[i].push_back(addMe);
+}
+
+grammer fury_grammer(){
+    grammer retMe;
     
-    retMe.push_back( {"syntax-partial", syntax_partial_applies, syntax_partial_folding} );// syntax partials out of pure tokens -- with scoping implications.
-    retMe.push_back( {"syntax-declaration", syntax_declaration_applies, syntax_declaration_folding} );// syntax declarations out of function partials & function parameter clauses.
-    retMe.push_back( {"syntax-definition", syntax_definition_applies, syntax_definition_folding} );// syntax definitions out of declarations & body definitions.
+    retMe.direction = {parse_dir::forward,parse_dir::forward};
+    retMe.rules = { {}, {} };
     
-    retMe.push_back( {"if-statement", if_statement_applies, if_statement_folding} );
-    retMe.push_back( {"if-else-statement", if_else_statement_applies, if_else_statement_folding} );
-    retMe.push_back( {"return-statement", return_statement_applies, return_statement_folding} );
+    retMe.add_layer( 1, parse_dir::backward );
     
-    retMe.push_back( {"function-call", function_call_applies, function_call_folding} );
-    retMe.push_back( {"comma", comma_applies, comma_folding} );
-    retMe.push_back( {"type-declaration", type_declaration_applies, type_declaration_folding} );
-    retMe.push_back( {"termination", termination_applies, termination_folding} );
+    retMe.add_rule(2,{"paren-closure", paren_closure_applies, paren_closure_folding} );
+    retMe.add_rule(2,{"curly-bracket-closure", curly_bracket_closure_applies, curly_bracket_closure_folding} );
+    
+    retMe.add_rule(2,{"function-partial", function_partial_applies, function_partial_folding} );
+    retMe.add_rule(2,{"function-declaration", function_declaration_applies, function_declaration_folding} );
+    retMe.add_rule(2,{"function-definition", function_definition_applies, function_definition_folding} );
+    
+    retMe.add_rule(2,{"syntax-partial", syntax_partial_applies, syntax_partial_folding} );
+    retMe.add_rule(2,{"syntax-declaration", syntax_declaration_applies, syntax_declaration_folding} );
+    retMe.add_rule(2,{"syntax-definition", syntax_definition_applies, syntax_definition_folding} );
+    
+    
+    
+    retMe.add_rule(1,{"if-statement", if_statement_applies, if_statement_folding} );
+    retMe.add_rule(1,{"if-else-statement", if_else_statement_applies, if_else_statement_folding} );
+    retMe.add_rule(1,{"return-statement", return_statement_applies, return_statement_folding} );
+    
+    
+    
+    retMe.add_rule(0,{"function-call", function_call_applies, function_call_folding});
+    retMe.add_rule(0,{"comma", comma_applies, comma_folding} );
+    retMe.add_rule(0,{"type-declaration", type_declaration_applies, type_declaration_folding} );
+    retMe.add_rule(0,{"termination", termination_applies, termination_folding} );//*/
     return retMe;
 }
 
