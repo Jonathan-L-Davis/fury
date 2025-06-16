@@ -1,16 +1,4 @@
-function f(){};
-function g(){};
-
-if
-    (byte b)
-    f();
-    else
-        if
-            (byte q)
-            g();
-        else
-            if
-                (byte a)
-                f();
-                else
-                    g();
+function byte f(byte a,byte b){
+    return a;
+    return b;
+};

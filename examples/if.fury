@@ -1,0 +1,61 @@
+function f(byte b){};
+function g(){};
+
+(quad q);
+
+byte a;
+byte c;
+byte d;
+
+if(a)
+    g()
+else if(byte b)
+    f(b)
+else if(c)
+    function h(){}
+else if(c)
+    function quad my_func(){}
+else if(c)
+    c
+else if(c)
+    c
+else if(c)
+    c
+else if(c)
+    c
+else if(c)
+    c
+else if(c)
+    c
+else if(c)
+    c
+else if(c)
+    c
+else if(c)
+    c
+else if(c)
+    c
+else if(c)
+    c
+else if(c)
+    c
+else if(c)
+    c
+else if(c)
+    c
+else if(c)
+    c
+else if(c)
+    c
+else if(c)
+    c
+else if(c)
+    c
+else if(c)
+    c
+else if(c)
+    c
+else if(c)
+    c
+else
+    d;

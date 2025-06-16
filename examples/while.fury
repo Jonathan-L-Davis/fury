@@ -1,0 +1,4 @@
+while();
+byte b;
+while (b) b;
+while (byte a) b;

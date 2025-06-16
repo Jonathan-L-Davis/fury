@@ -113,24 +113,45 @@ program parse(std::string file_name){
         // if we haven't completed a token, & we have a match for a syntax.
         completeToken = "";// don't reparse a completed token, duh.
         grammer g = fury_grammer();
-        /*/ ----------------------------------------------------    Reduction Rules Start Here    ---------------------------------------------------------- ///
-        int i = 0;
+        /// ----------------------------------------------------    Reduction Rules Start Here    ---------------------------------------------------------- ///
+        
+        bool no_terminals = true;
+        for(auto node:nodePool) if(node->text==";") no_terminals = false;// slightly tricky to think about, should be between end ; and last {, but there may be some extra stuff.
+        if(no_terminals) continue;
+        
+        top:;
+        
+        bool modified = false;
         do{
-            i = 0;
-            for( i = 0; i < nodePool.size(); i++ ){
-                
-                std::vector<rule> rules = fury_grammer_rules();
-                for( int j = 0; j < rules.size(); j++ ){
-                    if( rules[j].rule_applies(nodePool,context_stack,i) ){
-                        rules[j].apply_rule(nodePool,context_stack,i);
-                        i = -1;
-                        break;
-                    }
+            modified = false;
+            for( int i = g.rules.size()-1; i >= 0; i--){
+                std::vector<rule>& rules = g.rules[i];
+                for( int j = 0; j < rules.size(); j++){
+                if(modified) goto top;
+                    if(g.direction[i]==parse_dir::forward){
+                        t1:;
+                        for( int k = 0; k < nodePool.size(); k++ ){
+                            if( rules[j].rule_applies(nodePool,context_stack,k) ){
+                                rules[j].apply_rule(nodePool,context_stack,k);
+                                modified = true;
+                                goto t1;
+                            }
+                        }
+                    }else if(g.direction[i]==parse_dir::backward){
+                        t2:;
+                        for( int k = nodePool.size()-1; k >= 0; k-- ){
+                            if( rules[j].rule_applies(nodePool,context_stack,k) ){
+                                rules[j].apply_rule(nodePool,context_stack,k);
+                                modified = true;
+                                goto t2;
+                            }
+                        }
+                    }else{std::exit(-1);}
                 }
             }
-        }while(i<nodePool.size());//*/
+        }while(modified);
     }
-    
+    std::cout << "-------------------------------------------------------------------------------------------------------------\n";
     //std::cout << "--------------------------------------------------------------------------------\n";for( AST_node* node : nodePool ){node->print_with_types();};
     //for( AST_node* node : nodePool ) assert( is_terminated(node) );// if this fails you have bad grammer.
     

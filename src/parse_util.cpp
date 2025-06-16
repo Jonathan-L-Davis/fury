@@ -95,13 +95,16 @@ bool is_valid(const AST_node* const checkMe, const symbol_table* const context){
     if(is_return_statement(checkMe,context))
         return true;
     
-    if(is_id(checkMe,context))
+    if(is_id(checkMe,context)&&checkMe->type!=node_t::function_id)
         return true;
     
     if(is_if_statement(checkMe))
         return true;
     
     if(is_if_else_statement(checkMe))
+        return true;
+    
+    if(is_while_loop(checkMe))
         return true;
     
     return false;
@@ -424,6 +427,20 @@ bool is_if_else_statement(const AST_node* const checkMe){
     // expression checks assume the validity of sub-expressions. Don't know how I feel about that. Probably means I need to always propagate context, which does make the parse util api more consistent.
     //if(checkMe->children.size()>1 && !is_valid(checkMe->children[1],context)
     //    return false;
+    
+    return true;
+}
+
+bool is_for_loop(const AST_node* const checkMe){
+    
+}
+
+bool is_while_loop(const AST_node* const checkMe){
+    if(checkMe->text!="while")
+        return false;
+    
+    if(checkMe->children.size()<1||checkMe->children.size()>2)
+        return false;
     
     return true;
 }

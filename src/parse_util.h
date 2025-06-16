@@ -21,6 +21,9 @@ bool is_syntax_definition(const AST_node* const checkMe);
 bool is_if_statement(const AST_node* const checkMe);
 bool is_if_else_statement(const AST_node* const checkMe);
 
+bool is_for_loop(const AST_node* const checkMe);
+bool is_while_loop(const AST_node* const checkMe);
+
 bool is_return_statement(const AST_node* const checkMe, const symbol_table* const context);
 
 bool is_closed_parenthesis(const AST_node* checkMe);
