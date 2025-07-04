@@ -7,6 +7,8 @@ byte a;
 byte c;
 byte d;
 
+if(byte x){byte zfc;}else if(){byte zfd;}else if(){}else{};
+
 if(a)
     g()
 else if(byte b)

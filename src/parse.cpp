@@ -120,7 +120,6 @@ program parse(std::string file_name){
         if(no_terminals) continue;
         
         top:;
-        
         bool modified = false;
         do{
             modified = false;
