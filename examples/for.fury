@@ -1,3 +1,3 @@
 
-for(byte b; b; b);
+for(byte b; b; b) b;
 

@@ -460,17 +460,27 @@ void if_else_statement_folding(std::vector<AST_node*>& nodePool, std::vector<sym
 }
 
 bool for_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
-    return false && nodePool[i]->text=="for" &&
-            i+3<nodePool.size() && nodePool[i+1]->text=="(" && nodePool[i+1]->children.size()==0;
+    return  nodePool[i]->text=="for" && i+6<nodePool.size() &&
+            nodePool[i+1]->text=="(" && nodePool[i+1]->children.size()==0 &&
+            is_valid(nodePool[i+2],*(context.end()-1)) && is_terminated(nodePool[i+2]) &&
+            is_valid(nodePool[i+3],*(context.end()-1)) && is_terminated(nodePool[i+3]) &&
+            is_valid(nodePool[i+4],*(context.end()-1)) && is_terminable(nodePool[i+4],*(context.end()-1)) &&
+            nodePool[i+5]->text==")" && nodePool[i+5]->children.size()==0 &&
+            is_valid(nodePool[i+6],*(context.end()-1)) && is_terminable(nodePool[i+6],*(context.end()-1));
 }
 
 void for_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     assert(for_applies(nodePool,context,i));
     
+    delete nodePool[i+1];
+    delete nodePool[i+5];
     
+    nodePool[i]->children.push_back(nodePool[i+2]);
+    nodePool[i]->children.push_back(nodePool[i+3]);
+    nodePool[i]->children.push_back(nodePool[i+4]);
+    nodePool[i]->children.push_back(nodePool[i+6]);
     
-    
-    
+    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+7);
 }
 
 bool while_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
