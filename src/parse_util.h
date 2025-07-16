@@ -14,6 +14,11 @@ bool is_function_declaration(const AST_node* const checkMe);
 bool is_function_definition(const AST_node* const checkMe);
 bool is_function_call(const AST_node* const checkMe, const symbol_table* const context);
 
+bool is_operator_partial_declaration(const AST_node* const checkMe);
+bool is_operator_declaration(const AST_node* const checkMe);
+bool is_operator_definition(const AST_node* const checkMe);
+bool is_operator_call(const AST_node* const checkMe, const symbol_table* const context);
+
 bool is_syntax_partial_declaration(const AST_node* const checkMe);
 bool is_syntax_declaration(const AST_node* const checkMe);
 bool is_syntax_definition(const AST_node* const checkMe);

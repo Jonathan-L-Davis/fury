@@ -2,3 +2,10 @@ function byte f(byte a,byte b){
     return a;
     return b;
 };
+
+operator byte g g,operator byte m m, operator byte n n;
+function byte h();
+function byte i();
+function byte j();
+function byte k();
+function byte l();

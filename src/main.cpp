@@ -26,6 +26,7 @@ int main(int argc, char**argv){
     for(auto prog_frag:prog_frags){
         std::cout << prog_frag.file_name << "\n";
         prog_frag.root.print_with_types();
+        prog_frag.context.print();
     }
         
     return 0;

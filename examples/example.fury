@@ -1,5 +1,7 @@
 
 
-
-
+operator + (byte a)+(byte b);
+operator + (dual a)+(dual b);
+operator + (quad a)+(quad b);
+operator + (oct a)+(oct b);
 

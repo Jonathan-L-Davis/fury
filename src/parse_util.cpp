@@ -77,6 +77,15 @@ bool is_valid(const AST_node* const checkMe, const symbol_table* const context){
     if(is_function_call(checkMe,context))
         return true;
     
+    if(is_operator_declaration(checkMe))
+        return true;
+    
+    if(is_operator_definition(checkMe))
+        return true;
+    
+    //if(is_operator_call(checkMe,context))
+    //    return true;
+    
     if(is_syntax_declaration(checkMe))
         return true;
     
@@ -397,6 +406,135 @@ bool is_syntax_partial_declaration(const AST_node* const checkMe){
     if(s_id->children.size()!=0) return false;
     
     return true;
+}
+
+bool is_operator_partial_declaration(const AST_node* const checkMe){
+    
+    //using comments for pictures of tree structure after each check.
+    
+    if( checkMe->text != "operator" ){
+        return false;
+    }
+    /**
+    * 
+    * operator
+    * 
+    **/
+    if( checkMe->children.size() == 0 ){
+        return false;
+    }
+    
+    /**
+    * 
+    * operator
+    *     ...
+    **/
+    
+    int o_id_count = 0;
+    int o_id_idx = 0;
+    const AST_node* o_id;
+    for( int i = 0; i < checkMe->children.size(); i++ ){
+        if( checkMe->children[i]->type == node_t::operator_id ){
+            o_id_count++;
+            o_id = checkMe->children[i];
+            o_id_idx = i;
+            assert(i>=0 && i < 2);// only the type can come before the id
+            if(i!=checkMe->children.size()-1) return false;// id is the last thing in the function partial. No body or arguments yet.
+        }
+    }
+    
+    if( o_id_idx == 1 )
+        assert( checkMe->children[0]->type == node_t::type );
+    
+    /**
+    * 
+    * operator
+    *     [return type]
+    *     o_id
+    **/
+    assert(o_id_count == 1);
+    
+    if(o_id->children.size()!=0) return false;
+    
+    return true;
+}
+
+/**
+ * 
+ *  An operator definition should also pass this check. A definition is defined as a declaration & a body.
+ * 
+**/
+bool is_operator_declaration(const AST_node* const checkMe){
+    
+    //using comments for pictures of tree structure after each check.
+    
+    if( checkMe->text != "operator" ){
+        return false;
+    }
+    
+    /**
+    * 
+    * operator
+    * 
+    **/
+    if( checkMe->children.size() == 0 ){
+        return false;
+    }
+    
+    /**
+    * 
+    * operator
+    *     ...
+    **/
+    
+    int o_id_count = 0;
+    const AST_node* o_id;
+    for( int i = 0; i < checkMe->children.size(); i++ ){
+        if( checkMe->children[i]->type == node_t::operator_id ){
+            o_id_count++;
+            o_id = checkMe->children[i];
+            assert(i>=0 && i < 2);// only the type can come before the id
+        }
+    }
+    
+    assert(o_id_count == 1);
+    
+    /**
+    * 
+    * function
+    *     [return type]
+    *     o_id
+    *         (
+    *     [function body]
+    **/
+    
+    /**
+    * 
+    * function
+    *     [return type]
+    *     o_id
+    *         (
+    *             )
+    *     [function body]
+    **/
+    
+    std::string total_text = o_id->text;
+    std::string found_text;
+    for(auto n:o_id->children) if(n->type==node_t::id) found_text+=n->text;
+    
+    //assert(total_text==found_text&&"Malformed operator declaration");
+    
+    return true;
+}
+
+bool is_operator_definition(const AST_node* const checkMe){
+    if(!is_operator_declaration(checkMe))
+        return false;
+    if(checkMe->children[ checkMe->children.size()-1 ]->text != "{")
+        return false;
+    if( is_closed_curly_bracket(checkMe->children[ checkMe->children.size()-1 ]) )
+        return true;
+    return false;
 }
 
 bool is_if_statement(const AST_node* const checkMe){

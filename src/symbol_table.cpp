@@ -8,7 +8,7 @@ void symbol_table::add_symbol( symbol add_me ){
     //*
     for( unsigned int i = 0; i < sub_scopes.size(); i++){
         if( sub_scopes[i].scope == add_me.name ){
-            add_me.value->print_with_types();
+            //add_me.value->print_with_types();
             if( !(add_me.sym_type == sym_t_function || add_me.sym_type == sym_t_operator ) ){// basically allows overloading of overloadable functionals. The grammer rules have to be responsible and do their own validity checking.
                 assert(false);
             }
@@ -78,11 +78,29 @@ void symbol_table::add_symbol( symbol add_me ){
         case sym_t_operator:{
             for( unsigned int i = 0; i < operators.size(); i++){
                 if( operators[i].name == add_me.name ){
-                    assert(false);
+                    // loop through each param, see if it's the same type.
+                    
+                    assert(operators[i].value->children.size()>0);
+                    
+                    auto old_params = get_operator_param_types(operators[i].value);
+                    auto add_params = get_operator_param_types(add_me.value);
+                    
+                    bool same_signature = old_params.size()==add_params.size();
+                    if(same_signature)
+                        for( int i = 0; i < old_params.size() && i < add_params.size(); i++)
+                            if( old_params[i]!=add_params[i] )same_signature=false;
+                    
+                    if( same_signature && is_operator_definition(add_me.value) && is_operator_definition(operators[i].value) ){
+                        assert(false);// defining a previously defined operator.
+                    }else if(same_signature){
+                        operators[i] = add_me;// need to handle namespaces for function overloads, can't support overloads correctly until that happens
+                        break;
+                    }
                 }
             }
             
             operators.push_back(add_me);
+            end_operator:;
         }break;
         case sym_t_syntax:{
             for( unsigned int i = 0; i < syntaxes.size(); i++){
