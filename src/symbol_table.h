@@ -54,6 +54,7 @@ struct symbol_table{
     symbol_table( symbol_table*, std::string scope, scope_type );
     
     std::string scope;
+    std::vector<std::string> signature;
     std::vector<symbol_table> sub_scopes;
     
     std::vector<symbol> bytes;
@@ -115,10 +116,15 @@ struct symbol_table{
     symbol get_quad(std::string) const;
     symbol get_oct(std::string) const;
     
+    std::vector<symbol> get_symbol(std::string);
     symbol_table& get_subscope(std::string);
+    symbol_table& get_subscope(std::string,std::vector<std::string>);
+    symbol_table& get_operator_subscope(std::string,std::vector<std::string>);
+    
     //
     
     void add_symbol(symbol);
+    void remove_symbol(symbol);
     void add_scope(std::string scope, scope_type);
     
     bool id_starts_with_substr(std::string);

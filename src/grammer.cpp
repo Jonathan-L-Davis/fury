@@ -226,8 +226,9 @@ void termination_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_ta
     if( nodePool[i]->text == "function" )
         context.resize(context.size()-1);
     
+    /*
     if( nodePool[i]->text == "operator" )
-        context.resize(context.size()-1);
+        context.resize(context.size()-1);//*/
 }
 
 bool function_partial_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
@@ -555,8 +556,6 @@ void operator_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symb
         nodePool[i+1]->type = node_t::operator_id;
         
         context[context.size()-1]->add_symbol({sym_t_operator,{""},nodePool[i+1]->text,nodePool[i]});
-        context[context.size()-1]->add_scope(nodePool[i+1]->text,scope_type::scope_t_operator);
-        context.push_back( &context[context.size()-1]->get_subscope(nodePool[i+1]->text) );
         
         nodePool[i]->children.push_back(nodePool[i+1]);
         nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
@@ -567,8 +566,6 @@ void operator_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symb
         nodePool[i+2]->type = node_t::operator_id;
         
         context[context.size()-1]->add_symbol({sym_t_operator,{nodePool[i+1]->text},nodePool[i+2]->text,nodePool[i]});
-        context[context.size()-1]->add_scope(nodePool[i+2]->text,scope_type::scope_t_operator);
-        context.push_back( &context[context.size()-1]->get_subscope(nodePool[i+2]->text) );
         
         nodePool[i]->children.push_back(nodePool[i+1]);
         nodePool[i]->children.push_back(nodePool[i+2]);
@@ -596,7 +593,8 @@ bool operator_declaration_applies(std::vector<AST_node*>& nodePool, std::vector<
         
         if( found_text!=total_text.substr(0,std::min(total_text.size(),found_text.size())) ) break;// we have a bad declaration, or aren't done reducing params yet.
         
-        if( found_text==total_text && i+1<nodePool.size() && (is_closed_curly_bracket(nodePool[i+1]) || nodePool[i+1]->text==";") ) return true;
+        if( found_text==total_text && i+1<nodePool.size() && (is_closed_curly_bracket(nodePool[i+1]) || nodePool[i+1]->text==";") )
+            return true;
     }
     
     return false;
@@ -622,6 +620,58 @@ void operator_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<
         
         if( found_text==total_text && (is_closed_curly_bracket(nodePool[i+1]) || nodePool[i+1]->text==";" || nodePool[i+1]->text==",") ){
             nodePool.erase( nodePool.begin()+start_idx, nodePool.begin()+i+1 );
+            
+            context[context.size()-1]->add_scope(op_id->text,scope_type::scope_t_operator);
+            std::vector<std::string> signature;
+            for(int i = 0;i<op_id->children.size();i++){
+                
+                if(op_id->children[i]->text!="(")
+                    signature.push_back(op_id->children[i]->text);
+                else{
+                    AST_node* params = op_id->children[i];
+                    if(params->children[0]->text==",")
+                        params=params->children[0];
+                    
+                    for(AST_node* node:params->children){
+                        signature.push_back(node->text);
+                    }
+                }
+            }
+            //  Take type declarations from symbol table and push them into sub scope.
+            symbol_table& op_scope = (*(context.end()-1))->get_operator_subscope(found_text,{});
+            op_scope.signature=signature;
+            
+            for(int i = 0;i<op_id->children.size();i++){
+                
+                if(op_id->children[i]->text!="(")
+                    signature.push_back(op_id->children[i]->text);
+                else{
+                    AST_node* params = op_id->children[i];
+                    if(params->children[0]->text==",")
+                        params=params->children[0];
+                    
+                    for(AST_node* node:params->children){
+                        if(node->text==")")break;
+                        std::vector<symbol> sym_list = (*(context.end()-1))->get_symbol(node->children[0]->text);
+                        assert(sym_list.size()>0);
+                        symbol sym;
+                        bool match_exists = false;
+                        for(symbol S:sym_list){
+                            if( S.type.size()==1 && *S.type.begin()==node->text ){
+                                sym=S;
+                                match_exists=true;
+                            }
+                        }
+                        
+                        if(!match_exists)
+                            assert(false&&"No matching symbol for this declaration.");
+                        
+                        op_scope.add_symbol(sym);
+                        (*(context.end()-1))->remove_symbol(sym);
+                    }
+                }
+            }
+            
             return;
         }
         

@@ -10,7 +10,7 @@ void symbol_table::add_symbol( symbol add_me ){
         if( sub_scopes[i].scope == add_me.name ){
             //add_me.value->print_with_types();
             if( !(add_me.sym_type == sym_t_function || add_me.sym_type == sym_t_operator ) ){// basically allows overloading of overloadable functionals. The grammer rules have to be responsible and do their own validity checking.
-                assert(false);
+//                assert(false);
             }
         }
     }
@@ -19,7 +19,7 @@ void symbol_table::add_symbol( symbol add_me ){
         case sym_t_byte:{
             for( unsigned int i = 0; i < bytes.size(); i++){
                 if( bytes[i].name == add_me.name ){
-                    assert(false);
+//                    assert(false);
                 }
             }
             
@@ -28,7 +28,7 @@ void symbol_table::add_symbol( symbol add_me ){
         case sym_t_dual:{
             for( unsigned int i = 0; i < duals.size(); i++){
                 if( duals[i].name == add_me.name ){
-                    assert(false);
+//                    assert(false);
                 }
             }
             
@@ -37,7 +37,7 @@ void symbol_table::add_symbol( symbol add_me ){
         case sym_t_quad:{
             for( unsigned int i = 0; i < quads.size(); i++){
                 if( quads[i].name == add_me.name ){
-                    assert(false);
+//                    assert(false);
                 }
             }
             
@@ -46,7 +46,7 @@ void symbol_table::add_symbol( symbol add_me ){
         case sym_t_oct:{
             for( unsigned int i = 0; i < octs.size(); i++){
                 if( octs[i].name == add_me.name ){
-                    assert(false);
+//                    assert(false);
                 }
             }
             
@@ -55,7 +55,7 @@ void symbol_table::add_symbol( symbol add_me ){
         case sym_t_struct:{
             for( unsigned int i = 0; i < structs.size(); i++){
                 if( structs[i].name == add_me.name ){
-                    assert(false);
+//                    assert(false);
                 }
             }
             
@@ -65,7 +65,7 @@ void symbol_table::add_symbol( symbol add_me ){
             for( unsigned int i = 0; i < functions.size(); i++){
                 if( functions[i].name == add_me.name ){
                     if( is_function_definition(add_me.value) && is_function_definition(functions[i].value) ){
-                        assert(false);// defining a previously defined function.
+//                        assert(false);// defining a previously defined function.
                     }else{
                         functions[i] = add_me;// need to handle namespaces for function overloads, can't support overloads correctly until that happens
                         break;
@@ -91,7 +91,7 @@ void symbol_table::add_symbol( symbol add_me ){
                             if( old_params[i]!=add_params[i] )same_signature=false;
                     
                     if( same_signature && is_operator_definition(add_me.value) && is_operator_definition(operators[i].value) ){
-                        assert(false);// defining a previously defined operator.
+//                        assert(false);// defining a previously defined operator.
                     }else if(same_signature){
                         operators[i] = add_me;// need to handle namespaces for function overloads, can't support overloads correctly until that happens
                         break;
@@ -105,7 +105,7 @@ void symbol_table::add_symbol( symbol add_me ){
         case sym_t_syntax:{
             for( unsigned int i = 0; i < syntaxes.size(); i++){
                 if( syntaxes[i].name == add_me.name ){
-                    assert(false);
+//                    assert(false);
                 }
             }
             
@@ -114,7 +114,7 @@ void symbol_table::add_symbol( symbol add_me ){
         case sym_t_label:{
             for( unsigned int i = 0; i < labels.size(); i++){
                 if( labels[i].name == add_me.name ){
-                    assert(false);
+//                    assert(false);
                 }
             }
             
@@ -123,7 +123,7 @@ void symbol_table::add_symbol( symbol add_me ){
         case sym_t_type:{
             for( unsigned int i = 0; i < labels.size(); i++){
                 if( labels[i].name == add_me.name ){
-                    assert(false);
+//                    assert(false);
                 }
             }
             
@@ -131,6 +131,20 @@ void symbol_table::add_symbol( symbol add_me ){
         }break;
     }
 }
+
+//*
+void symbol_table::remove_symbol(symbol removeMe){
+    std::erase_if(bytes,[&](symbol checkMe){return removeMe.name==checkMe.name&&removeMe.sym_type==checkMe.sym_type&&removeMe.type==checkMe.type&&removeMe.value==checkMe.value;});
+    std::erase_if(duals,[&](symbol checkMe){return removeMe.name==checkMe.name&&removeMe.sym_type==checkMe.sym_type&&removeMe.type==checkMe.type&&removeMe.value==checkMe.value;});
+    std::erase_if(quads,[&](symbol checkMe){return removeMe.name==checkMe.name&&removeMe.sym_type==checkMe.sym_type&&removeMe.type==checkMe.type&&removeMe.value==checkMe.value;});
+    std::erase_if(octs,[&](symbol checkMe){return removeMe.name==checkMe.name&&removeMe.sym_type==checkMe.sym_type&&removeMe.type==checkMe.type&&removeMe.value==checkMe.value;});
+    std::erase_if(structs,[&](symbol checkMe){return removeMe.name==checkMe.name&&removeMe.sym_type==checkMe.sym_type&&removeMe.type==checkMe.type&&removeMe.value==checkMe.value;});
+    std::erase_if(syntaxes,[&](symbol checkMe){return removeMe.name==checkMe.name&&removeMe.sym_type==checkMe.sym_type&&removeMe.type==checkMe.type&&removeMe.value==checkMe.value;});
+    std::erase_if(functions,[&](symbol checkMe){return removeMe.name==checkMe.name&&removeMe.sym_type==checkMe.sym_type&&removeMe.type==checkMe.type&&removeMe.value==checkMe.value;});
+    std::erase_if(operators,[&](symbol checkMe){return removeMe.name==checkMe.name&&removeMe.sym_type==checkMe.sym_type&&removeMe.type==checkMe.type&&removeMe.value==checkMe.value;});
+    std::erase_if(types,[&](symbol checkMe){return removeMe.name==checkMe.name&&removeMe.sym_type==checkMe.sym_type&&removeMe.type==checkMe.type&&removeMe.value==checkMe.value;});
+    std::erase_if(labels,[&](symbol checkMe){return removeMe.name==checkMe.name&&removeMe.sym_type==checkMe.sym_type&&removeMe.type==checkMe.type&&removeMe.value==checkMe.value;});
+}//*/
 
 void symbol_table::add_scope(std::string scope,scope_type type ){
     sub_scopes.push_back( symbol_table(this,scope,type) );
@@ -476,6 +490,104 @@ symbol_table& symbol_table::get_subscope(std::string findMe){
     }
     
     assert(false);
+}
+
+std::vector<symbol> symbol_table::get_symbol(std::string getMe){
+    std::vector<symbol> retMe;
+    
+    for(symbol sym:bytes){
+        if(sym.name==getMe)
+            retMe.push_back(sym);
+    }
+    
+    for(symbol sym:duals){
+        if(sym.name==getMe)
+            retMe.push_back(sym);
+    }
+    
+    for(symbol sym:quads){
+        if(sym.name==getMe)
+            retMe.push_back(sym);
+    }
+    
+    for(symbol sym:octs){
+        if(sym.name==getMe)
+            retMe.push_back(sym);
+    }
+    
+    for(symbol sym:structs){
+        if(sym.name==getMe)
+            retMe.push_back(sym);
+    }
+    
+    for(symbol sym:syntaxes){
+        if(sym.name==getMe)
+            retMe.push_back(sym);
+    }
+    
+    for(symbol sym:functions){
+        if(sym.name==getMe)
+            retMe.push_back(sym);
+    }
+    
+    for(symbol sym:operators){
+        if(sym.name==getMe)
+            retMe.push_back(sym);
+    }
+    
+    for(symbol sym:labels){
+        if(sym.name==getMe)
+            retMe.push_back(sym);
+    }
+    
+    for(symbol sym:types){
+        if(sym.name==getMe)
+            retMe.push_back(sym);
+    }
+    
+    return retMe;
+}
+
+symbol_table& symbol_table::get_subscope(std::string id,std::vector<std::string> params){
+    
+    //assert(parent!=nullptr&&"Working on that nasty operator scoping problem.");
+    auto iter = std::find_if(sub_scopes.rbegin(),sub_scopes.rend(),[&]
+        (const symbol_table& checkMe){
+            bool signature_matches = true;
+            
+            for( int i = 0; i < params.size() && i < signature.size(); i++ ){
+                if(params[i]!=signature[i])signature_matches=false;
+            }
+            
+            return (checkMe.scope==id&&signature_matches);
+        });
+    
+    if(iter==sub_scopes.rend()){
+        assert("There are no matching operator scopes"&&false);
+    }
+    
+    return *iter;
+}
+
+symbol_table& symbol_table::get_operator_subscope(std::string id,std::vector<std::string> params){
+    
+    //assert(parent!=nullptr&&"Working on that nasty operator scoping problem.");
+    auto iter = std::find_if(sub_scopes.rbegin(),sub_scopes.rend(),[&]
+        (const symbol_table& checkMe){
+            bool signature_matches = true;
+            
+            for( int i = 0; i < params.size() && i < signature.size(); i++ ){
+                if(params[i]!=signature[i])signature_matches=false;
+            }
+            
+            return (checkMe.scope==id&&signature_matches);
+        });
+    
+    if(iter==sub_scopes.rend()){
+        assert("There is no matching operator scopes"&&false);
+    }
+    
+    return *iter;
 }
 
 bool symbol_table::contains_scope(std::string find_me) const{

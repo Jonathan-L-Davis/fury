@@ -1,3 +1,5 @@
+byte a,byte b;
+
 operator byte + (byte a)+(byte b);
 operator byte - (byte a)-(byte b);
 operator byte * (byte a)*(byte b);
@@ -103,7 +105,3 @@ operator oct >= (oct a)>=(oct b);
 operator oct >  (oct a)> (oct b);
 operator oct <= (oct a)<=(oct b);
 operator oct <  (oct a)< (oct b);
-
-
-byte a,byte b;
-a + b;
