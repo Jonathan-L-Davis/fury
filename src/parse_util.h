@@ -46,4 +46,13 @@ bool is_id( const AST_node* const checkMe, const symbol_table* const context);
 AST_node* get_rightmost_bottommost(const AST_node* const checkMe);
 AST_node* get_rightmost_bottommost_non_terminal( const AST_node* const traverseMe);
 
+std::string get_op_id(const AST_node* const idMe);
+std::vector<std::string> get_op_signature(const AST_node* const signMe);
+
+std::string get_func_id(const AST_node* const idMe);
+std::vector<std::string> get_func_signature(const AST_node* const signMe);
+
+void move_operator_param_declarations(const AST_node* const op_id, symbol_table& src, symbol_table& dst);
+void move_curly_bracket_declarations(const AST_node* const op_id, symbol_table& src, symbol_table& dst);
+
 #endif//PARSE_UTIL_H

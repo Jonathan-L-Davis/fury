@@ -554,37 +554,15 @@ symbol_table& symbol_table::get_subscope(std::string id,std::vector<std::string>
     auto iter = std::find_if(sub_scopes.rbegin(),sub_scopes.rend(),[&]
         (const symbol_table& checkMe){
             bool signature_matches = true;
-            
             for( int i = 0; i < params.size() && i < signature.size(); i++ ){
                 if(params[i]!=signature[i])signature_matches=false;
             }
             
             return (checkMe.scope==id&&signature_matches);
         });
-    
     if(iter==sub_scopes.rend()){
-        assert("There are no matching operator scopes"&&false);
-    }
-    
-    return *iter;
-}
-
-symbol_table& symbol_table::get_operator_subscope(std::string id,std::vector<std::string> params){
-    
-    //assert(parent!=nullptr&&"Working on that nasty operator scoping problem.");
-    auto iter = std::find_if(sub_scopes.rbegin(),sub_scopes.rend(),[&]
-        (const symbol_table& checkMe){
-            bool signature_matches = true;
-            
-            for( int i = 0; i < params.size() && i < signature.size(); i++ ){
-                if(params[i]!=signature[i])signature_matches=false;
-            }
-            
-            return (checkMe.scope==id&&signature_matches);
-        });
-    
-    if(iter==sub_scopes.rend()){
-        assert("There is no matching operator scopes"&&false);
+        for(auto p:params) std::cout << p << ",";
+        assert(false&&"There are no matching subscopes");
     }
     
     return *iter;
@@ -664,6 +642,15 @@ symbol symbol_table::get_oct(std::string getMe) const{
     }
     
     return parent->get_oct(getMe);// will null dereference if there isn't one.
+}
+    
+bool id_exists(std::string s){
+    return false;
+}
+    
+std::set<std::string> get_id_type(const AST_node* const typeMe){
+    assert(id_exists(typeMe->text));
+    return {};
 }
 
 bool symbol_table::inside_syntax(){

@@ -113,6 +113,9 @@ bool is_valid(const AST_node* const checkMe, const symbol_table* const context){
     if(is_if_else_statement(checkMe))
         return true;
     
+    if(is_for_loop(checkMe))
+        return true;
+    
     if(is_while_loop(checkMe))
         return true;
     
@@ -571,6 +574,17 @@ bool is_if_else_statement(const AST_node* const checkMe){
 
 bool is_for_loop(const AST_node* const checkMe){
     
+    if( checkMe->text!="for" )
+        return false;
+    
+    if( checkMe->children.size()!=4)
+        return false;
+    
+    auto c = checkMe->children;
+    if( !is_terminated(c[0]) || !is_terminated(c[1]) || is_terminated(c[2]) )
+        return false;
+    
+    return true;
 }
 
 bool is_while_loop(const AST_node* const checkMe){
@@ -626,6 +640,10 @@ bool is_comma_expression(const AST_node* const checkMe){
     return true;
 }
 
+bool is_operator_call(const AST_node* const checkMe, const symbol_table* const context){
+    return false;
+}
+
 ///-////////////////////////////////////////////////// These functions may modify AST_nodes or aren't pure checks.  ////////////////////////////////////////////////////////////////////////////////
 AST_node* get_rightmost_bottommost( const AST_node* const traverseMe){
     
@@ -648,4 +666,135 @@ AST_node* get_rightmost_bottommost_non_terminal( const AST_node* const traverseM
     }
     
     return retMe;
+}
+
+std::string get_op_id(const AST_node* const idMe){
+    assert(is_operator_declaration(idMe));
+    
+    if(is_operator_definition(idMe))
+        return (*(idMe->children.end()-2))->text;
+    return (*(idMe->children.end()-1))->text;
+}
+
+std::vector<std::string> get_op_signature(const AST_node* const signMe){
+    std::vector<std::string> retMe;
+    
+    AST_node* op_id;
+    if(is_operator_definition(signMe))
+        op_id = (*(signMe->children.end()-2));
+    else
+        op_id = (*(signMe->children.end()-1));
+    
+    for( auto n:op_id->children ){
+        if(n->text=="(")
+            for(auto m:n->children)
+                retMe.push_back(m->text);
+        else
+            retMe.push_back(n->text);
+    }
+    
+    return retMe;
+}
+
+std::string get_func_id(const AST_node* const idMe){
+    assert(is_function_declaration(idMe));
+    
+    if(is_function_definition(idMe))
+        return (*(idMe->children.end()-2))->text;
+    return (*(idMe->children.end()-1))->text;
+}
+
+std::vector<std::string> get_func_signature(const AST_node* const signMe){
+    std::vector<std::string> retMe;
+    
+    AST_node* op_id;
+    if(is_operator_definition(signMe))
+        op_id = (*(signMe->children.end()-2));
+    else
+        op_id = (*(signMe->children.end()-1));
+    
+    for( auto n:op_id->children ){
+        if(n->text=="(")
+            for(auto m:n->children)
+                retMe.push_back(m->text);
+        else
+            retMe.push_back(n->text);
+    }
+    
+    return retMe;
+}
+
+void move_operator_param_declarations(const AST_node* const op_id, symbol_table& src, symbol_table& dst){
+    for(int i = 0;i<op_id->children.size();i++){
+        
+        if(op_id->children[i]->text=="("){
+            AST_node* params = op_id->children[i];
+            if(params->children[0]->text==",")
+                params=params->children[0];
+            
+            for(AST_node* node:params->children){
+                if(node->text==")")break;
+                std::vector<symbol> sym_list = src.get_symbol(node->children[0]->text);
+                assert(sym_list.size()>0);
+                symbol sym;
+                bool match_exists = false;
+                for(symbol S:sym_list){
+                    if( S.type.size()==1 && *S.type.begin()==node->text ){
+                        sym=S;
+                        match_exists=true;
+                    }
+                }
+                
+                if(!match_exists)
+                    assert(false&&"No matching symbol for this declaration.");
+                
+                dst.add_symbol(sym);
+                src.remove_symbol(sym);
+            }
+        }
+    }
+}
+
+std::vector<AST_node*> get_sub_declarations(const AST_node* const node, symbol_table& context){
+    assert( is_closed_curly_bracket(node) || is_closed_parenthesis(node) || is_comma_expression(node) );
+    
+    std::vector<AST_node*> retMe;
+    
+    for(auto n:node->children){
+        if(is_type_declaration(n,&context))
+            retMe.push_back(n);
+        if( is_closed_curly_bracket(n) || is_closed_parenthesis(n) || is_comma_expression(n) )// conveniently, all the structures are similar enough to have the same loop
+            for(auto m:get_sub_declarations(n,context))
+                retMe.push_back(m);
+    }
+    
+    return retMe;
+}
+
+// I know this is a bad solution because it misses the nested {} & () & , expressions. It fails to completely handle declarations. I should handle {} recursively, and , & ( with a for loop.
+void move_curly_bracket_declarations(const AST_node* const bracket, symbol_table& src, symbol_table& dst){
+    assert(is_closed_curly_bracket(bracket));
+    
+    std::vector<AST_node*> declarations = get_sub_declarations(bracket,src);
+    
+    for(AST_node* node:declarations){
+        if(node->text==")")break;
+        std::vector<symbol> sym_list = src.get_symbol(node->children[0]->text);
+        assert(sym_list.size()>0);
+        symbol sym;
+        bool match_exists = false;
+        for(symbol S:sym_list){
+            if( S.type.size()==1 && *S.type.begin()==node->text ){
+                sym=S;
+                match_exists=true;
+            }
+        }
+        
+        if(!match_exists)
+            assert(false&&"No matching symbol for this declaration.");
+        
+        dst.add_symbol(sym);
+        src.remove_symbol(sym);
+    }
+    
 }

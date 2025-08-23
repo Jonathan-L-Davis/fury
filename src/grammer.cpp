@@ -112,21 +112,22 @@ grammer fury_grammer(){
     retMe.add_rule(2,{"curly-bracket-closure", curly_bracket_closure_applies, curly_bracket_closure_folding} );
     
     retMe.add_rule(2,{"operator-partial", operator_partial_applies, operator_partial_folding} );
-    retMe.add_rule(2,{"operator-declaration", operator_declaration_applies, operator_declaration_folding} );
-    retMe.add_rule(2,{"operator-definition", operator_definition_applies, operator_definition_folding} );
-    
     retMe.add_rule(2,{"function-partial", function_partial_applies, function_partial_folding} );
-    retMe.add_rule(2,{"function-declaration", function_declaration_applies, function_declaration_folding} );
-    retMe.add_rule(2,{"function-definition", function_definition_applies, function_definition_folding} );
-    
     retMe.add_rule(2,{"syntax-partial", syntax_partial_applies, syntax_partial_folding} );
-    retMe.add_rule(2,{"syntax-declaration", syntax_declaration_applies, syntax_declaration_folding} );
-    retMe.add_rule(2,{"syntax-definition", syntax_definition_applies, syntax_definition_folding} );
     
-    retMe.add_rule(2,{"function-call", function_call_applies, function_call_folding});
     retMe.add_rule(2,{"type-declaration", type_declaration_applies, type_declaration_folding} );
     
     
+    
+    retMe.add_rule(1,{"function-call", function_call_applies, function_call_folding});
+    retMe.add_rule(1,{"operator-call", operator_call_applies, operator_call_folding});
+    
+    retMe.add_rule(1,{"operator-declaration", operator_declaration_applies, operator_declaration_folding} );
+    retMe.add_rule(1,{"operator-definition", operator_definition_applies, operator_definition_folding} );
+    retMe.add_rule(1,{"function-declaration", function_declaration_applies, function_declaration_folding} );
+    retMe.add_rule(1,{"function-definition", function_definition_applies, function_definition_folding} );
+    retMe.add_rule(1,{"syntax-declaration", syntax_declaration_applies, syntax_declaration_folding} );
+    retMe.add_rule(1,{"syntax-definition", syntax_definition_applies, syntax_definition_folding} );
     
     retMe.add_rule(1,{"if-statement", if_statement_applies, if_statement_folding} );
     retMe.add_rule(1,{"if-else-statement", if_else_statement_applies, if_else_statement_folding} );
@@ -295,6 +296,13 @@ bool function_definition_applies(std::vector<AST_node*>& nodePool, std::vector<s
 
 void function_definition_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     assert(function_definition_applies(nodePool,context,i));
+    
+    
+    // need to handle scoping more like operators are now handled. Meaning I have some revisions to do in the earlier function fragments.
+    //symbol_table& current_scope = **(context.end()-1);
+    //symbol_table& func_scope    = (current_scope.get_subscope(get_func_id(nodePool[i]),get_func_signature(nodePool[i])));
+    
+    //move_curly_bracket_declarations(nodePool[i+1],current_scope,func_scope);
     
     nodePool[i]->children.push_back(nodePool[i+1]);
     nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
@@ -618,7 +626,7 @@ void operator_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<
             op_id->children.push_back(nodePool[i]);
         }
         
-        if( found_text==total_text && (is_closed_curly_bracket(nodePool[i+1]) || nodePool[i+1]->text==";" || nodePool[i+1]->text==",") ){
+        if( found_text==total_text && (is_closed_curly_bracket(nodePool[i+1]) || nodePool[i+1]->text==";" || nodePool[i+1]->text=="," || nodePool[i+1]->text=="{" ) ){
             nodePool.erase( nodePool.begin()+start_idx, nodePool.begin()+i+1 );
             
             context[context.size()-1]->add_scope(op_id->text,scope_type::scope_t_operator);
@@ -638,39 +646,10 @@ void operator_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<
                 }
             }
             //  Take type declarations from symbol table and push them into sub scope.
-            symbol_table& op_scope = (*(context.end()-1))->get_operator_subscope(found_text,{});
+            symbol_table& op_scope = (*(context.end()-1))->get_subscope(found_text,{});
             op_scope.signature=signature;
             
-            for(int i = 0;i<op_id->children.size();i++){
-                
-                if(op_id->children[i]->text!="(")
-                    signature.push_back(op_id->children[i]->text);
-                else{
-                    AST_node* params = op_id->children[i];
-                    if(params->children[0]->text==",")
-                        params=params->children[0];
-                    
-                    for(AST_node* node:params->children){
-                        if(node->text==")")break;
-                        std::vector<symbol> sym_list = (*(context.end()-1))->get_symbol(node->children[0]->text);
-                        assert(sym_list.size()>0);
-                        symbol sym;
-                        bool match_exists = false;
-                        for(symbol S:sym_list){
-                            if( S.type.size()==1 && *S.type.begin()==node->text ){
-                                sym=S;
-                                match_exists=true;
-                            }
-                        }
-                        
-                        if(!match_exists)
-                            assert(false&&"No matching symbol for this declaration.");
-                        
-                        op_scope.add_symbol(sym);
-                        (*(context.end()-1))->remove_symbol(sym);
-                    }
-                }
-            }
+            move_operator_param_declarations(op_id,**(context.end()-1),op_scope);
             
             return;
         }
@@ -691,6 +670,11 @@ bool operator_definition_applies(std::vector<AST_node*>& nodePool, std::vector<s
 void operator_definition_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     assert(operator_definition_applies(nodePool,context,i));
     
+    symbol_table& current_scope = **(context.end()-1);
+    symbol_table& op_scope      = (current_scope.get_subscope(get_op_id(nodePool[i]),get_op_signature(nodePool[i])));
+    
+    move_curly_bracket_declarations(nodePool[i+1],current_scope,op_scope);
+    
     nodePool[i]->children.push_back(nodePool[i+1]);
     nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
     
@@ -702,7 +686,7 @@ bool operator_call_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_
 }
 
 void operator_call_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
-    
+    assert(operator_call_applies(nodePool,context,i));
 }
 
 

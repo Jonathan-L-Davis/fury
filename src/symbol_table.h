@@ -102,6 +102,9 @@ struct symbol_table{
     bool type_exists(std::string) const;
     
     bool scope_exists(std::string find_me) const;
+    
+    std::set<std::string> get_id_type(const AST_node* const typeMe);
+    
     //
     bool inside_syntax();
     bool inside_function();
@@ -119,9 +122,6 @@ struct symbol_table{
     std::vector<symbol> get_symbol(std::string);
     symbol_table& get_subscope(std::string);
     symbol_table& get_subscope(std::string,std::vector<std::string>);
-    symbol_table& get_operator_subscope(std::string,std::vector<std::string>);
-    
-    //
     
     void add_symbol(symbol);
     void remove_symbol(symbol);
