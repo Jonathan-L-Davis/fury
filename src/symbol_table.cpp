@@ -647,10 +647,27 @@ symbol symbol_table::get_oct(std::string getMe) const{
 bool id_exists(std::string s){
     return false;
 }
-    
+
 std::set<std::string> get_id_type(const AST_node* const typeMe){
     assert(id_exists(typeMe->text));
+    
+    
+    
     return {};
+}
+
+std::vector<AST_node*> symbol_table::get_all_ops(){
+    
+    std::vector<AST_node*> retMe;
+    
+    for(symbol& s:operators)
+        retMe.push_back(s.value);
+    
+    if(parent!=nullptr)
+        for(auto n:parent->get_all_ops())
+            retMe.push_back();
+    
+    return retMe;
 }
 
 bool symbol_table::inside_syntax(){

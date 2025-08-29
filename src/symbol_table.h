@@ -122,6 +122,7 @@ struct symbol_table{
     std::vector<symbol> get_symbol(std::string);
     symbol_table& get_subscope(std::string);
     symbol_table& get_subscope(std::string,std::vector<std::string>);
+    std::vector<AST_node*> get_all_ops();
     
     void add_symbol(symbol);
     void remove_symbol(symbol);

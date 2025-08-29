@@ -682,6 +682,9 @@ void operator_definition_folding(std::vector<AST_node*>& nodePool, std::vector<s
 }
 
 bool operator_call_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    
+    std::vector<AST_node*> ops = (*(context.end()-1))->get_all_ops();
+    
     return false;
 }
 
