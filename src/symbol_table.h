@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <unordered_set>
 
 #include "node.h"
 
@@ -24,13 +25,19 @@ struct symbol{
     
     symbol_type sym_type;// used for differentiating what bucket the sym 
     
-    std::set<std::string> type;// 'evaluated type', think functions return type. After the function evaluates, it sort of is it's eval type, even though it's 'real' type is 'function T * (...)'
+    std::set<std::string> type;
     std::string name;
     AST_node* value;
     
     void print();
     
 };
+
+bool operator == (const symbol& a, const symbol& b);
+typedef std::vector<symbol> typeset;
+bool operator == (const typeset& a, const typeset& b);
+
+extern symbol invalid_type, byte_type, dual_type, quad_type, oct_type;
 
 enum scope_type:uint32_t{
     scope_t_function = 0,
@@ -105,7 +112,6 @@ struct symbol_table{
     
     std::set<std::string> get_id_type(const AST_node* const typeMe);
     
-    //
     bool inside_syntax();
     bool inside_function();
     bool inside_operator();
@@ -122,6 +128,24 @@ struct symbol_table{
     std::vector<symbol> get_symbol(std::string);
     symbol_table& get_subscope(std::string);
     symbol_table& get_subscope(std::string,std::vector<std::string>);
+    
+    std::vector<symbol> get_ops();
+    
+    typeset get_type(const AST_node* const typeMe);
+    typeset get_type_of_if(const AST_node* const typeMe);
+    typeset get_type_of_for(const AST_node* const typeMe);
+    typeset get_type_of_while(const AST_node* const typeMe);
+    //typeset get_type_of_return(const AST_node* const typeMe);
+    //typeset get_type_of_function_decl(const AST_node* const typeMe);
+    //typeset get_type_of_operator_decl(const AST_node* const typeMe);
+    //typeset get_type_of_syntax_decl(const AST_node* const typeMe);
+    typeset get_type_of_function_call(const AST_node* const typeMe);
+    typeset get_type_of_operator_call(const AST_node* const typeMe);
+    typeset get_type_of_syntax_call(const AST_node* const typeMe);
+    typeset get_type_of_id(const AST_node* const typeMe);
+    typeset get_type_of_decl(const AST_node* const typeMe);
+    //typeset get_type_of_parenthesis(const AST_node* const typeMe);
+    //typeset get_type_of_curly_bracket(const AST_node* const typeMe);
     
     void add_symbol(symbol);
     void remove_symbol(symbol);

@@ -633,9 +633,11 @@ void operator_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<
             std::vector<std::string> signature;
             for(int i = 0;i<op_id->children.size();i++){
                 
-                if(op_id->children[i]->text!="(")
+                if(op_id->children[i]->text!="("){// add op id's
+                    op_id->children[i]->type = node_t::operator_id;
                     signature.push_back(op_id->children[i]->text);
-                else{
+                }
+                else{// add parameters
                     AST_node* params = op_id->children[i];
                     if(params->children[0]->text==",")
                         params=params->children[0];
@@ -681,12 +683,115 @@ void operator_definition_folding(std::vector<AST_node*>& nodePool, std::vector<s
     return;
 }
 
+int op_applies(symbol S, symbol_table context, std::vector<AST_node*>& nodePool, int i){
+    
+    AST_node* op = S.value;
+    //op->print_with_types();
+    if(!is_operator_declaration(op))
+        return 0;
+    
+    if((*(op->children.end()-1))->text=="{")// should have a safety assert here to make sure the size is at least 2.
+        op=*(op->children.end()-2);
+    else
+        op=*(op->children.end()-1);
+    
+    // grab all types & strings. Might be worth dereferencing the pointer into a local variable to ingore threading concerns.
+    std::vector<AST_node*> tokens;
+    for(AST_node* c:op->children){
+        if(c->type==node_t::operator_id||c->type==node_t::id){
+            tokens.push_back(c);
+        }
+        if(c->text=="("){
+            if(c->children.size()>=1&&c->children[0]->text==","){
+                //c->print_with_types();
+                assert(c->children.size()==1&&"Comma's shouldn't have siblings.\n");
+                c=c->children[0];
+            }
+            
+            for( int i = 0; i < c->children.size()-1; i++ ){
+                tokens.push_back(c->children[i]);
+            }
+        }
+    }
+    
+    int k = 0;
+    for(int j = i; j < nodePool.size()&&k+1<=tokens.size(); j++,k++ ){// no I don't *need* 2 indices, but it's easier to track that way.
+        if((nodePool[j]->type==node_t::operator_id||nodePool[j]->type==node_t::id)&&nodePool[j]->text==tokens[k]->text)
+            continue;
+        
+        typeset a = context.get_type(nodePool[j]);
+        typeset b = context.get_type(tokens[k]);
+        
+        if( a==b )// need to match type to parameter ID
+            continue;
+        else return 0;
+    }
+    
+    return k;
+}
+
 bool operator_call_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    
+    symbol_table& sym_tbl = **(context.end()-1);
+    
+    std::vector<symbol> op_list = sym_tbl.get_ops();
+    
+    for(auto& op: op_list)
+        if( op_applies(op,sym_tbl,nodePool,i)>0 ) return true;
+    
     return false;
 }
 
 void operator_call_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     assert(operator_call_applies(nodePool,context,i));
+    /// We want the operator that consumes the most tokens/expressions/nodes (maximal munch). Then we want to prioritize the one in the lowest namespace (shadowing).
+    symbol_table& sym_tbl = **(context.end()-1);
+    std::vector<symbol> op_list = sym_tbl.get_ops();
+    int max = 0;
+    
+    for(auto S:op_list) max = std::max(max,op_applies(S,sym_tbl,nodePool,i));
+    
+    // grab the first one to hit the max, that should be the lowest scope match. (Hopefully only 1 match each time.)
+    AST_node* op;
+    for(auto S:op_list) if(max==op_applies(S,sym_tbl,nodePool,i)){ op = S.value;break;};
+    
+    assert(is_operator_declaration(op)&&"How can we be folding an operator call if we don't have a declaration for it?");
+    
+    if((*(op->children.end()-1))->text=="{")// should have a safety assert here to make sure the size is at least 2.
+        op=*(op->children.end()-2);
+    else
+        op=*(op->children.end()-1);
+    
+    // grab all types & strings. Might be worth dereferencing the pointer into a local variable to ingore threading concerns.
+    std::vector<AST_node*> tokens;
+    for(AST_node* c:op->children){
+        if(c->type==node_t::operator_id||c->type==node_t::id){
+            tokens.push_back(c);
+        }
+        if(c->text=="("){
+            if(c->children.size()>=1&&c->children[0]->text==","){
+                //c->print_with_types();
+                assert(c->children.size()==1&&"Comma's shouldn't have siblings.\n");
+                c=c->children[0];
+            }
+            
+            for( int i = 0; i < c->children.size()-1; i++ ){
+                tokens.push_back(c->children[i]);
+            }
+        }
+    }
+    
+    AST_node* call = new AST_node;
+    
+    *call = *op;
+    call->children={};
+    
+    for(int q = 0; q < max; q++)
+        call->children.push_back(nodePool[i+q]);
+    
+    nodePool.erase(nodePool.begin()+i,nodePool.begin()+i+max);
+    nodePool.insert(nodePool.begin()+i,call);
+    //std::exit(-1);
 }
 
 

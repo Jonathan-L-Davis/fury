@@ -1,23 +1,5 @@
-operator byte + (byte a)+(byte b, byte q){
-    byte c,
-    byte d;
-    byte e;
-    byte f;
-    (byte g),
-    {byte h;};
-};
+byte a, byte b;
 
-function f(byte a, byte b){
-    byte c,
-    byte 0;
-    byte o;
-    byte f;
-    (byte g),
-    {byte h;};
-};
+operator byte + (byte a)+(byte b);
 
-if(){}else{};
-
-byte a;
-for(a;a;a)a;
-while(a)a;
+a + b;
