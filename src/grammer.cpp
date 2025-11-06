@@ -119,15 +119,15 @@ grammer fury_grammer(){
     
     
     
-    retMe.add_rule(1,{"function-call", function_call_applies, function_call_folding});
-    retMe.add_rule(1,{"operator-call", operator_call_applies, operator_call_folding});
-    
     retMe.add_rule(1,{"operator-declaration", operator_declaration_applies, operator_declaration_folding} );
     retMe.add_rule(1,{"operator-definition", operator_definition_applies, operator_definition_folding} );
     retMe.add_rule(1,{"function-declaration", function_declaration_applies, function_declaration_folding} );
     retMe.add_rule(1,{"function-definition", function_definition_applies, function_definition_folding} );
     retMe.add_rule(1,{"syntax-declaration", syntax_declaration_applies, syntax_declaration_folding} );
     retMe.add_rule(1,{"syntax-definition", syntax_definition_applies, syntax_definition_folding} );
+
+    retMe.add_rule(1,{"function-call", function_call_applies, function_call_folding});
+    retMe.add_rule(1,{"operator-call", operator_call_applies, operator_call_folding});
     
     retMe.add_rule(1,{"if-statement", if_statement_applies, if_statement_folding} );
     retMe.add_rule(1,{"if-else-statement", if_else_statement_applies, if_else_statement_folding} );
@@ -715,8 +715,8 @@ int op_applies(symbol S, symbol_table context, std::vector<AST_node*>& nodePool,
     }
     
     int k = 0;
-    for(int j = i; j < nodePool.size()&&k+1<=tokens.size(); j++,k++ ){// no I don't *need* 2 indices, but it's easier to track that way.
-        if((nodePool[j]->type==node_t::operator_id||nodePool[j]->type==node_t::id)&&nodePool[j]->text==tokens[k]->text)
+    for(int j = i; j < nodePool.size()&&k<tokens.size(); j++,k++ ){// no I don't *need* 2 indices, but it's easier to track that way.
+        if((nodePool[j]->type==node_t::id||nodePool[j]->type==node_t::id)&&nodePool[j]->text==tokens[k]->text)
             continue;
         
         typeset a = context.get_type(nodePool[j]);
@@ -732,6 +732,8 @@ int op_applies(symbol S, symbol_table context, std::vector<AST_node*>& nodePool,
 
 bool operator_call_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     
+    if(is_terminated(nodePool[i]))return false;
+    
     symbol_table& sym_tbl = **(context.end()-1);
     
     std::vector<symbol> op_list = sym_tbl.get_ops();
@@ -743,6 +745,9 @@ bool operator_call_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_
 }
 
 void operator_call_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    /*
+    std::cout << "-------------------------------------------------------------------\n";
+    for(auto n: nodePool) n->print_with_types();//*/
     assert(operator_call_applies(nodePool,context,i));
     /// We want the operator that consumes the most tokens/expressions/nodes (maximal munch). Then we want to prioritize the one in the lowest namespace (shadowing).
     symbol_table& sym_tbl = **(context.end()-1);

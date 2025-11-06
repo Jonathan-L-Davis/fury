@@ -123,6 +123,7 @@ program parse(std::string file_name){
         bool modified = false;
         do{
             modified = false;
+            
             for( int i = g.rules.size()-1; i >= 0; i--){
                 std::vector<rule>& rules = g.rules[i];
                 for( int j = 0; j < rules.size(); j++){
@@ -131,7 +132,12 @@ program parse(std::string file_name){
                         t1:;
                         for( int k = 0; k < nodePool.size(); k++ ){
                             if( rules[j].rule_applies(nodePool,context_stack,k) ){
+                                std::cout << rules[i].name << "\n";
+                                if(rules[i].name=="operator-call")
+                                    for(auto n:nodePool) n->print_with_types();
                                 rules[j].apply_rule(nodePool,context_stack,k);
+                                if(rules[i].name=="operator-call")
+                                    for(auto n:nodePool) n->print_with_types();
                                 modified = true;
                                 goto t1;
                             }
@@ -140,7 +146,12 @@ program parse(std::string file_name){
                         t2:;
                         for( int k = nodePool.size()-1; k >= 0; k-- ){
                             if( rules[j].rule_applies(nodePool,context_stack,k) ){
+                                std::cout << rules[i].name << "\n";
+                                if(rules[i].name=="operator-call")
+                                    for(auto n:nodePool) n->print_with_types();
                                 rules[j].apply_rule(nodePool,context_stack,k);
+                                if(std::cout << "----------------------------------------\n";rules[i].name=="operator-call")
+                                    for(auto n:nodePool) n->print_with_types();
                                 modified = true;
                                 goto t2;
                             }
