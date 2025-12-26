@@ -127,7 +127,7 @@ grammer fury_grammer(){
     retMe.add_rule(1,{"syntax-definition", syntax_definition_applies, syntax_definition_folding} );
 
     retMe.add_rule(1,{"function-call", function_call_applies, function_call_folding});
-    retMe.add_rule(1,{"operator-call", operator_call_applies, operator_call_folding});
+    retMe.add_rule(0,{"operator-call", operator_call_applies, operator_call_folding});
     
     retMe.add_rule(1,{"if-statement", if_statement_applies, if_statement_folding} );
     retMe.add_rule(1,{"if-else-statement", if_else_statement_applies, if_else_statement_folding} );
@@ -719,10 +719,10 @@ int op_applies(symbol S, symbol_table context, std::vector<AST_node*>& nodePool,
         if((nodePool[j]->type==node_t::id||nodePool[j]->type==node_t::id)&&nodePool[j]->text==tokens[k]->text)
             continue;
         
-        typeset a = context.get_type(nodePool[j]);
-        typeset b = context.get_type(tokens[k]);
+        AST_node* a = context.get_type(nodePool[j]);
+        AST_node* b = context.get_type(tokens[k]);
         
-        if( a==b )// need to match type to parameter ID
+        if( context.types_equal(a,b) )// need to match type to parameter ID
             continue;
         else return 0;
     }
@@ -733,6 +733,7 @@ int op_applies(symbol S, symbol_table context, std::vector<AST_node*>& nodePool,
 bool operator_call_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     
     if(is_terminated(nodePool[i]))return false;
+    if(is_operator_declaration(nodePool[i])||is_operator_partial_declaration(nodePool[i])) return false;// not going to fly when I start allowing ops/functions as args, but for now.
     
     symbol_table& sym_tbl = **(context.end()-1);
     
@@ -790,7 +791,7 @@ void operator_call_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_
     
     *call = *op;
     call->children={};
-    
+    std::cout << "Max op size: " << max << "\n";
     for(int q = 0; q < max; q++)
         call->children.push_back(nodePool[i+q]);
     

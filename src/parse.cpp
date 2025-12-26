@@ -127,17 +127,16 @@ program parse(std::string file_name){
             for( int i = g.rules.size()-1; i >= 0; i--){
                 std::vector<rule>& rules = g.rules[i];
                 for( int j = 0; j < rules.size(); j++){
-                if(modified) goto top;
+                    if(modified) goto top;
+                    
                     if(g.direction[i]==parse_dir::forward){
                         t1:;
                         for( int k = 0; k < nodePool.size(); k++ ){
                             if( rules[j].rule_applies(nodePool,context_stack,k) ){
-                                std::cout << rules[i].name << "\n";
-                                if(rules[i].name=="operator-call")
-                                    for(auto n:nodePool) n->print_with_types();
+                                std::cout << rules[j].name << " : forward\n";
+                                if(rules[j].name=="operator-call") {std::cout << i << ":" << j << ":" << k << "\n"; std::cout << "\n";for(auto n : nodePool) n->print_with_types();}
                                 rules[j].apply_rule(nodePool,context_stack,k);
-                                if(rules[i].name=="operator-call")
-                                    for(auto n:nodePool) n->print_with_types();
+                                if(rules[j].name=="operator-call") {std::cout << "\n";for(auto n : nodePool) n->print_with_types();}
                                 modified = true;
                                 goto t1;
                             }
@@ -146,12 +145,11 @@ program parse(std::string file_name){
                         t2:;
                         for( int k = nodePool.size()-1; k >= 0; k-- ){
                             if( rules[j].rule_applies(nodePool,context_stack,k) ){
-                                std::cout << rules[i].name << "\n";
-                                if(rules[i].name=="operator-call")
-                                    for(auto n:nodePool) n->print_with_types();
+                                
+                                std::cout << rules[j].name << " : backward\n";
+                                
+                                if(rules[j].name=="operator-call") {std::cout << i << ":" << j << ":" << k << "\n"; std::cout << "\n";for(auto n : nodePool) n->print_with_types();}
                                 rules[j].apply_rule(nodePool,context_stack,k);
-                                if(std::cout << "----------------------------------------\n";rules[i].name=="operator-call")
-                                    for(auto n:nodePool) n->print_with_types();
                                 modified = true;
                                 goto t2;
                             }

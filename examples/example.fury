@@ -1,6 +1,6 @@
 byte a, byte b;
 
-operator byte + (byte zz)+(byte zzz);
+operator byte ++ (byte zz)+(byte zzz)+;
 operator byte ~         ~(byte zzz);
 
-a + b;
+a + b +;

@@ -4,38 +4,7 @@
 #include <assert.h>
 #include <iostream>
 
-symbol invalid_type = {symbol_type::sym_t_type,{" "},"invalid type",nullptr};// a space is never an acceptable type. it's useful to have an invalid type for better type checking/erroring properly.
-symbol byte_type = {symbol_type::sym_t_type,{"type"},"byte",nullptr};
-symbol dual_type = {symbol_type::sym_t_type,{"type"},"dual",nullptr};
-symbol quad_type = {symbol_type::sym_t_type,{"type"},"quad",nullptr};
-symbol oct_type  = {symbol_type::sym_t_type,{"type"},"oct" ,nullptr};
 
-// this is a bad method to check for type equality.
-bool operator == (const symbol& a, const symbol& b){
-    return a.sym_type==b.sym_type&&
-           //a.type==b.type&&
-           a.name==b.name&&
-           a.value==b.value;
-}
-
-// type set's shouldn't be vectors because it forces an O(n^2) comparison here, but oh well. I can't be assed to define an ordering for symbols, so I don't get to use set comparison.
-bool operator == (const typeset& a, const typeset& b){
-    if( a.size()!=b.size() ) return false;
-    
-    for(int i = 0; i < a.size(); i++){
-        
-        bool found = false;
-        for(int j = 0; j < b.size(); j++){
-            if(a[i]==b[j]){
-                found = true;
-                break;
-            }
-        }
-        if(!found) return false;
-    }
-    
-    return true;
-}
 
 void symbol_table::add_symbol( symbol add_me ){
     //*
@@ -733,122 +702,6 @@ bool symbol_table::lowest_functional_is_syntax(){
     return parent->lowest_functional_is_syntax();
 }
 
-typeset symbol_table::get_type(const AST_node* const typeMe){
-    typeset retMe = {invalid_type};
-    /*
-    if(is_closed_curly_bracket(typeMe))
-        return get_type_of_curly_bracket(typeMe);
-    if(is_closed_parenthesis(typeMe))
-        return get_type_of_parenthesis(typeMe);
-    
-    if(is_function_call(typeMe))
-        return get_type_of_function_call(typeMe);
-    if(is_operator_call(typeMe))
-        return get_type_of_operator_call(typeMe);
-    if(is_syntax_call(typeMe))
-        return get_type_of_syntax_call(typeMe);
-    
-    if(is_function_declaration(typeMe))
-        return get_type_of_function_decl(typeMe);
-    if(is_operator_declaration(typeMe))
-        return get_type_of_operator_decl(typeMe);
-    if(is_syntax_declaration(typeMe))
-        return get_type_of_syntax_decl(typeMe);
-    //*/
-    if(is_type_declaration(typeMe,this))
-        return get_type_of_decl(typeMe);
-    /*
-    if(is_return_statement(typeMe,this))
-        return get_type_of_return(typeMe);//*/
-    if(is_if_statement(typeMe))
-        return get_type_of_if(typeMe);
-    if(is_for_loop(typeMe))
-        return get_type_of_for(typeMe);
-    if(is_while_loop(typeMe))
-        return get_type_of_while(typeMe);
-        
-    if(typeMe->type==node_t::id)
-        return get_type_of_id(typeMe);
-    
-    if(typeMe->type==node_t::semicolon)
-        return {};
-    //*/
-    return retMe;
-}
-
-typeset symbol_table::get_type_of_if(const AST_node* const typeMe){
-    assert(is_if_statement(typeMe));
-    
-    typeset retMe = get_type(typeMe->children[1]);
-    
-    if(is_if_else_statement(typeMe)){
-        for(const auto& s:get_type(typeMe->children[2]->children[0]))
-            retMe.push_back(s);
-    }
-    
-    return retMe;
-}
-
-typeset symbol_table::get_type_of_for(const AST_node* const typeMe){
-    assert(is_for_loop(typeMe));
-    return get_type(typeMe->children[3]);
-}
-
-typeset symbol_table::get_type_of_while(const AST_node* const typeMe){
-    assert(is_while_loop(typeMe));
-    if(typeMe->children.size()==1)
-        return {};
-    return get_type(typeMe->children[1]);
-}
-/*
-typeset symbol_table::get_type_of_return(const AST_node* const typeMe);
-typeset symbol_table::get_type_of_function_decl(const AST_node* const typeMe);
-typeset symbol_table::get_type_of_operator_decl(const AST_node* const typeMe);
-typeset symbol_table::get_type_of_syntax_decl(const AST_node* const typeMe);
-typeset symbol_table::get_type_of_function_call(const AST_node* const typeMe);
-typeset symbol_table::get_type_of_operator_call(const AST_node* const typeMe);
-typeset symbol_table::get_type_of_syntax_call(const AST_node* const typeMe);
-*/
-typeset symbol_table::get_type_of_id(const AST_node* const typeMe){
-    
-    for(int i = 0; i < bytes.size(); i++)
-        if(bytes[i].name==typeMe->text)
-            return {byte_type};
-    for(int i = 0; i < duals.size(); i++)
-        if(duals[i].name==typeMe->text)
-            return {dual_type};
-    for(int i = 0; i < quads.size(); i++)
-        if(quads[i].name==typeMe->text)
-            return {quad_type};
-    for(int i = 0; i < octs.size(); i++)
-        if(octs[i].name==typeMe->text)
-            return {oct_type};
-    
-    // this is literally incomplete.
-    
-    if(parent!=nullptr)
-        return parent->get_type_of_id(typeMe);
-    return {invalid_type};
-}
-
-typeset symbol_table::get_type_of_decl(const AST_node* const typeMe){
-    
-    // assume only 1 symbol can contain a plain type.
-    for(symbol K:types){
-        if( (K.name==typeMe->text)||(K.value!=nullptr&&K.value->text==typeMe->text))
-            return {K};
-    }
-    
-    if(parent!=nullptr)
-        return parent->get_type_of_decl(typeMe);
-    else
-        return {invalid_type};
-}
-
-/*
-typeset symbol_table::get_type_of_parenthesis(const AST_node* const typeMe);
-typeset symbol_table::get_type_of_curly_bracket(const AST_node* const typeMe);
-*/
 std::vector<symbol> symbol_table::get_ops(){
     std::vector<symbol> retMe = operators;
     
@@ -860,3 +713,47 @@ std::vector<symbol> symbol_table::get_ops(){
     
     return retMe;
 }
+
+bool symbol_table::types_equal(const AST_node* const a, const AST_node* const b){
+    if(a==nullptr) return false;
+    if(b==nullptr) return false;
+    
+    // deliberately after the nullptr. Don't want to do stuff with null types. Maybe this will change later?
+    if(a==b) return true;
+    
+    std::cout << a->text << ":" << b->text << "\n";
+    if(a->text==b->text/*&&a->type==b->type*/) return true;
+    
+    return false;
+}
+
+AST_node* symbol_table::get_type(const AST_node* const typeMe){
+    typeMe->print_with_types();
+    if(byte_exists(typeMe->text)) return new AST_node {"byte",0,node_t::keyword};
+    
+    if(is_type_declaration(typeMe,this)) return new AST_node {typeMe->text,0,typeMe->type};
+    
+    std::cout << "HARHAKRJELHFDKJSHFLKDSAJFHSDKLJFHSDLKJFHSDKLJFHSDKJFKJ?!\n";
+    if(parent==nullptr)
+        return nullptr;
+    else
+        return parent->get_type(typeMe);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

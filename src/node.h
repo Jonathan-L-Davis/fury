@@ -32,9 +32,9 @@ std::basic_ostream<T>& operator << ( std::basic_ostream<T>& fillMe, node_t print
         case node_t::comma       : fillMe << "comma";       break;
         case node_t::function_id : fillMe << "function_id"; break;
         case node_t::operator_id : fillMe << "operator_id"; break;
-        case node_t::syntax_id : fillMe << "syntax_id"; break;
-        case node_t::label_id : fillMe << "label_id"; break;
-        case node_t::type : fillMe << "type"; break;
+        case node_t::syntax_id   : fillMe << "syntax_id";   break;
+        case node_t::label_id    : fillMe << "label_id";    break;
+        case node_t::type        : fillMe << "type";        break;
     }
     
     return fillMe;

@@ -33,12 +33,6 @@ struct symbol{
     
 };
 
-bool operator == (const symbol& a, const symbol& b);
-typedef std::vector<symbol> typeset;
-bool operator == (const typeset& a, const typeset& b);
-
-extern symbol invalid_type, byte_type, dual_type, quad_type, oct_type;
-
 enum scope_type:uint32_t{
     scope_t_function = 0,
     scope_t_if = 1,
@@ -131,21 +125,23 @@ struct symbol_table{
     
     std::vector<symbol> get_ops();
     
-    typeset get_type(const AST_node* const typeMe);
-    typeset get_type_of_if(const AST_node* const typeMe);
-    typeset get_type_of_for(const AST_node* const typeMe);
-    typeset get_type_of_while(const AST_node* const typeMe);
-    //typeset get_type_of_return(const AST_node* const typeMe);
-    //typeset get_type_of_function_decl(const AST_node* const typeMe);
-    //typeset get_type_of_operator_decl(const AST_node* const typeMe);
-    //typeset get_type_of_syntax_decl(const AST_node* const typeMe);
-    typeset get_type_of_function_call(const AST_node* const typeMe);
-    typeset get_type_of_operator_call(const AST_node* const typeMe);
-    typeset get_type_of_syntax_call(const AST_node* const typeMe);
-    typeset get_type_of_id(const AST_node* const typeMe);
-    typeset get_type_of_decl(const AST_node* const typeMe);
-    //typeset get_type_of_parenthesis(const AST_node* const typeMe);
-    //typeset get_type_of_curly_bracket(const AST_node* const typeMe);
+    bool types_equal(const AST_node* const a, const AST_node* const b);
+    
+    AST_node* get_type(const AST_node* const typeMe);
+    AST_node* get_type_of_if(const AST_node* const typeMe);
+    AST_node* get_type_of_for(const AST_node* const typeMe);
+    AST_node* get_type_of_while(const AST_node* const typeMe);
+    //AST_node* get_type_of_return(const AST_node* const typeMe);
+    //AST_node* get_type_of_function_decl(const AST_node* const typeMe);
+    //AST_node* get_type_of_operator_decl(const AST_node* const typeMe);
+    //AST_node* get_type_of_syntax_decl(const AST_node* const typeMe);
+    AST_node* get_type_of_function_call(const AST_node* const typeMe);
+    AST_node* get_type_of_operator_call(const AST_node* const typeMe);
+    AST_node* get_type_of_syntax_call(const AST_node* const typeMe);
+    AST_node* get_type_of_id(const AST_node* const typeMe);
+    AST_node* get_type_of_decl(const AST_node* const typeMe);
+    //AST_node* get_type_of_parenthesis(const AST_node* const typeMe);
+    //AST_node* get_type_of_curly_bracket(const AST_node* const typeMe);
     
     void add_symbol(symbol);
     void remove_symbol(symbol);
