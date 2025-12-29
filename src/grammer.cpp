@@ -1,6 +1,5 @@
 #include "grammer.h"
 #include "parse_util.h"
-#include "type_util.h"
 
 #include <cassert>
 

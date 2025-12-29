@@ -119,7 +119,7 @@ operator oct <  (oct a)< (oct b);
 syntax # (byte b){
     byte zero = (b^b);
     byte neg_one = ~ zero;
-    byte one = neg_one*neg_one;
+    byte one = neg_one * neg_one;
     byte two = (one + one);
     byte five = ( (two * two) + one );
     byte ten = (two * five);

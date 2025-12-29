@@ -1,5 +1,4 @@
 #include "parse_util.h"
-#include "type_util.h"
 #include "assert.h"
 
 
@@ -642,7 +641,7 @@ bool is_comma_expression(const AST_node* const checkMe){
 
 bool is_operator_call(const AST_node* const checkMe, const symbol_table* const context){
     // get all ops with same name. Check types of each argument until match found
-    
+    return false;// currently broken. This avoids the infinite loop.
     std::vector<symbol> ops = context->get_ops();
     
     for(const symbol& op:ops){

@@ -71,22 +71,6 @@ struct symbol_table{
     
     std::string get_full_scope();//returns absolute scope
     
-    //in this particular scope.
-    bool contains_id(std::string) const;
-    
-    bool contains_byte(std::string) const;
-    bool contains_dual(std::string) const;
-    bool contains_quad(std::string) const;
-    bool contains_oct(std::string) const;
-    bool contains_struct(std::string) const;
-    bool contains_function(std::string) const;
-    bool contains_operator(std::string) const;
-    bool contains_syntax(std::string) const;
-    bool contains_label(std::string) const;
-    bool contains_type(std::string) const;
-    
-    bool contains_scope(std::string) const;
-    
     //in this or parent scope.
     bool id_exists(std::string) const;
     
@@ -96,28 +80,12 @@ struct symbol_table{
     bool oct_exists(std::string) const;
     bool struct_exists(std::string) const;
     bool function_id_exists(std::string) const;
-    bool function_exists(std::string,std::vector<std::string>) const;
     bool operator_exists(std::string) const;
     bool syntax_exists(std::string) const;
     bool label_exists(std::string) const;
     bool type_exists(std::string) const;
     
     bool scope_exists(std::string find_me) const;
-    
-    std::set<std::string> get_id_type(const AST_node* const typeMe);
-    
-    bool inside_syntax();
-    bool inside_function();
-    bool inside_operator();
-    bool inside_functional();
-    
-    bool lowest_functional_is_syntax();
-    
-    symbol get_function(std::string,std::vector<std::string>) const;
-    symbol get_byte(std::string) const;
-    symbol get_dual(std::string) const;
-    symbol get_quad(std::string) const;
-    symbol get_oct(std::string) const;
     
     std::vector<symbol> get_symbol(std::string);
     symbol_table& get_subscope(std::string);
@@ -131,24 +99,21 @@ struct symbol_table{
     AST_node* get_type_of_if(const AST_node* const typeMe);
     AST_node* get_type_of_for(const AST_node* const typeMe);
     AST_node* get_type_of_while(const AST_node* const typeMe);
-    //AST_node* get_type_of_return(const AST_node* const typeMe);
-    //AST_node* get_type_of_function_decl(const AST_node* const typeMe);
-    //AST_node* get_type_of_operator_decl(const AST_node* const typeMe);
-    //AST_node* get_type_of_syntax_decl(const AST_node* const typeMe);
+    AST_node* get_type_of_return(const AST_node* const typeMe);
+    AST_node* get_type_of_function_decl(const AST_node* const typeMe);
+    AST_node* get_type_of_operator_decl(const AST_node* const typeMe);
+    AST_node* get_type_of_syntax_decl(const AST_node* const typeMe);
     AST_node* get_type_of_function_call(const AST_node* const typeMe);
     AST_node* get_type_of_operator_call(const AST_node* const typeMe);
     AST_node* get_type_of_syntax_call(const AST_node* const typeMe);
     AST_node* get_type_of_id(const AST_node* const typeMe);
     AST_node* get_type_of_decl(const AST_node* const typeMe);
-    //AST_node* get_type_of_parenthesis(const AST_node* const typeMe);
-    //AST_node* get_type_of_curly_bracket(const AST_node* const typeMe);
+    AST_node* get_type_of_parenthesis(const AST_node* const typeMe);
+    AST_node* get_type_of_curly_bracket(const AST_node* const typeMe);
     
     void add_symbol(symbol);
     void remove_symbol(symbol);
     void add_scope(std::string scope, scope_type);
-    
-    bool id_starts_with_substr(std::string);
-    bool type_starts_with_substr(std::string);
     
     void print();
     

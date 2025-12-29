@@ -1,6 +1,6 @@
 #include "symbol_table.h"
 #include "parse_util.h"
-#include "type_util.h"
+
 #include <assert.h>
 #include <iostream>
 
@@ -245,81 +245,6 @@ void symbol::print(){
     std::cout << sym_tbl_indent << "|" << type_str << "|" << name << "|" << value << "|\n";
 }
 
-// is id in local scope
-bool symbol_table::contains_id(std::string id) const{
-    return contains_byte(id) || contains_dual(id) || contains_quad(id) || contains_oct(id) || contains_struct(id) || contains_function(id) || contains_operator(id) || contains_syntax(id) || contains_label(id);
-}
-
-bool symbol_table::contains_byte(std::string id) const{
-    for( unsigned int i = 0; i < bytes.size(); i++ )
-        if( bytes[i].name == id )
-            return true;
-    return false;
-}
-
-bool symbol_table::contains_dual(std::string id) const{
-    for( unsigned int i = 0; i < duals.size(); i++ )
-        if( duals[i].name == id )
-            return true;
-    return false;
-}
-
-bool symbol_table::contains_quad(std::string id) const{
-    for( unsigned int i = 0; i < quads.size(); i++ )
-        if( quads[i].name == id )
-            return true;
-    return false;
-}
-
-bool symbol_table::contains_oct(std::string id) const{
-    for( unsigned int i = 0; i < bytes.size(); i++ )
-        if( bytes[i].name == id )
-            return true;
-    return false;
-}
-
-bool symbol_table::contains_struct(std::string id) const{
-    for( unsigned int i = 0; i < structs.size(); i++ )
-        if( structs[i].name == id )
-            return true;
-    return false;
-}
-
-bool symbol_table::contains_function(std::string id) const{
-    for( unsigned int i = 0; i < functions.size(); i++ )
-        if( functions[i].name == id )
-            return true;
-    return false;
-}
-
-bool symbol_table::contains_operator(std::string id) const{
-    for( unsigned int i = 0; i < operators.size(); i++ )
-        if( operators[i].name == id )
-            return true;
-    return false;
-}
-
-bool symbol_table::contains_syntax(std::string id) const{
-    for( unsigned int i = 0; i < syntaxes.size(); i++ )
-        if( syntaxes[i].name == id )
-            return true;
-    return false;
-}
-
-bool symbol_table::contains_label(std::string id) const{
-    for( unsigned int i = 0; i < labels.size(); i++ )
-        if( labels[i].name == id )
-            return true;
-    return false;
-}
-
-bool symbol_table::contains_type(std::string id) const{
-    for( unsigned int i = 0; i < types.size(); i++ )
-        if( types[i].name == id )
-            return true;
-    return false;
-}
-
 // is id in any scope
 bool symbol_table::id_exists(std::string id) const{
     return byte_exists(id) || dual_exists(id) || quad_exists(id) || oct_exists(id) || struct_exists(id) || function_id_exists(id) || operator_exists(id) || syntax_exists(id) || label_exists(id) || type_exists(id);
@@ -397,18 +322,6 @@ bool symbol_table::function_id_exists(std::string id) const{
     
 }
 
-bool symbol_table::function_exists(std::string id,std::vector<std::string>params) const{
-    
-    for( unsigned int i = 0; i < functions.size(); i++ ){
-        if( functions[i].name == id && get_function_param_types(functions[i].value) == params )
-            return true;
-    }
-    
-    if( scope != "" ) return parent->function_exists(id,params);
-    return false;
-    
-}
-
 bool symbol_table::operator_exists(std::string id) const{
     
     for( unsigned int i = 0; i < operators.size(); i++ ){
@@ -453,31 +366,6 @@ bool symbol_table::type_exists(std::string id) const{
     }
     
     if( scope != "" ) return parent->type_exists(id);
-    return false;
-    
-}
-
-
-bool symbol_table::id_starts_with_substr(std::string find_me){
-    /*
-    for( unsigned int i = 0; i < symbols.size(); i++ ){
-        if( symbols[i].name.size() >= find_me.size() && symbols[i].name.substr(0,find_me.size()) == find_me )
-            return true;
-    }
-    
-    if( scope != "" ) return parent->id_starts_with_substr(find_me);//*/
-    return false;
-    
-}
-
-bool symbol_table::type_starts_with_substr(std::string find_me){
-    /*
-    for( unsigned int i = 0; i < symbols.size(); i++ ){
-        if( symbols[i].name.size() >= find_me.size() && symbols[i].name.substr(0,find_me.size()) == find_me  )
-            return true;
-    }
-    
-    if( scope != "" ) return parent->id_starts_with_substr(find_me);//*/
     return false;
     
 }
@@ -567,82 +455,6 @@ symbol_table& symbol_table::get_subscope(std::string id,std::vector<std::string>
     
     return *iter;
 }
-
-bool symbol_table::contains_scope(std::string find_me) const{
-    
-    for( unsigned int i = 0; i < sub_scopes.size(); i++ ){
-        if( sub_scopes[i].scope == find_me )
-            return true;
-    }
-    
-    return false;
-}
-
-bool symbol_table::scope_exists(std::string find_me) const{
-    
-    for( unsigned int i = 0; i < sub_scopes.size(); i++ ){
-        if( sub_scopes[i].scope == find_me )
-            return true;
-    }
-    
-    if( scope != "" ) return parent->contains_scope(find_me);
-    return false;
-}
-
-// assumes function exists.
-symbol symbol_table::get_function(std::string getMe, std::vector<std::string> param_types) const{
-    
-    for( int i = 0; i < functions.size(); i++){
-        if( functions[i].name == getMe )
-            return functions[i];
-    }
-    
-    return parent->get_function(getMe,param_types);// will null dereference if there isn't one.
-}
-
-// assumes byte exists.
-symbol symbol_table::get_byte(std::string getMe) const{
-    
-    for( int i = 0; i < bytes.size(); i++){
-        if( bytes[i].name == getMe )
-            return bytes[i];
-    }
-    
-    return parent->get_byte(getMe);// will null dereference if there isn't one.
-}
-
-// assumes byte exists.
-symbol symbol_table::get_dual(std::string getMe) const{
-    
-    for( int i = 0; i < duals.size(); i++){
-        if( duals[i].name == getMe )
-            return duals[i];
-    }
-    
-    return parent->get_dual(getMe);// will null dereference if there isn't one.
-}
-
-// assumes byte exists.
-symbol symbol_table::get_quad(std::string getMe) const{
-    
-    for( int i = 0; i < quads.size(); i++){
-        if( quads[i].name == getMe )
-            return quads[i];
-    }
-    
-    return parent->get_quad(getMe);// will null dereference if there isn't one.
-}
-
-// assumes byte exists.
-symbol symbol_table::get_oct(std::string getMe) const{
-    
-    for( int i = 0; i < octs.size(); i++){
-        if( octs[i].name == getMe )
-            return octs[i];
-    }
-    
-    return parent->get_oct(getMe);// will null dereference if there isn't one.
-}
     
 bool id_exists(std::string s){
     return false;
@@ -651,52 +463,6 @@ bool id_exists(std::string s){
 std::set<std::string> get_id_type(const AST_node* const typeMe){
     assert(id_exists(typeMe->text));
     return {};
-}
-
-bool symbol_table::inside_syntax(){
-    if(type==scope_t_syntax)
-        return true;
-    
-    if(parent==nullptr)
-        return false;
-    
-    return parent->inside_syntax();
-}
-
-bool symbol_table::inside_function(){
-    if(type==scope_t_function)
-        return true;
-    
-    if(parent==nullptr)
-        return false;
-    
-    return parent->inside_function();
-}
-
-bool symbol_table::inside_operator(){
-    if(type==scope_t_operator)
-        return true;
-    
-    if(scope=="")
-        return false;
-    
-    return parent->inside_operator();
-}
-
-bool symbol_table::inside_functional(){
-    return inside_syntax()||inside_function()||inside_operator();
-}
-
-bool symbol_table::lowest_functional_is_syntax(){
-    
-    if(type==scope_t_syntax)
-        return true;
-    if(type==scope_t_function||type==scope_t_operator||type==scope_t_struct)
-        return false;
-    if(scope=="")
-        return false;
-    
-    return parent->lowest_functional_is_syntax();
 }
 
 std::vector<symbol> symbol_table::get_ops() const{
