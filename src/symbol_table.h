@@ -123,11 +123,11 @@ struct symbol_table{
     symbol_table& get_subscope(std::string);
     symbol_table& get_subscope(std::string,std::vector<std::string>);
     
-    std::vector<symbol> get_ops();
+    std::vector<symbol> get_ops() const;
     
-    bool types_equal(const AST_node* const a, const AST_node* const b);
+    bool types_equal(const AST_node* const a, const AST_node* const b) const;
     
-    AST_node* get_type(const AST_node* const typeMe);
+    AST_node* get_type(const AST_node* const typeMe) const;
     AST_node* get_type_of_if(const AST_node* const typeMe);
     AST_node* get_type_of_for(const AST_node* const typeMe);
     AST_node* get_type_of_while(const AST_node* const typeMe);

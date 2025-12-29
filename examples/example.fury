@@ -1,6 +1,129 @@
-byte a, byte b;
+operator byte + (byte a)+(byte b);
+operator byte - (byte a)-(byte b);
+operator byte * (byte a)*(byte b);
+operator byte / (byte a)/(byte b);
+operator byte % (byte a)%(byte b);
+operator byte = (byte a)=(byte b);
 
-operator byte ++ (byte zz)+(byte zzz)+;
-operator byte ~         ~(byte zzz);
+operator byte ~         ~(byte b);
+operator byte & (byte a)&(byte b);
+operator byte | (byte a)|(byte b);
+operator byte ^ (byte a)^(byte b);
 
-a + b +;
+operator byte >> (byte a)>>(byte b);
+operator byte << (byte a)<<(byte b);
+operator byte >O> (byte a)>O>(byte b);
+operator byte <O< (byte a)<O<(byte b);
+
+operator byte && (byte a)&&(byte b);
+operator byte || (byte a)||(byte b);
+operator byte ! !(byte b);
+
+operator byte == (byte a)==(byte b);
+operator byte != (byte a)!=(byte b);
+operator byte >= (byte a)>=(byte b);
+operator byte >  (byte a)> (byte b);
+operator byte <= (byte a)<=(byte b);
+operator byte <  (byte a)< (byte b);
+
+
+
+operator dual + (dual a)+(dual b);
+operator dual - (dual a)-(dual b);
+operator dual * (dual a)*(dual b);
+operator dual / (dual a)/(dual b);
+operator dual % (dual a)%(dual b);
+operator dual = (dual a)=(dual b);
+
+operator dual ~         ~(dual b);
+operator dual & (dual a)&(dual b);
+operator dual | (dual a)|(dual b);
+operator dual ^ (dual a)^(dual b);
+
+operator dual >> (dual a)>>(dual b);
+operator dual << (dual a)<<(dual b);
+operator dual >O> (dual a)>O>(dual b);
+operator dual <O< (dual a)<O<(dual b);
+
+operator dual && (dual a)&&(dual b);
+operator dual || (dual a)||(dual b);
+operator dual ! !(dual b);
+
+operator dual == (dual a)==(dual b);
+operator dual != (dual a)!=(dual b);
+operator dual >= (dual a)>=(dual b);
+operator dual >  (dual a)> (dual b);
+operator dual <= (dual a)<=(dual b);
+operator dual <  (dual a)< (dual b);
+
+
+
+operator quad + (quad a)+(quad b);
+operator quad - (quad a)-(quad b);
+operator quad * (quad a)*(quad b);
+operator quad / (quad a)/(quad b);
+operator quad % (quad a)%(quad b);
+operator quad = (quad a)=(quad b);
+
+operator quad ~         ~(quad b);
+operator quad & (quad a)&(quad b);
+operator quad | (quad a)|(quad b);
+operator quad ^ (quad a)^(quad b);
+
+operator quad >> (quad a)>>(quad b);
+operator quad << (quad a)<<(quad b);
+operator quad >O> (quad a)>O>(quad b);
+operator quad <O< (quad a)<O<(quad b);
+
+operator quad && (quad a)&&(quad b);
+operator quad || (quad a)||(quad b);
+operator quad ! !(quad b);
+
+operator quad == (quad a)==(quad b);
+operator quad != (quad a)!=(quad b);
+operator quad >= (quad a)>=(quad b);
+operator quad >  (quad a)> (quad b);
+operator quad <= (quad a)<=(quad b);
+operator quad <  (quad a)< (quad b);
+
+
+
+operator oct + (oct a)+(oct b);
+operator oct - (oct a)-(oct b);
+operator oct * (oct a)*(oct b);
+operator oct / (oct a)/(oct b);
+operator oct % (oct a)%(oct b);
+operator oct = (oct a)=(oct b);
+
+operator oct ~        ~(oct b);
+operator oct & (oct a)&(oct b);
+operator oct | (oct a)|(oct b);
+operator oct ^ (oct a)^(oct b);
+
+operator oct >> (oct a)>>(oct b);
+operator oct << (oct a)<<(oct b);
+operator oct >O> (oct a)>O>(oct b);
+operator oct <O< (oct a)<O<(oct b);
+
+operator oct && (oct a)&&(oct b);
+operator oct || (oct a)||(oct b);
+operator oct ! !(oct b);
+
+operator oct == (oct a)==(oct b);
+operator oct != (oct a)!=(oct b);
+operator oct >= (oct a)>=(oct b);
+operator oct >  (oct a)> (oct b);
+operator oct <= (oct a)<=(oct b);
+operator oct <  (oct a)< (oct b);
+
+syntax # (byte b){
+    byte zero = (b^b);
+    byte neg_one = ~ zero;
+    byte one = neg_one*neg_one;
+    byte two = (one + one);
+    byte five = ( (two * two) + one );
+    byte ten = (two * five);
+    
+    if( b == ten ) return;
+    return b;
+};

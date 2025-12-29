@@ -22,13 +22,16 @@ int main(int argc, char**argv){
         }else
         prog_frags.push_back( parse( argv[i] ) );
     }
-
+    
     for(auto prog_frag:prog_frags){
         std::cout << prog_frag.file_name << "\n";
-        prog_frag.root.print_with_types();
-        prog_frag.context.print();
+        //prog_frag.context.print();
+        prog_frag.root.print_with_types(&prog_frag.context);
     }
-        
+    
+    assert( prog_frags.size()==1 && "OOPS! You didn't have only 1 file." );
+    //interpret(prog_frags[0]);
+    
     return 0;
 }
 

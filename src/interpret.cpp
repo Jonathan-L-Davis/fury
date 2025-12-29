@@ -1,6 +1,7 @@
 #include "interpret.h"
 #include "stack.h"
 #include "type_util.h"
+#include "parse_util.h"
 
 #include <cassert>
 
@@ -100,19 +101,12 @@ void exec(stack &prog_stack, program &prog){
         return;
     }
     
-    if( prog.context.function_exists(obj.object->children[obj.idx]->text,get_function_param_types(obj.object)) ){
+    if( is_function_call(obj.object,&prog.context) ){
         
         stackObject a;
         a.object = prog.context.get_function(obj.object->children[obj.idx]->text,get_function_param_types(obj.object)).value;
         a.idx = 0;
         
-        
-        
-        if( !is_function_definition(a.object) ){
-            a.object->print();
-            std::cout << "Function '" << a.object->children[0]->text << "' not defined. Exiting now.\n";
-            std::exit(-1);
-        }
         
         a.object = a.object->children[1];
         prog_stack.push(a);

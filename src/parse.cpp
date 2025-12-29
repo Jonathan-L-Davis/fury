@@ -133,10 +133,9 @@ program parse(std::string file_name){
                         t1:;
                         for( int k = 0; k < nodePool.size(); k++ ){
                             if( rules[j].rule_applies(nodePool,context_stack,k) ){
-                                std::cout << rules[j].name << " : forward\n";
-                                if(rules[j].name=="operator-call") {std::cout << i << ":" << j << ":" << k << "\n"; std::cout << "\n";for(auto n : nodePool) n->print_with_types();}
+                                
                                 rules[j].apply_rule(nodePool,context_stack,k);
-                                if(rules[j].name=="operator-call") {std::cout << "\n";for(auto n : nodePool) n->print_with_types();}
+                                
                                 modified = true;
                                 goto t1;
                             }
@@ -146,10 +145,8 @@ program parse(std::string file_name){
                         for( int k = nodePool.size()-1; k >= 0; k-- ){
                             if( rules[j].rule_applies(nodePool,context_stack,k) ){
                                 
-                                std::cout << rules[j].name << " : backward\n";
-                                
-                                if(rules[j].name=="operator-call") {std::cout << i << ":" << j << ":" << k << "\n"; std::cout << "\n";for(auto n : nodePool) n->print_with_types();}
                                 rules[j].apply_rule(nodePool,context_stack,k);
+                                
                                 modified = true;
                                 goto t2;
                             }

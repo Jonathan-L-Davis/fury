@@ -85,19 +85,16 @@ void symbol_table::add_symbol( symbol add_me ){
                     
                     assert(operators[i].value->children.size()>0);
                     
-                    auto old_params = get_operator_param_types(operators[i].value);
-                    auto add_params = get_operator_param_types(add_me.value);
+                    auto a = get_type(add_me.value);
+                    auto b = get_type(operators[i].value);
                     
-                    bool same_signature = old_params.size()==add_params.size();
-                    if(same_signature)
-                        for( int i = 0; i < old_params.size() && i < add_params.size(); i++)
-                            if( old_params[i]!=add_params[i] )same_signature=false;
+                    bool same_signature = types_equal(a,b);
                     
                     if( same_signature && is_operator_definition(add_me.value) && is_operator_definition(operators[i].value) ){
-//                        assert(false);// defining a previously defined operator.
+                        assert(false);// defining a previously defined operator.
                     }else if(same_signature){
                         operators[i] = add_me;// need to handle namespaces for function overloads, can't support overloads correctly until that happens
-                        break;
+                        goto end_operator;
                     }
                 }
             }
@@ -702,7 +699,7 @@ bool symbol_table::lowest_functional_is_syntax(){
     return parent->lowest_functional_is_syntax();
 }
 
-std::vector<symbol> symbol_table::get_ops(){
+std::vector<symbol> symbol_table::get_ops() const{
     std::vector<symbol> retMe = operators;
     
     std::vector<symbol> parent_retMe;
@@ -714,26 +711,49 @@ std::vector<symbol> symbol_table::get_ops(){
     return retMe;
 }
 
-bool symbol_table::types_equal(const AST_node* const a, const AST_node* const b){
+bool symbol_table::types_equal(const AST_node* const a, const AST_node* const b) const {
     if(a==nullptr) return false;
     if(b==nullptr) return false;
     
     // deliberately after the nullptr. Don't want to do stuff with null types. Maybe this will change later?
     if(a==b) return true;
     
-    std::cout << a->text << ":" << b->text << "\n";
-    if(a->text==b->text/*&&a->type==b->type*/) return true;
+    if(a->text==b->text&&a->type==b->type) return true;
     
     return false;
 }
 
-AST_node* symbol_table::get_type(const AST_node* const typeMe){
-    typeMe->print_with_types();
-    if(byte_exists(typeMe->text)) return new AST_node {"byte",0,node_t::keyword};
+AST_node* symbol_table::get_type(const AST_node* const typeMe)const {
     
-    if(is_type_declaration(typeMe,this)) return new AST_node {typeMe->text,0,typeMe->type};
+    if(typeMe->text == "("){
+        if(!is_closed_parenthesis(typeMe)) return nullptr;
+        if(typeMe->children.size()<=1) return nullptr;
+        assert(typeMe->children.size()==2);
+        return get_type(typeMe->children[0]);
+    }
     
-    std::cout << "HARHAKRJELHFDKJSHFLKDSAJFHSDKLJFHSDLKJFHSDKLJFHSDKJFKJ?!\n";
+    if(is_type_declaration(typeMe,this)){
+        return new AST_node {typeMe->text,0,node_t::type};
+    }
+    
+    if(byte_exists(typeMe->text)) return new AST_node {"byte",0,node_t::type};
+    if(dual_exists(typeMe->text)) return new AST_node {"dual",0,node_t::type};
+    if(quad_exists(typeMe->text)) return new AST_node {"quad",0,node_t::type};
+    if( oct_exists(typeMe->text)) return new AST_node { "oct",0,node_t::type};
+    
+    if(is_type_declaration(typeMe,this)){
+        assert(typeMe->type==node_t::type);
+        return new AST_node {typeMe->text,0,node_t::type};
+    }
+    
+    // This is a really nasty dependency. This has to come later in the function so when is_operator_call calls this function, we don't recurse forever.
+    if(is_operator_call(typeMe,this)){/*
+        std::cout << "--------------------------------------------------------------------------------\n";
+        typeMe->print_with_types();
+        std::cout << "--------------------------------------------------------------------------------\n";//*/
+        return new AST_node {"byte",0,node_t::type};
+    }
+    
     if(parent==nullptr)
         return nullptr;
     else

@@ -5,6 +5,8 @@
 #include <string>
 #include <iostream>
 
+struct symbol_table;
+
 enum class node_t: uint32_t {
     root,
     keyword,
@@ -47,6 +49,7 @@ struct AST_node{
     std::vector<AST_node*> children;
     void print() const;
     void print_with_types() const;
+    void print_with_types(symbol_table* S) const;
 };
 
 #endif//NODE_H

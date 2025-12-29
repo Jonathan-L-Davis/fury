@@ -653,6 +653,9 @@ void operator_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<
             
             move_operator_param_declarations(op_id,**(context.end()-1),op_scope);
             
+            // Can't have empty parens for parameters in ops. It causes headaches when checking for type matches. Makes it harder to know you're aligning args & id correctly.
+            for(auto c:op_id->children)if(is_closed_parenthesis(c))assert(c->children.size()==2);
+            
             return;
         }
         
@@ -722,9 +725,16 @@ int op_applies(symbol S, symbol_table context, std::vector<AST_node*>& nodePool,
         AST_node* a = context.get_type(nodePool[j]);
         AST_node* b = context.get_type(tokens[k]);
         
-        if( context.types_equal(a,b) )// need to match type to parameter ID
+        if( context.types_equal(a,b) ){// need to match type to parameter ID
+            delete a;
+            delete b;
             continue;
-        else return 0;
+        }
+        else{
+            delete a;
+            delete b;
+            return 0;
+        }
     }
     
     return k;
@@ -791,7 +801,7 @@ void operator_call_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_
     
     *call = *op;
     call->children={};
-    std::cout << "Max op size: " << max << "\n";
+    
     for(int q = 0; q < max; q++)
         call->children.push_back(nodePool[i+q]);
     

@@ -614,8 +614,8 @@ bool is_id( const AST_node* const checkMe, const symbol_table* const context){
 
 bool is_type_declaration(const AST_node* const checkMe, const symbol_table* const context){
     
-        if( checkMe->type!=node_t::type )
-        return false;
+    if( checkMe->type!=node_t::type )
+    return false;
     
     if( !context->type_exists(checkMe->text) )
         return false;
@@ -641,6 +641,34 @@ bool is_comma_expression(const AST_node* const checkMe){
 }
 
 bool is_operator_call(const AST_node* const checkMe, const symbol_table* const context){
+    // get all ops with same name. Check types of each argument until match found
+    
+    std::vector<symbol> ops = context->get_ops();
+    
+    for(const symbol& op:ops){
+        if(op.name!=checkMe->text) continue;
+        if(op.value->children.size()!=checkMe->children.size()) continue;
+        
+        bool matches = true;
+        for(int i = 0; i < op.value->children.size(); i++){
+            auto n = op.value->children[i];
+            auto cn = checkMe->children[i];
+            // check that params match & id's match
+            
+            // if we have an id, we need 2 id's and the text must match.
+            if( n->type==node_t::operator_id || cn->type==node_t::operator_id ){
+                
+                if( n->type!=node_t::operator_id || cn->type!=node_t::operator_id) matches = false;
+                if( n->text!=cn->text ) matches = false;
+                continue;
+            }
+            
+            // if types don't match we mark the matches as false.
+            matches &= context->types_equal(context->get_type(cn),context->get_type(n));
+        }
+        if(matches)return true;
+    }
+    
     return false;
 }
 
