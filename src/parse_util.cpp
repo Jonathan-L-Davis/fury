@@ -2,6 +2,41 @@
 #include "assert.h"
 
 
+///-//////////////////////////////////////// Left over lexing utils. (not many).
+
+std::vector<std::string> keywords
+{
+    "b8",
+    "b16",
+    "b32",
+    "b64",
+    "else",
+    "export",
+    "for",
+    "function",
+    "goto",
+    "if",
+    "import",
+    "label",
+    "namespace",
+    "operator",
+    "return",
+    "struct",
+    "syntax",
+    "type",
+    "while",
+};
+
+bool is_keyword( std::string str ){
+    if( std::find(keywords.begin(), keywords.end(), str ) != keywords.end() )
+        return true;
+    return false;
+}
+
+bool is_keyword_type( std::string str ){
+    return str=="b8"||str=="b16"||str=="b32"||str=="b64"||str=="label"||str=="type";
+}
+
 ///-////////////////////////////////////////////////// These functions do not modify AST_nodes and are pure checks.  ////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -34,17 +69,6 @@ bool is_closed_curly_bracket(const AST_node* const amIClosed){
     const AST_node* const checkMe = get_rightmost_bottommost_non_terminal(amIClosed);// lazy, should do the one layer end checking.
     if( amIClosed->text != "{" ) return false;
     if( checkMe->text == "}" ){
-        return true;
-    }
-    
-    return false;
-}
-
-bool is_unterminated_closed_parentehsis(const AST_node* const amIClosed){
-    
-    const AST_node* const checkMe = get_rightmost_bottommost(amIClosed);
-    if( amIClosed->text != "(" ) return false;
-    if( checkMe->text == ")" ){
         return true;
     }
     
@@ -702,9 +726,9 @@ std::string get_op_id(const AST_node* const idMe){
         return (*(idMe->children.end()-2))->text;
     return (*(idMe->children.end()-1))->text;
 }
-
-std::vector<std::string> get_op_signature(const AST_node* const signMe){
-    std::vector<std::string> retMe;
+/*
+std::vector<AST_node*> get_op_signature(const AST_node* const signMe){
+    std::vector<AST_node*> retMe;
     
     AST_node* op_id;
     if(is_operator_definition(signMe))
@@ -715,13 +739,13 @@ std::vector<std::string> get_op_signature(const AST_node* const signMe){
     for( auto n:op_id->children ){
         if(n->text=="(")
             for(auto m:n->children)
-                retMe.push_back(m->text);
+                retMe.push_back(m);
         else
             retMe.push_back(n->text);
     }
     
     return retMe;
-}
+}//*/
 
 std::string get_func_id(const AST_node* const idMe){
     assert(is_function_declaration(idMe));
@@ -730,7 +754,7 @@ std::string get_func_id(const AST_node* const idMe){
         return (*(idMe->children.end()-2))->text;
     return (*(idMe->children.end()-1))->text;
 }
-
+/*
 std::vector<std::string> get_func_signature(const AST_node* const signMe){
     std::vector<std::string> retMe;
     
@@ -749,7 +773,7 @@ std::vector<std::string> get_func_signature(const AST_node* const signMe){
     }
     
     return retMe;
-}
+}//*/
 
 void move_operator_param_declarations(const AST_node* const op_id, symbol_table& src, symbol_table& dst){
     for(int i = 0;i<op_id->children.size();i++){

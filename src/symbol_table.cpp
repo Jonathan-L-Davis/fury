@@ -502,10 +502,10 @@ AST_node* symbol_table::get_type(const AST_node* const typeMe)const {
         return new AST_node {typeMe->text,0,node_t::type};
     }
     
-    if(byte_exists(typeMe->text)) return new AST_node {"byte",0,node_t::type};
-    if(dual_exists(typeMe->text)) return new AST_node {"dual",0,node_t::type};
-    if(quad_exists(typeMe->text)) return new AST_node {"quad",0,node_t::type};
-    if( oct_exists(typeMe->text)) return new AST_node { "oct",0,node_t::type};
+    if(byte_exists(typeMe->text)) return new AST_node {"b8" ,0,node_t::type};
+    if(dual_exists(typeMe->text)) return new AST_node {"b16",0,node_t::type};
+    if(quad_exists(typeMe->text)) return new AST_node {"b32",0,node_t::type};
+    if( oct_exists(typeMe->text)) return new AST_node {"b64",0,node_t::type};
     
     if(is_type_declaration(typeMe,this)){
         assert(typeMe->type==node_t::type);
@@ -517,7 +517,7 @@ AST_node* symbol_table::get_type(const AST_node* const typeMe)const {
         std::cout << "--------------------------------------------------------------------------------\n";
         typeMe->print_with_types();
         std::cout << "--------------------------------------------------------------------------------\n";//*/
-        return new AST_node {"byte",0,node_t::type};
+        return new AST_node {"b8",0,node_t::type};
     }
     
     if(parent==nullptr)

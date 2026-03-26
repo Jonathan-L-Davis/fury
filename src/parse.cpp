@@ -38,8 +38,8 @@ program parse(std::string file_name){
     
     std::vector<uint8_t> file_buffer;
     std::vector<AST_node*> nodePool = {};
+    std::vector<AST_node*> finishedNodes = {};
     std::vector<symbol_table*> context_stack = {&retMe.context};
-    
     
     uint8_t q;
     while(file.read((char*)&q,1)){
@@ -155,12 +155,25 @@ program parse(std::string file_name){
                 }
             }
         }while(modified);
+        
+        while( nodePool.size()>0 ){
+            AST_node* node = nodePool[0];
+            if(is_terminated(node))
+                finishedNodes.push_back(node);
+            else
+                break;
+            
+            //analyze(node); // this is where we finally construct the real symbol table.
+            
+            nodePool.erase(nodePool.begin());
+        }
+        
     }
     std::cout << "-------------------------------------------------------------------------------------------------------------\n";
     //std::cout << "--------------------------------------------------------------------------------\n";for( AST_node* node : nodePool ){node->print_with_types();};
     //for( AST_node* node : nodePool ) assert( is_terminated(node) );// if this fails you have bad grammer.
     
-    retMe.root.children = nodePool;
+    retMe.root.children = finishedNodes;
     return retMe;
 }
 

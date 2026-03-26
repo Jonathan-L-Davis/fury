@@ -4,8 +4,14 @@
 #include "node.h"
 #include "symbol_table.h"
 
+// lexing utilities
+extern std::vector<std::string> keywords;
+
+bool is_keyword( std::string str );
+bool is_keyword_type( std::string str );
+
+// parsing utilities
 bool is_terminated(const AST_node* const checkMe);
-bool is_unterminated_closed_parentehsis(const AST_node* const amIClosed);
 bool is_terminable(const AST_node* const checkMe, const symbol_table* const context);
 bool is_valid(const AST_node* const checkMe, const symbol_table* const context);
 
@@ -47,10 +53,10 @@ AST_node* get_rightmost_bottommost(const AST_node* const checkMe);
 AST_node* get_rightmost_bottommost_non_terminal( const AST_node* const traverseMe);
 
 std::string get_op_id(const AST_node* const idMe);
-std::vector<std::string> get_op_signature(const AST_node* const signMe);
+std::vector<AST_node*> get_op_signature(const AST_node* const signMe);
 
 std::string get_func_id(const AST_node* const idMe);
-std::vector<std::string> get_func_signature(const AST_node* const signMe);
+std::vector<AST_node*> get_func_signature(const AST_node* const signMe);
 
 void move_operator_param_declarations(const AST_node* const op_id, symbol_table& src, symbol_table& dst);
 void move_curly_bracket_declarations(const AST_node* const op_id, symbol_table& src, symbol_table& dst);

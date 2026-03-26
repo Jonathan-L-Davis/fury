@@ -70,10 +70,10 @@ symbol_table fury_default_context(){
     symbol_table retMe;
     
     // the basic complete types
-    retMe.add_symbol({sym_t_type,{"type"},"byte",nullptr});
-    retMe.add_symbol({sym_t_type,{"type"},"dual",nullptr});
-    retMe.add_symbol({sym_t_type,{"type"},"quad",nullptr});
-    retMe.add_symbol({sym_t_type,{"type"},"oct",nullptr});
+    retMe.add_symbol({sym_t_type,{"type"},"b8",nullptr});
+    retMe.add_symbol({sym_t_type,{"type"},"b16",nullptr});
+    retMe.add_symbol({sym_t_type,{"type"},"b32",nullptr});
+    retMe.add_symbol({sym_t_type,{"type"},"b64",nullptr});
     retMe.add_symbol({sym_t_type,{"type"},"type",nullptr});
     retMe.add_symbol({sym_t_type,{"type"},"label",nullptr});
     
@@ -370,10 +370,10 @@ void type_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<symb
     assert(type_declaration_applies(nodePool,context,i));
     
     symbol_type sym_type;
-    if( nodePool[i]->text == "byte" ) sym_type = sym_t_byte;
-    if( nodePool[i]->text == "dual" ) sym_type = sym_t_dual;
-    if( nodePool[i]->text == "quad" ) sym_type = sym_t_quad;
-    if( nodePool[i]->text == "oct" ) sym_type = sym_t_oct;
+    if( nodePool[i]->text == "b8" ) sym_type = sym_t_byte;
+    if( nodePool[i]->text == "b16" ) sym_type = sym_t_dual;
+    if( nodePool[i]->text == "b32" ) sym_type = sym_t_quad;
+    if( nodePool[i]->text == "b64" ) sym_type = sym_t_oct;
     if( nodePool[i]->text == "type" ) sym_type = sym_t_type;
     if( nodePool[i]->text == "label" ) sym_type = sym_t_label;
     
@@ -429,7 +429,7 @@ void syntax_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symbol
 bool syntax_declaration_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     return (is_syntax_partial_declaration(nodePool[i]) && !is_syntax_declaration(nodePool[i]) &&
             i+1 < nodePool.size() && is_closed_parenthesis(nodePool[i+1]) ) &&
-            nodePool[i+1]->children.size() == 2 && nodePool[i+1]->children[0]->text == "byte";// type checking the param type of syntax, which can only be a single byte type.
+            nodePool[i+1]->children.size() == 2 && nodePool[i+1]->children[0]->text == "b8";// type checking the param type of syntax, which can only be a single byte type.
 }
 
 void syntax_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
@@ -674,10 +674,10 @@ bool operator_definition_applies(std::vector<AST_node*>& nodePool, std::vector<s
 void operator_definition_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     assert(operator_definition_applies(nodePool,context,i));
     
-    symbol_table& current_scope = **(context.end()-1);
-    symbol_table& op_scope      = (current_scope.get_subscope(get_op_id(nodePool[i]),get_op_signature(nodePool[i])));
+    //symbol_table& current_scope = **(context.end()-1);
+    //symbol_table& op_scope      = (current_scope.get_subscope(get_op_id(nodePool[i]),get_op_signature(nodePool[i])));
     
-    move_curly_bracket_declarations(nodePool[i+1],current_scope,op_scope);
+    //move_curly_bracket_declarations(nodePool[i+1],current_scope,op_scope);
     
     nodePool[i]->children.push_back(nodePool[i+1]);
     nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);

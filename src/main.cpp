@@ -8,7 +8,10 @@
 #include <vector>
 #include <assert.h>
 
-
+/** General notes/complaints.
+ * I dislike how I've been allocating memory for type info. I should be passing existing nodes back out instead, but that's more work and I don't know how exactly that needs to look, so it works fine for now to manually allocate and delete the memory.
+ * Scoping only works for ops right now. I need to make it work for {}, and then just have functions suck those down.
+**/
 
 int main(int argc, char**argv){
     // currently leaks memory on exit. Not a big deal (yet). Just need to define destructors for AST_node's.
