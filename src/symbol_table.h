@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <map>
 #include <unordered_set>
 
 #include "node.h"
@@ -68,6 +69,8 @@ struct symbol_table{
     std::vector<symbol> syntaxes;
     std::vector<symbol> labels;
     std::vector<symbol> types;
+    
+    //std::map<std::string,symbol> id_to_symbol;
     
     std::string get_full_scope();//returns absolute scope
     

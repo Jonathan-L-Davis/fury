@@ -96,7 +96,22 @@ program parse(std::string file_name){
                 }
             }else if(byte=='('||byte==')')
                 node->type = node_t::paren;
-            else if(byte=='{'||byte=='}')
+            else if(byte=='{'){
+                node->type = node_t::curly;
+                
+                symbol_table table;
+                table.type = scope_t_anonymous;
+                
+                if(nodePool.size()>0&&!is_terminated(nodePool[nodePool.size()-1])&&!is_syntax_definition(nodePool[nodePool.size()-1])&&is_syntax_declaration(nodePool[nodePool.size()-1])) table.type = scope_t_syntax;
+                if(nodePool.size()>0&&!is_terminated(nodePool[nodePool.size()-1])&&!is_function_definition(nodePool[nodePool.size()-1])&&is_function_declaration(nodePool[nodePool.size()-1])) table.type = scope_t_function;
+                if(nodePool.size()>0&&!is_terminated(nodePool[nodePool.size()-1])&&!is_operator_definition(nodePool[nodePool.size()-1])&&is_operator_declaration(nodePool[nodePool.size()-1])) table.type = scope_t_operator;
+                
+                symbol_table& context = **(context_stack.end()-1);
+                
+                context.sub_scopes.push_back(table);
+                
+                context_stack.push_back(&*(context.sub_scopes.end()-1));
+            }else if(byte=='}')
                 node->type = node_t::curly;
             else if(byte==',')
                 node->type = node_t::comma;
@@ -151,7 +166,7 @@ program parse(std::string file_name){
                                 goto t2;
                             }
                         }
-                    }else{std::exit(-1);}
+                    }else{std::cout << "Parse direction must be either forward or backward.\n";std::exit(-1);}
                 }
             }
         }while(modified);
@@ -162,8 +177,6 @@ program parse(std::string file_name){
                 finishedNodes.push_back(node);
             else
                 break;
-            
-            //analyze(node); // this is where we finally construct the real symbol table.
             
             nodePool.erase(nodePool.begin());
         }

@@ -202,6 +202,7 @@ void curly_bracket_closure_folding(std::vector<AST_node*>& nodePool, std::vector
         for( int j = start_sequence; j < end_sequence+1; j++ )
             nodePool[i]->children.push_back( nodePool[j] );
         nodePool.erase(nodePool.begin()+start_sequence,nodePool.begin()+end_sequence+1);
+        context.erase(context.end()-1);
         return;
     }
     
@@ -244,10 +245,6 @@ void function_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symb
     bool is_folded_correctly = false;
     if( i+1<nodePool.size() && nodePool[i+1]->type == node_t::id ){
         nodePool[i+1]->type = node_t::function_id;
-        
-        context[context.size()-1]->add_symbol({sym_t_function,{""},nodePool[i+1]->text,nodePool[i]});
-        context[context.size()-1]->add_scope(nodePool[i+1]->text,scope_type::scope_t_function);
-        context.push_back( &context[context.size()-1]->get_subscope(nodePool[i+1]->text) );
         
         nodePool[i]->children.push_back(nodePool[i+1]);
         nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
