@@ -220,16 +220,6 @@ void termination_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_ta
     end_node->children.push_back(nodePool[i+1]);
     
     nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
-    
-    
-    // should really have some sort of general functional/control flow check here. Should also include if's, elses, and for's
-    // actually, on second thought maybe it's best to not have such things, since if's would potentially need multiple scoped popped off.
-    if( nodePool[i]->text == "function" )
-        context.resize(context.size()-1);
-    
-    /*
-    if( nodePool[i]->text == "operator" )
-        context.resize(context.size()-1);//*/
 }
 
 bool function_partial_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
@@ -246,6 +236,8 @@ void function_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symb
     if( i+1<nodePool.size() && nodePool[i+1]->type == node_t::id ){
         nodePool[i+1]->type = node_t::function_id;
         
+        context[context.size()-1]->add_symbol({sym_t_function,{},nodePool[i+1]->text,nodePool[i]});
+        
         nodePool[i]->children.push_back(nodePool[i+1]);
         nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
         is_folded_correctly = true;
@@ -255,8 +247,6 @@ void function_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symb
         nodePool[i+2]->type = node_t::function_id;
         
         context[context.size()-1]->add_symbol({sym_t_function,{nodePool[i+1]->text},nodePool[i+2]->text,nodePool[i]});
-        context[context.size()-1]->add_scope(nodePool[i+2]->text,scope_type::scope_t_function);
-        context.push_back( &context[context.size()-1]->get_subscope(nodePool[i+2]->text) );
         
         nodePool[i]->children.push_back(nodePool[i+1]);
         nodePool[i]->children.push_back(nodePool[i+2]);
@@ -293,13 +283,6 @@ bool function_definition_applies(std::vector<AST_node*>& nodePool, std::vector<s
 void function_definition_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     assert(function_definition_applies(nodePool,context,i));
     
-    
-    // need to handle scoping more like operators are now handled. Meaning I have some revisions to do in the earlier function fragments.
-    //symbol_table& current_scope = **(context.end()-1);
-    //symbol_table& func_scope    = (current_scope.get_subscope(get_func_id(nodePool[i]),get_func_signature(nodePool[i])));
-    
-    //move_curly_bracket_declarations(nodePool[i+1],current_scope,func_scope);
-    
     nodePool[i]->children.push_back(nodePool[i+1]);
     nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
     
@@ -313,7 +296,7 @@ bool function_call_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_
 void function_call_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     assert(function_call_applies(nodePool,context,i));
     
-    nodePool[i+1]->type = node_t::function_id;
+    nodePool[i]->type = node_t::function_id;
     
     nodePool[i]->children.push_back(nodePool[i+1]);
     nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
@@ -332,23 +315,12 @@ void comma_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>&
         nodePool[i]->children.push_back(nodePool[i+2]);
         delete nodePool[i+1];// pointer fun
     }else{
-        if( nodePool[i]->text == "function" )
-            context.resize(context.size()-1);
-        
-        if( nodePool[i]->text == "operator" )
-            context.resize(context.size()-1);
         
         nodePool[i+1]->children.push_back(nodePool[i]);
         nodePool[i+1]->children.push_back(nodePool[i+2]);
         
         nodePool[i] = nodePool[i+1];
     }
-    
-    if( nodePool[i+2]->text == "function" )
-        context.resize(context.size()-1);
-    
-    if( nodePool[i+2]->text == "operator" )
-        context.resize(context.size()-1);
     
     nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);
 }

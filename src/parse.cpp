@@ -57,11 +57,13 @@ program parse(std::string file_name){
     
     for(uint8_t byte : file_buffer){
         
+        // excludes unicode for now. 
         if( !( byte=='\n' || (byte>=' ' && byte<127) ) ){
             std::cout << (int) byte << std::endl;
             assert(byte=='\n' || ( byte>=' ' && byte<127) );
         }
         
+        // whitespace breaks a token off.
         if(byte == ' ' || byte == '\n'){
             completeToken = currentToken;
             currentToken = "";
@@ -77,6 +79,7 @@ program parse(std::string file_name){
                 currentToken="";
                 nodePool.push_back(n);
             }
+            
             completeToken = std::string(1,byte);
         }else{
             currentToken += byte;
@@ -94,28 +97,43 @@ program parse(std::string file_name){
                 if( is_keyword_type(completeToken) ){
                     node->type = node_t::type;
                 }
-            }else if(byte=='('||byte==')')
+            }else if(completeToken=="("||completeToken==")")
                 node->type = node_t::paren;
-            else if(byte=='{'){
+            else if(completeToken=="{"){
+                
                 node->type = node_t::curly;
                 
                 symbol_table table;
                 table.type = scope_t_anonymous;
                 
-                if(nodePool.size()>0&&!is_terminated(nodePool[nodePool.size()-1])&&!is_syntax_definition(nodePool[nodePool.size()-1])&&is_syntax_declaration(nodePool[nodePool.size()-1])) table.type = scope_t_syntax;
-                if(nodePool.size()>0&&!is_terminated(nodePool[nodePool.size()-1])&&!is_function_definition(nodePool[nodePool.size()-1])&&is_function_declaration(nodePool[nodePool.size()-1])) table.type = scope_t_function;
-                if(nodePool.size()>0&&!is_terminated(nodePool[nodePool.size()-1])&&!is_operator_definition(nodePool[nodePool.size()-1])&&is_operator_declaration(nodePool[nodePool.size()-1])) table.type = scope_t_operator;
+                if(nodePool.size()>0&&!is_terminated(nodePool[nodePool.size()-1])&&is_syntax_declaration(nodePool[nodePool.size()-1])){
+                    table.type = scope_t_syntax;
+                }
+                if(nodePool.size()>0&&!is_terminated(nodePool[nodePool.size()-1])&&is_function_declaration(nodePool[nodePool.size()-1])) {
+                    
+                    AST_node* decl = nodePool[nodePool.size()-1];
+                    AST_node* id   = decl->children[decl->children.size()-1];
+                    
+                    table.type = scope_t_function;
+                    table.scope = id->text;
+                    
+                    // this is the perfect spot to take the variables from the parameters & shove them back down into the function scope.
+                    
+                }
+                
+                if(nodePool.size()>0&&!is_terminated(nodePool[nodePool.size()-1])&&is_operator_declaration(nodePool[nodePool.size()-1])) table.type = scope_t_operator;
                 
                 symbol_table& context = **(context_stack.end()-1);
                 
+                table.parent = &context;
                 context.sub_scopes.push_back(table);
                 
                 context_stack.push_back(&*(context.sub_scopes.end()-1));
-            }else if(byte=='}')
+            }else if(completeToken=="}")
                 node->type = node_t::curly;
-            else if(byte==',')
+            else if(completeToken==",")
                 node->type = node_t::comma;
-            else if(byte==';')
+            else if(completeToken==";")
                 node->type = node_t::semicolon;
             else if(context_stack[context_stack.size()-1]->syntax_exists(currentToken))
                 node->type = node_t::syntax_id;
@@ -130,9 +148,13 @@ program parse(std::string file_name){
         grammer g = fury_grammer();
         /// ----------------------------------------------------    Reduction Rules Start Here    ---------------------------------------------------------- ///
         
+        /*// Actually need some stuff to reduce before encountering a semicolon. Really tricky, might be simpler to explain once I have the parser working fully.
         bool no_terminals = true;
         for(auto node:nodePool) if(node->text==";") no_terminals = false;// slightly tricky to think about, should be between end ; and last {, but there may be some extra stuff.
         if(no_terminals) continue;
+        //*/
+        
+        //std::cout << "--------------------------------------------------------------------------------\n";
         
         top:;
         bool modified = false;
@@ -171,6 +193,7 @@ program parse(std::string file_name){
             }
         }while(modified);
         
+        // this is effectively an optimization, but also avoids bugs.
         while( nodePool.size()>0 ){
             AST_node* node = nodePool[0];
             if(is_terminated(node))
@@ -182,10 +205,10 @@ program parse(std::string file_name){
         }
         
     }
-    std::cout << "-------------------------------------------------------------------------------------------------------------\n";
+    //std::cout << "-------------------------------------------------------------------------------------------------------------\n";
     //std::cout << "--------------------------------------------------------------------------------\n";for( AST_node* node : nodePool ){node->print_with_types();};
     //for( AST_node* node : nodePool ) assert( is_terminated(node) );// if this fails you have bad grammer.
-    
+    //for( auto& tbl:context_stack) tbl->print();
     retMe.root.children = finishedNodes;
     return retMe;
 }
