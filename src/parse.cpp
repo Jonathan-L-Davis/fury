@@ -2,7 +2,6 @@
 #include <fstream>
 #include <iostream>
 
-#include "lex.h"
 #include "parse.h"
 #include "parse_util.h"
 #include "symbol_table.h"
@@ -226,8 +225,6 @@ program parse(std::string file_name){
         
     }
     retMe.root.children = finishedNodes;
-    
-    for(auto n:nodePool) n->print();
     
     assert(context_stack.size()==1);
     
