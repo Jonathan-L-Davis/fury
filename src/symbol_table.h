@@ -8,6 +8,7 @@
 #include <unordered_set>
 
 #include "node.h"
+bool operator_declaration_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 
 enum symbol_type:uint32_t{
     sym_t_byte     = 1,
@@ -54,7 +55,7 @@ struct symbol_table{
     AST_node* node;
     scope_type type;
     symbol_table();
-    symbol_table( symbol_table*, std::string scope, scope_type T, AST_node* node = nullptr );
+    symbol_table( symbol_table*, std::string scope, scope_type T, AST_node* node );
     
     std::string scope;
     std::vector<std::string> signature;
@@ -117,7 +118,7 @@ struct symbol_table{
     
     void add_symbol(symbol);
     void remove_symbol(symbol);
-    symbol_table* add_scope(std::string scope, scope_type T, AST_node* node = nullptr);
+    symbol_table* add_scope(std::string scope, scope_type T, AST_node* node);
     
     void print();
     

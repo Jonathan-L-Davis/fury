@@ -15,18 +15,18 @@ function j(b8 b){
 },
 function b8 k(b8 c){
     b8 byte;
-};
+},
 
+operator - (b8 a)-(b8 b){
+},
 
+operator + (b8 a)+(b8 b){
+    b8 baba;
+},
 
+operator ++ (b8)++(){b8 b;},
 
-
-
-
-
-
-
-
-
-
+syntax b32 " (b8 b){b8 b;},
+syntax b32 L" (b8 b){b8 b;},
+syntax b32 Q" (b8 b){b8 b;};
 

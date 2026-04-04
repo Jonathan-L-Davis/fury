@@ -217,9 +217,7 @@ bool termination_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_ta
 void termination_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     assert( termination_applies(nodePool,context,i)  );
     
-    if(needs_scope_escape(nodePool[i])){
-        context.resize(context.size()-1);
-    }
+    if( (*(context.end()-1))->node == nodePool[i] ) context.resize(context.size()-1);
     
     AST_node* end_node = get_rightmost_bottommost(nodePool[i]);
     end_node->children.push_back(nodePool[i+1]);
@@ -329,8 +327,6 @@ void comma_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>&
         nodePool[i] = nodePool[i+1];
     }
     
-    //if(needs_scope_escape(nodePool[i+2])) context.resize(context.size()-1);// pop child scopes. First child is already handled correctly in the top level parse loop.
-    
     if( (*(context.end()-1))->node == nodePool[i+2] ) context.resize(context.size()-1);// pop child scopes. First child is already handled correctly in the top level parse loop.
     
     nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);
@@ -379,8 +375,7 @@ void syntax_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symbol
         nodePool[i+1]->type = node_t::syntax_id;
         
         context[context.size()-1]->add_symbol({sym_t_syntax,{""},nodePool[i+1]->text,nodePool[i]});
-        context[context.size()-1]->add_scope(nodePool[i+1]->text,scope_type::scope_t_syntax);
-        context.push_back( &context[context.size()-1]->get_subscope(nodePool[i+1]->text) );
+        context.push_back( context[context.size()-1]->add_scope(nodePool[i+1]->text,scope_type::scope_t_syntax,nodePool[i]) );
         
         nodePool[i]->children.push_back(nodePool[i+1]);
         nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
@@ -391,8 +386,7 @@ void syntax_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symbol
         nodePool[i+2]->type = node_t::syntax_id;
         
         context[context.size()-1]->add_symbol({sym_t_syntax,{nodePool[i+1]->text},nodePool[i+2]->text,nodePool[i]});
-        context[context.size()-1]->add_scope(nodePool[i+2]->text,scope_type::scope_t_syntax);
-        context.push_back( &context[context.size()-1]->get_subscope(nodePool[i+2]->text) );
+        context.push_back( context[context.size()-1]->add_scope(nodePool[i+2]->text,scope_type::scope_t_syntax,nodePool[i]) );
         
         nodePool[i]->children.push_back(nodePool[i+1]);
         nodePool[i]->children.push_back(nodePool[i+2]);
@@ -543,6 +537,7 @@ void operator_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symb
         nodePool[i+1]->type = node_t::operator_id;
         
         context[context.size()-1]->add_symbol({sym_t_operator,{""},nodePool[i+1]->text,nodePool[i]});
+        context.push_back( context[context.size()-1]->add_scope(nodePool[i+1]->text,scope_type::scope_t_operator, nodePool[i]) );
         
         nodePool[i]->children.push_back(nodePool[i+1]);
         nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
@@ -553,6 +548,7 @@ void operator_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symb
         nodePool[i+2]->type = node_t::operator_id;
         
         context[context.size()-1]->add_symbol({sym_t_operator,{nodePool[i+1]->text},nodePool[i+2]->text,nodePool[i]});
+        context.push_back( context[context.size()-1]->add_scope(nodePool[i+2]->text,scope_type::scope_t_operator, nodePool[i]) );
         
         nodePool[i]->children.push_back(nodePool[i+1]);
         nodePool[i]->children.push_back(nodePool[i+2]);
@@ -573,6 +569,9 @@ bool operator_declaration_applies(std::vector<AST_node*>& nodePool, std::vector<
     std::string total_text = op_id->text;
     std::string found_text = "";
     
+    bool expecting_parens = true;
+    bool expecting_id     = false;
+    
     for( i++; i < nodePool.size(); i++ ){
         if(nodePool[i]->type==node_t::id) found_text += nodePool[i]->text;
         
@@ -580,7 +579,7 @@ bool operator_declaration_applies(std::vector<AST_node*>& nodePool, std::vector<
         
         if( found_text!=total_text.substr(0,std::min(total_text.size(),found_text.size())) ) break;// we have a bad declaration, or aren't done reducing params yet.
         
-        if( found_text==total_text && i+1<nodePool.size() && (is_closed_curly_bracket(nodePool[i+1]) || nodePool[i+1]->text==";") )
+        if( found_text==total_text && is_closed_parenthesis(nodePool[i]) )
             return true;
     }
     
@@ -605,10 +604,8 @@ void operator_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<
             op_id->children.push_back(nodePool[i]);
         }
         
-        if( found_text==total_text && (is_closed_curly_bracket(nodePool[i+1]) || nodePool[i+1]->text==";" || nodePool[i+1]->text=="," || nodePool[i+1]->text=="{" ) ){
+        if( found_text==total_text && is_closed_parenthesis(nodePool[i]) ){
             nodePool.erase( nodePool.begin()+start_idx, nodePool.begin()+i+1 );
-            
-            context[context.size()-1]->add_scope(op_id->text,scope_type::scope_t_operator);
             std::vector<std::string> signature;
             for(int i = 0;i<op_id->children.size();i++){
                 
@@ -626,14 +623,6 @@ void operator_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<
                     }
                 }
             }
-            //  Take type declarations from symbol table and push them into sub scope.
-            symbol_table& op_scope = (*(context.end()-1))->get_subscope(found_text,{});
-            op_scope.signature=signature;
-            
-            move_operator_param_declarations(op_id,**(context.end()-1),op_scope);
-            
-            // Can't have empty parens for parameters in ops. It causes headaches when checking for type matches. Makes it harder to know you're aligning args & id correctly.
-            for(auto c:op_id->children)if(is_closed_parenthesis(c))assert(c->children.size()==2);
             
             return;
         }

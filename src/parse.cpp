@@ -108,7 +108,11 @@ program parse(std::string file_name){
                 AST_node* node = nullptr;
                 
                 if(nodePool.size()>0&&!is_terminated(nodePool[nodePool.size()-1])&&is_syntax_declaration(nodePool[nodePool.size()-1])){
+                    
+                    node = nodePool[nodePool.size()-1];
+                    
                     new_scope_t = scope_t_syntax;
+                    scope = "body";
                 }
                 if(nodePool.size()>0&&!is_terminated(nodePool[nodePool.size()-1])&&is_function_declaration(nodePool[nodePool.size()-1])) {
                     
@@ -116,10 +120,14 @@ program parse(std::string file_name){
                     
                     new_scope_t = scope_t_function;
                     scope = "body";
-                    
                 }
-                
-                //if(nodePool.size()>0&&!is_terminated(nodePool[nodePool.size()-1])&&is_operator_declaration(nodePool[nodePool.size()-1])) table.type = scope_t_operator;
+                if(nodePool.size()>0&&!is_terminated(nodePool[nodePool.size()-1])&&is_operator_declaration(nodePool[nodePool.size()-1])) {
+                    
+                    node = nodePool[nodePool.size()-1];
+                    
+                    new_scope_t = scope_t_operator;
+                    scope = "body";
+                }
                 
                 symbol_table& context = **(context_stack.end()-1);
                 context_stack.push_back(context.add_scope(scope,new_scope_t,node));
@@ -131,8 +139,8 @@ program parse(std::string file_name){
                 
                 
                 int idx = nodePool.size()-1;
-                
-                if(nodePool.size()>=1 && needs_scope_escape(nodePool[idx])) context_stack.resize(context_stack.size()-1);// escapes the first child of a comma. Subsequent child scopes can be correctly popped during folding.
+                symbol_table* context = *(context_stack.end()-1);
+                if(nodePool.size()>=1 && nodePool[idx]==context->node) context_stack.resize(context_stack.size()-1);// escapes the first child of a comma. Subsequent child scopes can be correctly popped during folding.
             }else if(completeToken==";")
                 node->type = node_t::semicolon;
             else if(context_stack[context_stack.size()-1]->syntax_exists(currentToken))
@@ -150,8 +158,6 @@ program parse(std::string file_name){
         
         top:;
         int lowest_layer = 1;
-        int last_comma = 0;
-        int comma_count = 0;
         bool ends_in_terminal = false;
         
         auto last_idx = [&](){
@@ -165,15 +171,11 @@ program parse(std::string file_name){
             return 0;
         };
         
-        for(int i = 0; i < nodePool.size(); i++){
-            if(nodePool[i]->text==";"&&(i+1==nodePool.size())) ends_in_terminal = true;
-            if(nodePool[i]->text==","){
-                comma_count++;
-                last_comma = i;
-            }
-        }
+        if(nodePool.size()>0&&nodePool[nodePool.size()-1]->text==";") ends_in_terminal = true;
         
-        if(ends_in_terminal){ lowest_layer = 0;}// prevents ',' nodes from grabbing too quickly. This prevents comma separated function definitions from stopping before getting the body of the second function.
+        if(ends_in_terminal){// prevents ',' nodes from grabbing too quickly. This prevents comma separated function definitions from stopping before getting the body of the second function.
+            lowest_layer = 0;
+        }
         
         bool modified = false;
         do{
@@ -224,6 +226,8 @@ program parse(std::string file_name){
         
     }
     retMe.root.children = finishedNodes;
+    
+    for(auto n:nodePool) n->print();
     
     assert(context_stack.size()==1);
     

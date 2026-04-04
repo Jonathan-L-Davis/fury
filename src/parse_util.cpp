@@ -313,7 +313,7 @@ bool is_syntax_declaration(const AST_node* const checkMe){
     
     /**
     * 
-    * function
+    * syntax
     * 
     **/
     if( checkMe->children.size() == 0 ){
@@ -322,7 +322,7 @@ bool is_syntax_declaration(const AST_node* const checkMe){
     
     /**
     * 
-    * function
+    * syntax
     *     ...
     **/
     
@@ -340,9 +340,9 @@ bool is_syntax_declaration(const AST_node* const checkMe){
     
     /**
     * 
-    * function
+    * syntax
     *     [return type]
-    *     f_id
+    *     s_id
     *     [function body]
     **/
     
@@ -350,14 +350,14 @@ bool is_syntax_declaration(const AST_node* const checkMe){
     
     /**
     * 
-    * function
+    * syntax
     *     [return type]
-    *     f_id
+    *     s_id
     *         (
     *     [function body]
     **/
     
-    if( s_id->children[0]->children.size()==2 && s_id->children[0]->children[0]->text == "byte" && s_id->children[0]->children[1]->text == ")" ) return true;
+    if( s_id->children[0]->children.size()==2 && s_id->children[0]->children[0]->text == "b8" && s_id->children[0]->children[1]->text == ")" ) return true;
     
     /**
     * 
@@ -637,6 +637,10 @@ bool is_id( const AST_node* const checkMe, const symbol_table* const context){
 
 bool needs_scope_escape( const AST_node* checkMe ){
     if(is_function_declaration(checkMe))
+        return true;
+    if(is_operator_declaration(checkMe))
+        return true;
+    if(is_syntax_declaration(checkMe))
         return true;
     return false;
 }
