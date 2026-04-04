@@ -10,7 +10,7 @@ void symbol_table::add_symbol( symbol add_me ){
     //*
     
     for( unsigned int i = 0; i < sub_scopes.size(); i++){
-        if( sub_scopes[i].scope == add_me.name ){
+        if( sub_scopes[i]->scope == add_me.name ){
             //add_me.value->print_with_types();
             if( !(add_me.sym_type == sym_t_function || add_me.sym_type == sym_t_operator ) ){// basically allows overloading of overloadable functionals. The grammer rules have to be responsible and do their own validity checking.
                 assert(false);
@@ -146,12 +146,14 @@ void symbol_table::remove_symbol(symbol removeMe){
     std::erase_if(labels,[&](symbol checkMe){return removeMe.name==checkMe.name&&removeMe.sym_type==checkMe.sym_type&&removeMe.type==checkMe.type&&removeMe.value==checkMe.value;});
 }//*/
 
-void symbol_table::add_scope(std::string scope,scope_type type ){
-    sub_scopes.push_back( symbol_table(this,scope,type) );
+symbol_table* symbol_table::add_scope(std::string new_scope,scope_type type, AST_node* node ){
+    sub_scopes.push_back( new symbol_table(this,new_scope,type,node) );
+    //std::cout << scope << "\n" << ((uint64_t)(&*(sub_scopes.end()-1))%8) << "\n";
+    return *(sub_scopes.end()-1);
 }
 
 std::string symbol_table::get_full_scope(){
-    
+    assert(parent!=this);
     if ( scope != "" ){
         return parent->get_full_scope() + "::" + scope;
     }
@@ -163,10 +165,11 @@ symbol_table::symbol_table(){
     this->scope = "";
 }
 
-symbol_table::symbol_table( symbol_table* parent_ptr, std::string scope, scope_type type ){
+symbol_table::symbol_table( symbol_table* parent_ptr, std::string scope, scope_type type, AST_node* node ){
     parent = parent_ptr;
     this->scope = scope;
     this->type = type;
+    this->node = node;
 }
 
 std::string sym_tbl_indent = "";
@@ -227,7 +230,7 @@ void symbol_table::print(){
     if(sub_scopes.size()>0) std::cout << sym_tbl_indent << "sub-scopes\n";
     sym_tbl_indent += "    ";
     for( unsigned int i = 0; i < sub_scopes.size(); i++ )
-        sub_scopes[i].print();
+        sub_scopes[i]->print();
     
     sym_tbl_indent.resize(sym_tbl_indent.size()-4);
 }
@@ -373,8 +376,8 @@ bool symbol_table::type_exists(std::string id) const{
 symbol_table& symbol_table::get_subscope(std::string findMe){
     
     for( int i = 0; i < sub_scopes.size(); i++ ){
-        if( sub_scopes[i].scope == findMe )
-            return sub_scopes[i];
+        if( sub_scopes[i]->scope == findMe )
+            return *sub_scopes[i];
     }
     
     assert(false);
@@ -440,20 +443,20 @@ symbol_table& symbol_table::get_subscope(std::string id,std::vector<std::string>
     
     //assert(parent!=nullptr&&"Working on that nasty operator scoping problem.");
     auto iter = std::find_if(sub_scopes.rbegin(),sub_scopes.rend(),[&]
-        (const symbol_table& checkMe){
+        (const symbol_table* checkMe){
             bool signature_matches = true;
             for( int i = 0; i < params.size() && i < signature.size(); i++ ){
                 if(params[i]!=signature[i])signature_matches=false;
             }
             
-            return (checkMe.scope==id&&signature_matches);
+            return (checkMe->scope==id&&signature_matches);
         });
     if(iter==sub_scopes.rend()){
         for(auto p:params) std::cout << p << ",";
         assert(false&&"There are no matching subscopes");
     }
     
-    return *iter;
+    return **iter;
 }
     
 bool id_exists(std::string s){

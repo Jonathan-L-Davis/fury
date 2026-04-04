@@ -51,13 +51,14 @@ enum scope_type:uint32_t{
 struct symbol_table{
     
     symbol_table* parent; //non owning
+    AST_node* node;
     scope_type type;
     symbol_table();
-    symbol_table( symbol_table*, std::string scope, scope_type );
+    symbol_table( symbol_table*, std::string scope, scope_type T, AST_node* node = nullptr );
     
     std::string scope;
     std::vector<std::string> signature;
-    std::vector<symbol_table> sub_scopes;
+    std::vector<symbol_table*> sub_scopes;
     
     std::vector<symbol> bytes;
     std::vector<symbol> duals;
@@ -116,7 +117,7 @@ struct symbol_table{
     
     void add_symbol(symbol);
     void remove_symbol(symbol);
-    void add_scope(std::string scope, scope_type);
+    symbol_table* add_scope(std::string scope, scope_type T, AST_node* node = nullptr);
     
     void print();
     

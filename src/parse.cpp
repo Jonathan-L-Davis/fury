@@ -103,37 +103,37 @@ program parse(std::string file_name){
                 
                 node->type = node_t::curly;
                 
-                symbol_table table;
-                table.type = scope_t_anonymous;
+                std::string scope = "";
+                scope_type new_scope_t = scope_t_anonymous;
+                AST_node* node = nullptr;
                 
                 if(nodePool.size()>0&&!is_terminated(nodePool[nodePool.size()-1])&&is_syntax_declaration(nodePool[nodePool.size()-1])){
-                    table.type = scope_t_syntax;
+                    new_scope_t = scope_t_syntax;
                 }
                 if(nodePool.size()>0&&!is_terminated(nodePool[nodePool.size()-1])&&is_function_declaration(nodePool[nodePool.size()-1])) {
                     
-                    AST_node* decl = nodePool[nodePool.size()-1];
-                    AST_node* id   = decl->children[decl->children.size()-1];
+                    node = nodePool[nodePool.size()-1];
                     
-                    table.type = scope_t_function;
-                    table.scope = id->text;
-                    
-                    // this is the perfect spot to take the variables from the parameters & shove them back down into the function scope.
+                    new_scope_t = scope_t_function;
+                    scope = "body";
                     
                 }
                 
-                if(nodePool.size()>0&&!is_terminated(nodePool[nodePool.size()-1])&&is_operator_declaration(nodePool[nodePool.size()-1])) table.type = scope_t_operator;
+                //if(nodePool.size()>0&&!is_terminated(nodePool[nodePool.size()-1])&&is_operator_declaration(nodePool[nodePool.size()-1])) table.type = scope_t_operator;
                 
                 symbol_table& context = **(context_stack.end()-1);
+                context_stack.push_back(context.add_scope(scope,new_scope_t,node));
                 
-                table.parent = &context;
-                context.sub_scopes.push_back(table);
-                
-                context_stack.push_back(&*(context.sub_scopes.end()-1));
             }else if(completeToken=="}")
                 node->type = node_t::curly;
-            else if(completeToken==",")
+            else if(completeToken==","){
                 node->type = node_t::comma;
-            else if(completeToken==";")
+                
+                
+                int idx = nodePool.size()-1;
+                
+                if(nodePool.size()>=1 && needs_scope_escape(nodePool[idx])) context_stack.resize(context_stack.size()-1);// escapes the first child of a comma. Subsequent child scopes can be correctly popped during folding.
+            }else if(completeToken==";")
                 node->type = node_t::semicolon;
             else if(context_stack[context_stack.size()-1]->syntax_exists(currentToken))
                 node->type = node_t::syntax_id;
@@ -148,27 +148,45 @@ program parse(std::string file_name){
         grammer g = fury_grammer();
         /// ----------------------------------------------------    Reduction Rules Start Here    ---------------------------------------------------------- ///
         
-        /*// Actually need some stuff to reduce before encountering a semicolon. Really tricky, might be simpler to explain once I have the parser working fully.
-        bool no_terminals = true;
-        for(auto node:nodePool) if(node->text==";") no_terminals = false;// slightly tricky to think about, should be between end ; and last {, but there may be some extra stuff.
-        if(no_terminals) continue;
-        //*/
-        
-        //std::cout << "--------------------------------------------------------------------------------\n";
-        
         top:;
+        int lowest_layer = 1;
+        int last_comma = 0;
+        int comma_count = 0;
+        bool ends_in_terminal = false;
+        
+        auto last_idx = [&](){
+            return int(nodePool.size())-1;
+        };
+        
+        auto first_idx = [&](){
+            for(int i = int(nodePool.size())-1; i >= 0; i--)
+                if(nodePool[i]->text=="{"&&!is_closed_curly_bracket(nodePool[i]))
+                    return i;
+            return 0;
+        };
+        
+        for(int i = 0; i < nodePool.size(); i++){
+            if(nodePool[i]->text==";"&&(i+1==nodePool.size())) ends_in_terminal = true;
+            if(nodePool[i]->text==","){
+                comma_count++;
+                last_comma = i;
+            }
+        }
+        
+        if(ends_in_terminal){ lowest_layer = 0;}// prevents ',' nodes from grabbing too quickly. This prevents comma separated function definitions from stopping before getting the body of the second function.
+        
         bool modified = false;
         do{
             modified = false;
             
-            for( int i = g.rules.size()-1; i >= 0; i--){
+            for( int i = g.rules.size()-1; i >= lowest_layer; i--){
                 std::vector<rule>& rules = g.rules[i];
                 for( int j = 0; j < rules.size(); j++){
                     if(modified) goto top;
                     
                     if(g.direction[i]==parse_dir::forward){
                         t1:;
-                        for( int k = 0; k < nodePool.size(); k++ ){
+                        for( int k = first_idx(); k < last_idx(); k++ ){
                             if( rules[j].rule_applies(nodePool,context_stack,k) ){
                                 
                                 rules[j].apply_rule(nodePool,context_stack,k);
@@ -179,7 +197,7 @@ program parse(std::string file_name){
                         }
                     }else if(g.direction[i]==parse_dir::backward){
                         t2:;
-                        for( int k = nodePool.size()-1; k >= 0; k-- ){
+                        for( int k = last_idx(); k >= first_idx(); k-- ){
                             if( rules[j].rule_applies(nodePool,context_stack,k) ){
                                 
                                 rules[j].apply_rule(nodePool,context_stack,k);
@@ -205,11 +223,10 @@ program parse(std::string file_name){
         }
         
     }
-    //std::cout << "-------------------------------------------------------------------------------------------------------------\n";
-    //std::cout << "--------------------------------------------------------------------------------\n";for( AST_node* node : nodePool ){node->print_with_types();};
-    //for( AST_node* node : nodePool ) assert( is_terminated(node) );// if this fails you have bad grammer.
-    //for( auto& tbl:context_stack) tbl->print();
     retMe.root.children = finishedNodes;
+    
+    assert(context_stack.size()==1);
+    
     return retMe;
 }
 

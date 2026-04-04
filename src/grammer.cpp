@@ -106,35 +106,35 @@ grammer fury_grammer(){
     retMe.rules = { {}, {} };
     
     retMe.add_layer( 1, parse_dir::backward );
+    retMe.add_layer( 1, parse_dir::forward );
     
-    retMe.add_rule(2,{"paren-closure", paren_closure_applies, paren_closure_folding} );
-    retMe.add_rule(2,{"curly-bracket-closure", curly_bracket_closure_applies, curly_bracket_closure_folding} );
+    retMe.add_rule(3,{"paren-closure", paren_closure_applies, paren_closure_folding} );
+    retMe.add_rule(3,{"curly-bracket-closure", curly_bracket_closure_applies, curly_bracket_closure_folding} );
     
-    retMe.add_rule(2,{"operator-partial", operator_partial_applies, operator_partial_folding} );
-    retMe.add_rule(2,{"function-partial", function_partial_applies, function_partial_folding} );
-    retMe.add_rule(2,{"syntax-partial", syntax_partial_applies, syntax_partial_folding} );
+    retMe.add_rule(3,{"operator-partial", operator_partial_applies, operator_partial_folding} );
+    retMe.add_rule(3,{"function-partial", function_partial_applies, function_partial_folding} );
+    retMe.add_rule(3,{"syntax-partial", syntax_partial_applies, syntax_partial_folding} );
     
-    retMe.add_rule(2,{"type-declaration", type_declaration_applies, type_declaration_folding} );
+    retMe.add_rule(3,{"type-declaration", type_declaration_applies, type_declaration_folding} );
     
     
     
-    retMe.add_rule(1,{"operator-declaration", operator_declaration_applies, operator_declaration_folding} );
-    retMe.add_rule(1,{"operator-definition", operator_definition_applies, operator_definition_folding} );
-    retMe.add_rule(1,{"function-declaration", function_declaration_applies, function_declaration_folding} );
-    retMe.add_rule(1,{"function-definition", function_definition_applies, function_definition_folding} );
-    retMe.add_rule(1,{"syntax-declaration", syntax_declaration_applies, syntax_declaration_folding} );
-    retMe.add_rule(1,{"syntax-definition", syntax_definition_applies, syntax_definition_folding} );
+    retMe.add_rule(2,{"operator-declaration", operator_declaration_applies, operator_declaration_folding} );
+    retMe.add_rule(2,{"operator-definition", operator_definition_applies, operator_definition_folding} );
+    retMe.add_rule(2,{"function-declaration", function_declaration_applies, function_declaration_folding} );
+    retMe.add_rule(2,{"function-definition", function_definition_applies, function_definition_folding} );
+    retMe.add_rule(2,{"syntax-declaration", syntax_declaration_applies, syntax_declaration_folding} );
+    retMe.add_rule(2,{"syntax-definition", syntax_definition_applies, syntax_definition_folding} );
 
-    retMe.add_rule(1,{"function-call", function_call_applies, function_call_folding});
-    retMe.add_rule(0,{"operator-call", operator_call_applies, operator_call_folding});
+    retMe.add_rule(2,{"function-call", function_call_applies, function_call_folding});
     
-    retMe.add_rule(1,{"if-statement", if_statement_applies, if_statement_folding} );
-    retMe.add_rule(1,{"if-else-statement", if_else_statement_applies, if_else_statement_folding} );
-    retMe.add_rule(1,{"return-statement", return_statement_applies, return_statement_folding} );
-    retMe.add_rule(1,{"for-loop", for_applies, for_folding});
-    retMe.add_rule(1,{"while-loop", while_applies, while_folding});
+    retMe.add_rule(2,{"if-statement", if_statement_applies, if_statement_folding} );
+    retMe.add_rule(2,{"if-else-statement", if_else_statement_applies, if_else_statement_folding} );
+    retMe.add_rule(2,{"return-statement", return_statement_applies, return_statement_folding} );
+    retMe.add_rule(2,{"for-loop", for_applies, for_folding});
+    retMe.add_rule(2,{"while-loop", while_applies, while_folding});
     
-    
+    retMe.add_rule(1,{"operator-call", operator_call_applies, operator_call_folding});
     
     retMe.add_rule(0,{"comma", comma_applies, comma_folding} );
     retMe.add_rule(0,{"termination", termination_applies, termination_folding} );//*/
@@ -202,6 +202,7 @@ void curly_bracket_closure_folding(std::vector<AST_node*>& nodePool, std::vector
         for( int j = start_sequence; j < end_sequence+1; j++ )
             nodePool[i]->children.push_back( nodePool[j] );
         nodePool.erase(nodePool.begin()+start_sequence,nodePool.begin()+end_sequence+1);
+        
         context.erase(context.end()-1);
         return;
     }
@@ -215,6 +216,10 @@ bool termination_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_ta
 
 void termination_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     assert( termination_applies(nodePool,context,i)  );
+    
+    if(needs_scope_escape(nodePool[i])){
+        context.resize(context.size()-1);
+    }
     
     AST_node* end_node = get_rightmost_bottommost(nodePool[i]);
     end_node->children.push_back(nodePool[i+1]);
@@ -237,6 +242,7 @@ void function_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symb
         nodePool[i+1]->type = node_t::function_id;
         
         context[context.size()-1]->add_symbol({sym_t_function,{},nodePool[i+1]->text,nodePool[i]});
+        context.push_back((*(context.end()-1))->add_scope(nodePool[i+1]->text,scope_t_function, nodePool[i]));
         
         nodePool[i]->children.push_back(nodePool[i+1]);
         nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
@@ -247,6 +253,7 @@ void function_partial_folding(std::vector<AST_node*>& nodePool, std::vector<symb
         nodePool[i+2]->type = node_t::function_id;
         
         context[context.size()-1]->add_symbol({sym_t_function,{nodePool[i+1]->text},nodePool[i+2]->text,nodePool[i]});
+        context.push_back((*(context.end()-1))->add_scope(nodePool[i+2]->text,scope_t_function, nodePool[i]));
         
         nodePool[i]->children.push_back(nodePool[i+1]);
         nodePool[i]->children.push_back(nodePool[i+2]);
@@ -313,7 +320,7 @@ bool comma_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>&
 void comma_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
     if( nodePool[i]->text == "," ){
         nodePool[i]->children.push_back(nodePool[i+2]);
-        delete nodePool[i+1];// pointer fun
+        delete nodePool[i+1];
     }else{
         
         nodePool[i+1]->children.push_back(nodePool[i]);
@@ -321,6 +328,10 @@ void comma_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>&
         
         nodePool[i] = nodePool[i+1];
     }
+    
+    //if(needs_scope_escape(nodePool[i+2])) context.resize(context.size()-1);// pop child scopes. First child is already handled correctly in the top level parse loop.
+    
+    if( (*(context.end()-1))->node == nodePool[i+2] ) context.resize(context.size()-1);// pop child scopes. First child is already handled correctly in the top level parse loop.
     
     nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);
 }

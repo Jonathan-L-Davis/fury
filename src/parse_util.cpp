@@ -635,6 +635,12 @@ bool is_id( const AST_node* const checkMe, const symbol_table* const context){
     return context->id_exists(checkMe->text);
 }
 
+bool needs_scope_escape( const AST_node* checkMe ){
+    if(is_function_declaration(checkMe))
+        return true;
+    return false;
+}
+
 bool is_type_declaration(const AST_node* const checkMe, const symbol_table* const context){
     
     if( checkMe->type!=node_t::type )

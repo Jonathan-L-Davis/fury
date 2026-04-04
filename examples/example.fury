@@ -1,4 +1,32 @@
-b8 byte;
-function f(b8 a){
-    f(byte);
+function b8 f(b8 a){
+    b8 byte;
+},
+function g(b8 b){
+    b8 byte;
+},
+function h(b8 b){
+    b8 byte;
+},
+function b8 i(b8 b){
+    b8 byte;
+},
+function j(b8 b){
+    b8 byte;
+},
+function b8 k(b8 c){
+    b8 byte;
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
