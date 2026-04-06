@@ -1,11 +1,11 @@
 function f(b8 b){};
 function g(){};
 
-(quad q);
+(b32 q);
 
-byte a;
-byte c;
-byte d;
+b8 a;
+b8 c;
+b8 d;
 
 if(b8 x){b8 zfc;}else if(){b8 zfd;}else if(){}else{};
 
@@ -15,8 +15,8 @@ else if(b8 b)
     f(b)
 else if(c)
     function h(){}
-else if(c)
-    function b32 my_func(){}
+else if(c){
+    function b32 my_func(){};}
 else if(c)
     c
 else if(c)

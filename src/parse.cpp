@@ -171,7 +171,7 @@ program parse(std::string file_name){
         /// ----------------------------------------------------    Reduction Rules Start Here    ---------------------------------------------------------- ///
         
         top:;
-        int lowest_layer = 1;
+        int lowest_layer = 2;
         bool ends_in_terminal = false;
         
         auto last_idx = [&](){

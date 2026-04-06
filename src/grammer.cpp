@@ -111,43 +111,40 @@ void grammer::add_rule(int i,rule addMe){
 grammer fury_grammer(){
     grammer retMe;
     
-    retMe.direction = {parse_dir::forward,parse_dir::forward};
-    retMe.rules = { {}, {} };
+    retMe.direction = {parse_dir::forward, parse_dir::backward ,parse_dir::forward, parse_dir::backward ,parse_dir::forward};
+    retMe.rules = { {}, {}, {}, {}, {} };
     
-    retMe.add_layer( 1, parse_dir::backward );
-    retMe.add_layer( 1, parse_dir::forward );
+    retMe.add_rule(4,{"paren-closure", paren_closure_applies, paren_closure_folding} );
+    retMe.add_rule(4,{"curly-bracket-closure", curly_bracket_closure_applies, curly_bracket_closure_folding} );
     
-    retMe.add_rule(3,{"paren-closure", paren_closure_applies, paren_closure_folding} );
-    retMe.add_rule(3,{"curly-bracket-closure", curly_bracket_closure_applies, curly_bracket_closure_folding} );
+    retMe.add_rule(4,{"operator-partial", operator_partial_applies, operator_partial_folding} );
+    retMe.add_rule(4,{"function-partial", function_partial_applies, function_partial_folding} );
+    retMe.add_rule(4,{"syntax-partial", syntax_partial_applies, syntax_partial_folding} );
     
-    retMe.add_rule(3,{"operator-partial", operator_partial_applies, operator_partial_folding} );
-    retMe.add_rule(3,{"function-partial", function_partial_applies, function_partial_folding} );
-    retMe.add_rule(3,{"syntax-partial", syntax_partial_applies, syntax_partial_folding} );
-    
-    retMe.add_rule(3,{"if-head", if_head_applies, if_head_folding} );
+    retMe.add_rule(4,{"if-head", if_head_applies, if_head_folding} );
     //retMe.add_rule(3,{"for-head", for_head_applies, for_head_folding} );
     //retMe.add_rule(3,{"while-head", while_head_applies, while_head_folding} );
     
-    retMe.add_rule(3,{"type-declaration", type_declaration_applies, type_declaration_folding} );
+    retMe.add_rule(4,{"type-declaration", type_declaration_applies, type_declaration_folding} );
     
     
     
-    retMe.add_rule(2,{"operator-declaration", operator_declaration_applies, operator_declaration_folding} );
-    retMe.add_rule(2,{"operator-definition", operator_definition_applies, operator_definition_folding} );
-    retMe.add_rule(2,{"function-declaration", function_declaration_applies, function_declaration_folding} );
-    retMe.add_rule(2,{"function-definition", function_definition_applies, function_definition_folding} );
-    retMe.add_rule(2,{"syntax-declaration", syntax_declaration_applies, syntax_declaration_folding} );
-    retMe.add_rule(2,{"syntax-definition", syntax_definition_applies, syntax_definition_folding} );
+    retMe.add_rule(3,{"operator-declaration", operator_declaration_applies, operator_declaration_folding} );
+    retMe.add_rule(3,{"operator-definition", operator_definition_applies, operator_definition_folding} );
+    retMe.add_rule(3,{"function-declaration", function_declaration_applies, function_declaration_folding} );
+    retMe.add_rule(3,{"function-definition", function_definition_applies, function_definition_folding} );
+    retMe.add_rule(3,{"syntax-declaration", syntax_declaration_applies, syntax_declaration_folding} );
+    retMe.add_rule(3,{"syntax-definition", syntax_definition_applies, syntax_definition_folding} );
 
-    retMe.add_rule(2,{"function-call", function_call_applies, function_call_folding});
+    retMe.add_rule(3,{"function-call", function_call_applies, function_call_folding});
     
-    retMe.add_rule(2,{"if-statement", if_statement_applies, if_statement_folding} );
-    retMe.add_rule(2,{"if-else-statement", if_else_statement_applies, if_else_statement_folding} );
-    retMe.add_rule(2,{"return-statement", return_statement_applies, return_statement_folding} );
-    retMe.add_rule(2,{"for-loop", for_applies, for_folding});
-    retMe.add_rule(2,{"while-loop", while_applies, while_folding});
+    retMe.add_rule(1,{"if-statement", if_statement_applies, if_statement_folding} );
+    retMe.add_rule(1,{"if-else-statement", if_else_statement_applies, if_else_statement_folding} );
+    retMe.add_rule(3,{"return-statement", return_statement_applies, return_statement_folding} );
+    retMe.add_rule(3,{"for-loop", for_applies, for_folding});
+    retMe.add_rule(3,{"while-loop", while_applies, while_folding});
     
-    retMe.add_rule(1,{"operator-call", operator_call_applies, operator_call_folding});
+    retMe.add_rule(2,{"operator-call", operator_call_applies, operator_call_folding});
     
     retMe.add_rule(0,{"comma", comma_applies, comma_folding} );
     retMe.add_rule(0,{"termination", termination_applies, termination_folding} );//*/
@@ -485,7 +482,7 @@ void if_statement_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_t
     
     nodePool[i]->children.push_back(nodePool[i+1]);
     
-    if( (*(context.end()-1))->node == nodePool[i+0] ) context.resize(context.size()-1);
+    context.resize(context.size()-1);
     
     nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
     
@@ -503,7 +500,7 @@ void if_else_statement_folding(std::vector<AST_node*>& nodePool, std::vector<sym
     nodePool[i+1]->children.push_back(nodePool[i+2]);
     nodePool[i]->children.push_back(nodePool[i+1]);
     
-    if( (*(context.end()-1))->node == nodePool[i+1] ) context.resize(context.size()-1);
+    context.resize(context.size()-1);
     
     nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);
     
