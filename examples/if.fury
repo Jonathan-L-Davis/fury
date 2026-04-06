@@ -1,4 +1,4 @@
-function f(byte b){};
+function f(b8 b){};
 function g(){};
 
 (quad q);
@@ -7,16 +7,16 @@ byte a;
 byte c;
 byte d;
 
-if(byte x){byte zfc;}else if(){byte zfd;}else if(){}else{};
+if(b8 x){b8 zfc;}else if(){b8 zfd;}else if(){}else{};
 
 if(a)
     g()
-else if(byte b)
+else if(b8 b)
     f(b)
 else if(c)
     function h(){}
 else if(c)
-    function quad my_func(){}
+    function b32 my_func(){}
 else if(c)
     c
 else if(c)

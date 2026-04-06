@@ -29,4 +29,3 @@ operator ++ (b8)++(){b8 b;},
 syntax b32 " (b8 b){b8 b;},
 syntax b32 L" (b8 b){b8 b;},
 syntax b32 Q" (b8 b){b8 b;};
-

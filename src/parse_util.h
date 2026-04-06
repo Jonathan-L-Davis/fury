@@ -29,6 +29,7 @@ bool is_syntax_partial_declaration(const AST_node* const checkMe);
 bool is_syntax_declaration(const AST_node* const checkMe);
 bool is_syntax_definition(const AST_node* const checkMe);
 
+bool is_if_head(const AST_node* const checkMe);
 bool is_if_statement(const AST_node* const checkMe);
 bool is_if_else_statement(const AST_node* const checkMe);
 

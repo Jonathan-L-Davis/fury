@@ -45,6 +45,7 @@ enum scope_type:uint32_t{
     scope_t_operator = 6,
     scope_t_syntax = 7,
     scope_t_struct = 8,
+    scope_t_else = 9,
 };
 
 

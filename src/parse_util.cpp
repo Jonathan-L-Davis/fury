@@ -563,20 +563,25 @@ bool is_operator_definition(const AST_node* const checkMe){
     return false;
 }
 
+bool is_if_head(const AST_node* const checkMe){
+    if(checkMe->text!="if")
+        return false;
+    
+    if(checkMe->children.size()==1&&is_closed_parenthesis(checkMe->children[0]))
+        return true;
+    
+    return false;
+}
+
 bool is_if_statement(const AST_node* const checkMe){
     if(checkMe->text!="if")
         return false;
     
-    if(checkMe->children.size()<1||checkMe->children.size()>3)
+    if(checkMe->children.size()<2||checkMe->children.size()>3)
         return false;
     
     if(!is_closed_parenthesis(checkMe->children[0]))
         return false;
-    
-    // expression checks assume the validity of sub-expressions.
-    //if(checkMe->children.size()>1 && !is_valid(checkMe->children[1],context)
-    //    return false;
-    
     
     return true;
 }
@@ -587,10 +592,6 @@ bool is_if_else_statement(const AST_node* const checkMe){
     
     if( (*(checkMe->children.end()-1))->text!="else")
         return false;
-    
-    // expression checks assume the validity of sub-expressions. Don't know how I feel about that. Probably means I need to always propagate context, which does make the parse util api more consistent.
-    //if(checkMe->children.size()>1 && !is_valid(checkMe->children[1],context)
-    //    return false;
     
     return true;
 }

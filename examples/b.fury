@@ -1,0 +1,4 @@
+b8 a;
+
+function f(){};
+if(a) {}else{};

@@ -11,7 +11,9 @@
 #include <vector>
 #include <assert.h>
 
-bool termination_applies(std::vector<AST_node*>&,symbol_table*,int);
+bool termination_applies(std::vector<AST_node*>&, std::vector<symbol_table*>&,int);
+bool if_head_applies(std::vector<AST_node*>&, std::vector<symbol_table*>&,int);
+bool if_statement_applies(std::vector<AST_node*>&, std::vector<symbol_table*>&,int);
 
 enum token_type:uint32_t{
     epsilon = 0,
@@ -70,13 +72,19 @@ program parse(std::string file_name){
             if(byte == '\n') line_no++;
         }else if(byte=='('||byte==')'||byte=='{'||byte=='}'||byte==','||byte==';'){// these characters are forced to be single character tokens, cannot be part of other tokens. period.
             if(currentToken!=""){
-                AST_node* n = new AST_node;
+                AST_node* node = new AST_node;
                 node_t node_type = node_t::id;
-                if(is_keyword(completeToken)) node_type = node_t::keyword;
+                if(is_keyword(currentToken)) node_type = node_t::keyword;
                 if(context_stack[context_stack.size()-1]->syntax_exists(currentToken+(char)byte)) node_type = node_t::syntax_id;
-                *n = {currentToken,line_no,node_type};
+                *node = {currentToken,line_no,node_type};
+                nodePool.push_back(node);
+                
+                if(currentToken=="else"){
+                    symbol_table& context = **(context_stack.end()-1);
+                    context_stack.push_back(context.add_scope("else",scope_t_else,node));
+                }
+                
                 currentToken="";
-                nodePool.push_back(n);
             }
             
             completeToken = std::string(1,byte);
@@ -96,13 +104,19 @@ program parse(std::string file_name){
                 if( is_keyword_type(completeToken) ){
                     node->type = node_t::type;
                 }
+                
+                if(completeToken=="else"){
+                    symbol_table& context = **(context_stack.end()-1);
+                    context_stack.push_back(context.add_scope("else",scope_t_else,node));
+                }
+                
             }else if(completeToken=="("||completeToken==")")
                 node->type = node_t::paren;
             else if(completeToken=="{"){
                 
                 node->type = node_t::curly;
                 
-                std::string scope = "";
+                std::string scope = "anon";
                 scope_type new_scope_t = scope_t_anonymous;
                 AST_node* node = nullptr;
                 
@@ -142,9 +156,10 @@ program parse(std::string file_name){
                 if(nodePool.size()>=1 && nodePool[idx]==context->node) context_stack.resize(context_stack.size()-1);// escapes the first child of a comma. Subsequent child scopes can be correctly popped during folding.
             }else if(completeToken==";")
                 node->type = node_t::semicolon;
-            else if(context_stack[context_stack.size()-1]->syntax_exists(currentToken))
+            else if(context_stack[context_stack.size()-1]->syntax_exists(currentToken)){
                 node->type = node_t::syntax_id;
-            else node->type = node_t::id;
+                assert(false&&"Syntax execution not yet supported.");
+            }else node->type = node_t::id;
             
             nodePool.push_back(node);
         }
@@ -165,7 +180,7 @@ program parse(std::string file_name){
         
         auto first_idx = [&](){
             for(int i = int(nodePool.size())-1; i >= 0; i--)
-                if(nodePool[i]->text=="{"&&!is_closed_curly_bracket(nodePool[i]))
+                if(nodePool[i]->text=="{"&&!is_closed_curly_bracket(nodePool[i]))// might also have to consider if/else/for/while as scoping. Not sure yet how those scopes will play with the rest of the language. For now it's an extra knob to turn when I get stuck debugging. Probably should just be ignored though.
                     return i;
             return 0;
         };
