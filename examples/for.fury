@@ -1,3 +1,11 @@
 
 for(b8 b; b; b) b;
 
+for(b8 b; b; b){b;};
+
+for(b8 b; b; b){
+    for(b8 b; b; b){
+        b;
+    };
+};
+

@@ -79,9 +79,18 @@ program parse(std::string file_name){
                 *node = {currentToken,line_no,node_type};
                 nodePool.push_back(node);
                 
-                if(currentToken=="else"){
+                if(currentToken=="if"){
+                    symbol_table& context = **(context_stack.end()-1);
+                    context_stack.push_back(context.add_scope("if",scope_t_if,node));
+                }else if(currentToken=="else"){
                     symbol_table& context = **(context_stack.end()-1);
                     context_stack.push_back(context.add_scope("else",scope_t_else,node));
+                }else if(currentToken=="for"){
+                    symbol_table& context = **(context_stack.end()-1);
+                    context_stack.push_back(context.add_scope("for",scope_t_for,node));
+                }else if(currentToken=="while"){
+                    symbol_table& context = **(context_stack.end()-1);
+                    context_stack.push_back(context.add_scope("while",scope_t_while,node));
                 }
                 
                 currentToken="";
@@ -105,9 +114,18 @@ program parse(std::string file_name){
                     node->type = node_t::type;
                 }
                 
-                if(completeToken=="else"){
+                if(completeToken=="if"){
+                    symbol_table& context = **(context_stack.end()-1);
+                    context_stack.push_back(context.add_scope("if",scope_t_if,node));
+                }else if(completeToken=="else"){
                     symbol_table& context = **(context_stack.end()-1);
                     context_stack.push_back(context.add_scope("else",scope_t_else,node));
+                }else if(completeToken=="for"){
+                    symbol_table& context = **(context_stack.end()-1);
+                    context_stack.push_back(context.add_scope("for",scope_t_for,node));
+                }else if(completeToken=="while"){
+                    symbol_table& context = **(context_stack.end()-1);
+                    context_stack.push_back(context.add_scope("while",scope_t_while,node));
                 }
                 
             }else if(completeToken=="("||completeToken==")")
@@ -240,6 +258,8 @@ program parse(std::string file_name){
         
     }
     retMe.root.children = finishedNodes;
+    
+    std::cout << context_stack.size() << "\n";
     
     assert(context_stack.size()==1);
     

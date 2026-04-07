@@ -596,6 +596,21 @@ bool is_if_else_statement(const AST_node* const checkMe){
     return true;
 }
 
+bool is_for_head(const AST_node* const checkMe){
+    
+    if( checkMe->text!="for" )
+        return false;
+    
+    if( checkMe->children.size()!=3)
+        return false;
+    
+    auto c = checkMe->children;
+    if( !is_terminated(c[0]) || !is_terminated(c[1]) || is_terminated(c[2]) )
+        return false;
+    
+    return true;
+}
+
 bool is_for_loop(const AST_node* const checkMe){
     
     if( checkMe->text!="for" )

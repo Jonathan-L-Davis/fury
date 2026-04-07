@@ -1,14 +1,14 @@
 while();
-byte b;
+b8 b;
 while (b) b;
-while (byte a) b;
+while (b8 a) b;
 
 while()
 while()
 while()
 while()
-while()
-while()
+while(b8 q)
+while(q)
 while()
 while()
 while()
