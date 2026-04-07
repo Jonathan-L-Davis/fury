@@ -1,11 +1,11 @@
-function byte f(byte a,byte b){
+function byte f(b8 a, b8 b){
     return a;
     return b;
 };
 
-operator byte g g,operator byte m m, operator byte n n;
-function byte h();
-function byte i();
-function byte j();
-function byte k();
-function byte l();
+operator b8 g g,operator b8 m m, operator b8 n n;
+function b8 h();
+function b8 i();
+function b8 j();
+function b8 k();
+function b8 l();

@@ -1,122 +1,122 @@
-operator byte + (byte a)+(byte b);
-operator byte - (byte a)-(byte b);
-operator byte * (byte a)*(byte b);
-operator byte / (byte a)/(byte b);
-operator byte % (byte a)%(byte b);
-operator byte = (byte a)=(byte b);
+operator b8 + (b8 a)+(b8 b);
+operator b8 - (b8 a)-(b8 b);
+operator b8 * (b8 a)*(b8 b);
+operator b8 / (b8 a)/(b8 b);
+operator b8 % (b8 a)%(b8 b);
+operator b8 = (b8 a)=(b8 b);
 
-operator byte ~         ~(byte b);
-operator byte & (byte a)&(byte b);
-operator byte | (byte a)|(byte b);
-operator byte ^ (byte a)^(byte b);
+operator b8 ~         ~(b8 b);
+operator b8 & (b8 a)&(b8 b);
+operator b8 | (b8 a)|(b8 b);
+operator b8 ^ (b8 a)^(b8 b);
 
-operator byte >> (byte a)>>(byte b);
-operator byte << (byte a)<<(byte b);
-operator byte >O> (byte a)>O>(byte b);
-operator byte <O< (byte a)<O<(byte b);
+operator b8 >> (b8 a)>>(b8 b);
+operator b8 << (b8 a)<<(b8 b);
+operator b8 >O> (b8 a)>O>(b8 b);
+operator b8 <O< (b8 a)<O<(b8 b);
 
-operator byte && (byte a)&&(byte b);
-operator byte || (byte a)||(byte b);
-operator byte ! !(byte b);
+operator b8 && (b8 a)&&(b8 b);
+operator b8 || (b8 a)||(b8 b);
+operator b8 ! !(b8 b);
 
-operator byte == (byte a)==(byte b);
-operator byte != (byte a)!=(byte b);
-operator byte >= (byte a)>=(byte b);
-operator byte >  (byte a)> (byte b);
-operator byte <= (byte a)<=(byte b);
-operator byte <  (byte a)< (byte b);
-
-
-
-operator dual + (dual a)+(dual b);
-operator dual - (dual a)-(dual b);
-operator dual * (dual a)*(dual b);
-operator dual / (dual a)/(dual b);
-operator dual % (dual a)%(dual b);
-operator dual = (dual a)=(dual b);
-
-operator dual ~         ~(dual b);
-operator dual & (dual a)&(dual b);
-operator dual | (dual a)|(dual b);
-operator dual ^ (dual a)^(dual b);
-
-operator dual >> (dual a)>>(dual b);
-operator dual << (dual a)<<(dual b);
-operator dual >O> (dual a)>O>(dual b);
-operator dual <O< (dual a)<O<(dual b);
-
-operator dual && (dual a)&&(dual b);
-operator dual || (dual a)||(dual b);
-operator dual ! !(dual b);
-
-operator dual == (dual a)==(dual b);
-operator dual != (dual a)!=(dual b);
-operator dual >= (dual a)>=(dual b);
-operator dual >  (dual a)> (dual b);
-operator dual <= (dual a)<=(dual b);
-operator dual <  (dual a)< (dual b);
+operator b8 == (b8 a)==(b8 b);
+operator b8 != (b8 a)!=(b8 b);
+operator b8 >= (b8 a)>=(b8 b);
+operator b8 >  (b8 a)> (b8 b);
+operator b8 <= (b8 a)<=(b8 b);
+operator b8 <  (b8 a)< (b8 b);
 
 
 
-operator quad + (quad a)+(quad b);
-operator quad - (quad a)-(quad b);
-operator quad * (quad a)*(quad b);
-operator quad / (quad a)/(quad b);
-operator quad % (quad a)%(quad b);
-operator quad = (quad a)=(quad b);
+operator b16 + (b16 a)+(b16 b);
+operator b16 - (b16 a)-(b16 b);
+operator b16 * (b16 a)*(b16 b);
+operator b16 / (b16 a)/(b16 b);
+operator b16 % (b16 a)%(b16 b);
+operator b16 = (b16 a)=(b16 b);
 
-operator quad ~         ~(quad b);
-operator quad & (quad a)&(quad b);
-operator quad | (quad a)|(quad b);
-operator quad ^ (quad a)^(quad b);
+operator b16 ~         ~(b16 b);
+operator b16 & (b16 a)&(b16 b);
+operator b16 | (b16 a)|(b16 b);
+operator b16 ^ (b16 a)^(b16 b);
 
-operator quad >> (quad a)>>(quad b);
-operator quad << (quad a)<<(quad b);
-operator quad >O> (quad a)>O>(quad b);
-operator quad <O< (quad a)<O<(quad b);
+operator b16 >> (b16 a)>>(b16 b);
+operator b16 << (b16 a)<<(b16 b);
+operator b16 >O> (b16 a)>O>(b16 b);
+operator b16 <O< (b16 a)<O<(b16 b);
 
-operator quad && (quad a)&&(quad b);
-operator quad || (quad a)||(quad b);
-operator quad ! !(quad b);
+operator b16 && (b16 a)&&(b16 b);
+operator b16 || (b16 a)||(b16 b);
+operator b16 ! !(b16 b);
 
-operator quad == (quad a)==(quad b);
-operator quad != (quad a)!=(quad b);
-operator quad >= (quad a)>=(quad b);
-operator quad >  (quad a)> (quad b);
-operator quad <= (quad a)<=(quad b);
-operator quad <  (quad a)< (quad b);
+operator b16 == (b16 a)==(b16 b);
+operator b16 != (b16 a)!=(b16 b);
+operator b16 >= (b16 a)>=(b16 b);
+operator b16 >  (b16 a)> (b16 b);
+operator b16 <= (b16 a)<=(b16 b);
+operator b16 <  (b16 a)< (b16 b);
 
 
 
-operator oct + (oct a)+(oct b);
-operator oct - (oct a)-(oct b);
-operator oct * (oct a)*(oct b);
-operator oct / (oct a)/(oct b);
-operator oct % (oct a)%(oct b);
-operator oct = (oct a)=(oct b);
+operator b32 + (b32 a)+(b32 b);
+operator b32 - (b32 a)-(b32 b);
+operator b32 * (b32 a)*(b32 b);
+operator b32 / (b32 a)/(b32 b);
+operator b32 % (b32 a)%(b32 b);
+operator b32 = (b32 a)=(b32 b);
 
-operator oct ~        ~(oct b);
-operator oct & (oct a)&(oct b);
-operator oct | (oct a)|(oct b);
-operator oct ^ (oct a)^(oct b);
+operator b32 ~         ~(b32 b);
+operator b32 & (b32 a)&(b32 b);
+operator b32 | (b32 a)|(b32 b);
+operator b32 ^ (b32 a)^(b32 b);
 
-operator oct >> (oct a)>>(oct b);
-operator oct << (oct a)<<(oct b);
-operator oct >O> (oct a)>O>(oct b);
-operator oct <O< (oct a)<O<(oct b);
+operator b32 >> (b32 a)>>(b32 b);
+operator b32 << (b32 a)<<(b32 b);
+operator b32 >O> (b32 a)>O>(b32 b);
+operator b32 <O< (b32 a)<O<(b32 b);
 
-operator oct && (oct a)&&(oct b);
-operator oct || (oct a)||(oct b);
-operator oct ! !(oct b);
+operator b32 && (b32 a)&&(b32 b);
+operator b32 || (b32 a)||(b32 b);
+operator b32 ! !(b32 b);
 
-operator oct == (oct a)==(oct b);
-operator oct != (oct a)!=(oct b);
-operator oct >= (oct a)>=(oct b);
-operator oct >  (oct a)> (oct b);
-operator oct <= (oct a)<=(oct b);
-operator oct <  (oct a)< (oct b);
+operator b32 == (b32 a)==(b32 b);
+operator b32 != (b32 a)!=(b32 b);
+operator b32 >= (b32 a)>=(b32 b);
+operator b32 >  (b32 a)> (b32 b);
+operator b32 <= (b32 a)<=(b32 b);
+operator b32 <  (b32 a)< (b32 b);
 
-byte a, byte b;
+
+
+operator b64 + (b64 a)+(b64 b);
+operator b64 - (b64 a)-(b64 b);
+operator b64 * (b64 a)*(b64 b);
+operator b64 / (b64 a)/(b64 b);
+operator b64 % (b64 a)%(b64 b);
+operator b64 = (b64 a)=(b64 b);
+
+operator b64 ~        ~(b64 b);
+operator b64 & (b64 a)&(b64 b);
+operator b64 | (b64 a)|(b64 b);
+operator b64 ^ (b64 a)^(b64 b);
+
+operator b64 >> (b64 a)>>(b64 b);
+operator b64 << (b64 a)<<(b64 b);
+operator b64 >O> (b64 a)>O>(b64 b);
+operator b64 <O< (b64 a)<O<(b64 b);
+
+operator b64 && (b64 a)&&(b64 b);
+operator b64 || (b64 a)||(b64 b);
+operator b64 ! !(b64 b);
+
+operator b64 == (b64 a)==(b64 b);
+operator b64 != (b64 a)!=(b64 b);
+operator b64 >= (b64 a)>=(b64 b);
+operator b64 >  (b64 a)> (b64 b);
+operator b64 <= (b64 a)<=(b64 b);
+operator b64 <  (b64 a)< (b64 b);
+
+b8 a, b8 b;
 
 a + b;
 a - b;

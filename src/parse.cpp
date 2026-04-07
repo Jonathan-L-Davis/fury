@@ -259,8 +259,6 @@ program parse(std::string file_name){
     }
     retMe.root.children = finishedNodes;
     
-    std::cout << context_stack.size() << "\n";
-    
     assert(context_stack.size()==1);
     
     return retMe;
