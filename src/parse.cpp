@@ -257,6 +257,9 @@ program parse(std::string file_name){
         }
         
     }
+    
+    for( auto n:nodePool ) n->print_with_types();
+    
     retMe.root.children = finishedNodes;
     
     assert(context_stack.size()==1);

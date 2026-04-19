@@ -75,6 +75,18 @@ void operator_definition_folding(std::vector<AST_node*>& nodePool, std::vector<s
 bool operator_call_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 void operator_call_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
 
+bool struct_declaration_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+void struct_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+
+bool struct_definition_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+void struct_definition_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+
+bool namespace_declaration_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+void namespace_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+
+bool namespace_definition_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+void namespace_definition_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int index);
+
 symbol_table fury_default_context(){
     symbol_table retMe;
     
@@ -144,7 +156,7 @@ grammer fury_grammer(){
     retMe.add_rule(1,{"for-loop", for_applies, for_folding});
     retMe.add_rule(1,{"while-loop", while_applies, while_folding});
     
-    retMe.add_rule(2,{"operator-call", operator_call_applies, operator_call_folding});
+    retMe.add_rule(1,{"operator-call", operator_call_applies, operator_call_folding});
     
     retMe.add_rule(0,{"comma", comma_applies, comma_folding} );
     retMe.add_rule(0,{"termination", termination_applies, termination_folding} );//*/
@@ -821,4 +833,35 @@ void operator_call_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_
     //std::exit(-1);
 }
 
+bool struct_declaration_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    
+}
+
+void struct_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    
+}
+
+bool struct_definition_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    
+}
+
+void struct_definition_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    
+}
+
+bool namespace_declaration_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    
+}
+
+void namespace_declaration_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    
+}
+
+bool namespace_definition_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    
+}
+
+void namespace_definition_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    
+}
 
