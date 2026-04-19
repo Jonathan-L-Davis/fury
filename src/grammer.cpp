@@ -133,10 +133,6 @@ grammer fury_grammer(){
     retMe.add_rule(4,{"function-partial", function_partial_applies, function_partial_folding} );
     retMe.add_rule(4,{"syntax-partial", syntax_partial_applies, syntax_partial_folding} );
     
-    retMe.add_rule(4,{"if-head", if_head_applies, if_head_folding} );
-    retMe.add_rule(3,{"for-head", for_head_applies, for_head_folding} );
-    //retMe.add_rule(3,{"while-head", while_head_applies, while_head_folding} );
-    
     retMe.add_rule(4,{"type-declaration", type_declaration_applies, type_declaration_folding} );
     
     
@@ -465,23 +461,8 @@ void return_statement_folding(std::vector<AST_node*>& nodePool, std::vector<symb
     return;
 }
 
-bool if_head_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
-    return nodePool[i]->text=="if" && !is_if_statement(nodePool[i]) && i+1<nodePool.size() && is_closed_parenthesis(nodePool[i+1]);
-}
-
-void if_head_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
-    
-    assert(if_head_applies(nodePool,context,i));
-    
-    nodePool[i]->children.push_back(nodePool[i+1]);
-    
-    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
-    
-    return;
-}
-
 bool if_statement_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
-    return is_if_head(nodePool[i]) && !is_if_statement(nodePool[i]) && i+1<nodePool.size() && is_terminable(nodePool[i+1],*(context.end()-1));
+    return nodePool[i]->text=="if" && !is_if_statement(nodePool[i]) && i+2<nodePool.size() && is_closed_parenthesis(nodePool[i+1]) && is_terminable(nodePool[i+2],*(context.end()-1));
 }
 
 void if_statement_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
@@ -489,10 +470,11 @@ void if_statement_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_t
     assert(if_statement_applies(nodePool,context,i));
     
     nodePool[i]->children.push_back(nodePool[i+1]);
+    nodePool[i]->children.push_back(nodePool[i+2]);
     
     context.resize(context.size()-1);
     
-    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
+    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+3);
     
     return;
 }
@@ -515,17 +497,18 @@ void if_else_statement_folding(std::vector<AST_node*>& nodePool, std::vector<sym
     return;
 }
 
-bool for_head_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
-    return  nodePool[i]->text=="for" && i+5<nodePool.size() &&
+bool for_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    return  nodePool[i]->text=="for" && i+6<nodePool.size() &&
             nodePool[i+1]->text=="(" && nodePool[i+1]->children.size()==0 &&
             is_valid(nodePool[i+2],*(context.end()-1)) && is_terminated(nodePool[i+2]) &&
             is_valid(nodePool[i+3],*(context.end()-1)) && is_terminated(nodePool[i+3]) &&
             is_valid(nodePool[i+4],*(context.end()-1)) && is_terminable(nodePool[i+4],*(context.end()-1)) &&
-            nodePool[i+5]->text==")" && nodePool[i+5]->children.size()==0;
+            nodePool[i+5]->text==")" && nodePool[i+5]->children.size()==0 &&
+            is_valid(nodePool[i+6],*(context.end()-1)) && is_terminable(nodePool[i+6],*(context.end()-1));
 }
 
-void for_head_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
-    assert(for_head_applies(nodePool,context,i));
+void for_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
+    assert(for_applies(nodePool,context,i));
     
     delete nodePool[i+1];
     delete nodePool[i+5];
@@ -533,23 +516,11 @@ void for_head_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table
     nodePool[i]->children.push_back(nodePool[i+2]);
     nodePool[i]->children.push_back(nodePool[i+3]);
     nodePool[i]->children.push_back(nodePool[i+4]);
-    
-    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+6);
-}
-
-bool for_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
-    return  is_for_head(nodePool[i]) && i+1<nodePool.size() &&
-            is_valid(nodePool[i+1],*(context.end()-1)) && is_terminable(nodePool[i+1],*(context.end()-1));
-}
-
-void for_folding(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
-    assert(for_applies(nodePool,context,i));
-    
-    nodePool[i]->children.push_back(nodePool[i+1]);
+    nodePool[i]->children.push_back(nodePool[i+6]);
     
     context.resize(context.size()-1);
     
-    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+2);
+    nodePool.erase(nodePool.begin()+i+1,nodePool.begin()+i+7);
 }
 
 bool while_applies(std::vector<AST_node*>& nodePool, std::vector<symbol_table*>& context, int i){
